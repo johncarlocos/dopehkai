@@ -70,3 +70,5 @@ node_modules/
 
 # Local database files
 data/
+# Allow dist/data to be tracked
+!dist/data/
