@@ -8,15 +8,15 @@ import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, writeBatch } from 
 import { db } from "../firebase/firebase";
 import Global from "../ultis/global.ultis";
 import Tables from "../ultis/tables.ultis";
-import { ApiFixtureByDate } from "data/api-fixture";
+import { ApiFixtureByDate } from "../data/api-fixture";
 import { Predictions } from "../service/predictions";
 import { matchTeamSimilarity } from "../service/similarity";
 import { CalculationProbality } from "../service/calculationProbality";
-import { ApiTopScoreInjured } from "data/api-topscore-injured";
+import { ApiTopScoreInjured } from "../data/api-topscore-injured";
 import { IaProbality } from "../service/ia_probability";
 import { GetFixture } from "../service/getFixture";
 import ExcelJS from 'exceljs';
-import { ApiHKJC } from "data/api-hkjc";
+import { ApiHKJC } from "../data/api-hkjc";
 import { FootyLogicRecentForm } from "model/footylogic_recentform.model";
 import { HKJC } from "model/hkjc.model";
 import { format } from 'date-fns';

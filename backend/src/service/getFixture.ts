@@ -1,4 +1,4 @@
-import { ApiFixtureByDate } from "data/api-fixture";
+import { ApiFixtureByDate } from "../data/api-fixture";
 import { Match } from "../model/match.model";
 import { matchTeamSimilarity } from "./similarity";
 
