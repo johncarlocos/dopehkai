@@ -8,15 +8,15 @@ import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, writeBatch } from 
 import { db } from "../firebase/firebase";
 import Global from "../ultis/global.ultis";
 import Tables from "../ultis/tables.ultis";
-import { ApiFixtureByDate } from "../data/api-fixture";
+import { ApiFixtureByDate } from "data/api-fixture";
 import { Predictions } from "../service/predictions";
 import { matchTeamSimilarity } from "../service/similarity";
 import { CalculationProbality } from "../service/calculationProbality";
-import { ApiTopScoreInjured } from "../data/api-topscore-injured";
+import { ApiTopScoreInjured } from "data/api-topscore-injured";
 import { IaProbality } from "../service/ia_probability";
 import { GetFixture } from "../service/getFixture";
 import ExcelJS from 'exceljs';
-import { ApiHKJC } from "../data/api-hkjc";
+import { ApiHKJC } from "data/api-hkjc";
 import { FootyLogicRecentForm } from "model/footylogic_recentform.model";
 import { HKJC } from "model/hkjc.model";
 import { format } from 'date-fns';
@@ -1180,7 +1180,7 @@ class MatchController {
             const [resultDetails, gamesResult, hkjcData] = await Promise.all([
                 API.GET(Global.footylogicDetails + id).catch(err => ({ status: 500, data: null, error: err })),
                 API.GET(Global.footylogicGames).catch(err => ({ status: 500, data: null, error: err })),
-                ApiHKJC().catch(err => { console.error("[getMatchDetails] Error fetching HKJC:", err); return []; })
+                ApiHKJC().catch((err: any) => { console.error("[getMatchDetails] Error fetching HKJC:", err); return []; })
             ]);
             
             // Extract match event from games result first (this is more reliable)
@@ -1255,7 +1255,7 @@ class MatchController {
             const matchData: Match = existingMatchData ? { ...existingMatchData, ...matchDataFromAPI } : matchDataFromAPI;
 
             // Apply HKJC data for Chinese names (already fetched in parallel)
-            const hkjcMatch = hkjcData.find((x) => x.id === id);
+            const hkjcMatch = hkjcData.find((x: HKJC) => x.id === id);
             if (hkjcMatch) {
                 if (hkjcMatch.homeTeam?.name_ch) {
                     matchData.homeTeamName = hkjcMatch.homeTeam.name_ch;

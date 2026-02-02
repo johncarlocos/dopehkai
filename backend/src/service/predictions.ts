@@ -1,4 +1,4 @@
-import { ApiPredictions } from "../data/api-predictions";
+import { ApiPredictions } from "data/api-predictions";
 
 export async function Predictions(fixture_id: number) {
     try {
