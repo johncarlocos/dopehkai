@@ -12,7 +12,7 @@ import { recordsRouter } from './routes/records.routes';
 import { configRouter } from './routes/config.routes';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 // CORS Configuration
 // For local development: specify exact origin and allow credentials
@@ -26,8 +26,8 @@ const corsOptions = {
         }
         
         const allowedOrigins = process.env.NODE_ENV === 'production'
-            ? [process.env.CORS_ORIGIN || 'https://kicksystem.ai']
-            : ['http://localhost:5173', 'http://localhost:3000', process.env.CORS_ORIGIN || 'https://kicksystem.ai'].filter(Boolean);
+            ? [process.env.CORS_ORIGIN || 'https://yourdomain.com']
+            : ['http://localhost:5173', 'http://localhost:4000', 'http://localhost:3000', process.env.CORS_ORIGIN || 'https://yourdomain.com'].filter(Boolean);
         
         console.log('[CORS] Checking origin:', origin);
         console.log('[CORS] Allowed origins:', allowedOrigins);
