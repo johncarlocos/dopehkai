@@ -22,7 +22,7 @@ export default function SectionComponent3() {
                         className="sm:w-40 w-28 mb-3"
                     />
 
-                    <p className="sm:text-2xl text-base italic text-red-500 mb-6 font-bold">
+                    <p className="sm:text-2xl text-base italic text-black mb-6 font-bold">
                         {t("testimony_name") + " - " + t("Using_the_system_for")}
                     </p>
 

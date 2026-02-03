@@ -46,7 +46,7 @@ function LoginPage() {
           <div className="bg-white sm:p-10 p-7 rounded-xl">
 
             <div className="flex items-start w-screen">
-              <div className="w-2 bg-[#fc3a45] mr-2 self-stretch" />
+              <div className="w-2 bg-black mr-2 self-stretch" />
               <div className="flex flex-col justify-center space-y-2 text-black">
                 <p className="sm:text-2xl text-base sm:h-7 h-6 font-bold">
                   {t("login").toUpperCase()}
@@ -61,7 +61,7 @@ function LoginPage() {
                   type="email"
                   id="text"
                   name="text"
-                  className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-[#fc3a45] focus:outline-none focus:ring-2 focus:ring-[##fc3a45]"
+                  className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-black focus:outline-none focus:ring-2 focus:ring-black"
                   placeholder={t('enterYourEmail')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -74,7 +74,7 @@ function LoginPage() {
                   type="password"
                   id="password"
                   name="password"
-                  className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-[#fc3a45] focus:outline-none focus:ring-2 focus:ring-[##fc3a45]"
+                  className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-black focus:outline-none focus:ring-2 focus:ring-black"
                   placeholder={t('輸入您的密碼')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -83,7 +83,7 @@ function LoginPage() {
               </div>
 
               {showErro ?
-                <div className="bg-red-500 rounded-lg p-2 mt-2 flex-row flex items-center justify-center">
+                <div className="bg-black rounded-lg p-2 mt-2 flex-row flex items-center justify-center">
                   <ThemedText
                     className="font-bold text-[12px] sm:text-[16px] leading-tight"
                     type="defaultSemiBold"
@@ -98,18 +98,18 @@ function LoginPage() {
 
               <button
                 type="submit"
-                className="w-full py-3 mt-12 text-white bg-[#fc3a45] hover:bg-red-700 focus:outline-none focus:ring-2 border-none"
+                className="w-full py-3 mt-12 text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 border-none"
                 disabled={loading}
               >
                 {loading ? t("loading") : t("login")}
               </button>
 
               <div className="mt-4 text-center">
-                <a href="/forget-password" className="text-sm text-[#fc3a45] hover:underline">{t("forgotPassword")}</a>
+                <a href="/forget-password" className="text-sm text-black hover:underline">{t("forgotPassword")}</a>
               </div>
 
               <div className="mt-4 text-center">
-                <a href="/register" className="text-sm text-[#fc3a45] hover:underline">{t("register")}</a>
+                <a href="/register" className="text-sm text-black hover:underline">{t("register")}</a>
               </div>
 
 

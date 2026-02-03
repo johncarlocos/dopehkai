@@ -167,7 +167,7 @@ function DetailsCardComponent({
                 <p className="sm:text-sm text-sm sm:h-4 h-4 font-bold text-black text-center">
                     {t("PER_GAME")}
                 </p>
-                <p className="sm:text-sm text-sm font-heading sm:h-4 h-4 font-bold text-red-500 text-center">
+                <p className="sm:text-sm text-sm font-heading sm:h-4 h-4 font-bold text-black text-center">
                     {t("STATISTIC")}
                 </p>
 
@@ -210,7 +210,7 @@ function DetailsCardComponent({
                 <p className="sm:text-sm text-xs sm:h-4 h-4 font-bold text-black text-center">
                     {t("PER_GAME")}
                 </p>
-                <p className="sm:text-sm text-xs font-heading sm:h-4 h-4 font-bold text-red-500 text-center">
+                <p className="sm:text-sm text-xs font-heading sm:h-4 h-4 font-bold text-black text-center">
                     {t("STATISTIC")}
                 </p>
 

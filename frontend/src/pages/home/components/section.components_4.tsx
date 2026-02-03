@@ -11,7 +11,7 @@ export default function SectionComponent4() {
 
                 <div>
                     <div className="flex items-center space-x-4">
-                        <img src={AppAssets.card_img_4} alt="Trophy" className="w-28 h-28 text-red-500" />
+                        <img src={AppAssets.card_img_4} alt="Trophy" className="w-28 h-28 text-black" />
                         <div className="flex flex-col justify-center sm:text-xl text-base">
                             <h3 className="sm:text-xl text-base font-bold text-black">{t("User_Trust").toUpperCase()}</h3>
                             <p className="text-gray-600">
@@ -24,7 +24,7 @@ export default function SectionComponent4() {
 
                 <div>
                     <div className="flex items-center space-x-4">
-                        <img src={AppAssets.card_img_5} alt="Trophy" className="w-28 h-28 text-red-500" />
+                        <img src={AppAssets.card_img_5} alt="Trophy" className="w-28 h-28 text-black" />
                         <div className="flex flex-col justify-center sm:text-xl text-base">
                             <h3 className="sm:text-xl text-base font-bold text-black">
                                 {t("Analysis_Time_Saved").toUpperCase()}
@@ -38,7 +38,7 @@ export default function SectionComponent4() {
                 </div>
 
                 <div className="flex items-center space-x-4">
-                    <img src={AppAssets.card_img_1} alt="Trophy" className="w-28 h-28 text-red-500" />
+                    <img src={AppAssets.card_img_1} alt="Trophy" className="w-28 h-28 text-black" />
                     <div className="flex flex-col justify-center sm:text-xl text-base">
                         <h3 className="sm:text-xl text-base font-bold text-black">
                             {t("Average_Earnings").toUpperCase()}

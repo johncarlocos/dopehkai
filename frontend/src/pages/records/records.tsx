@@ -24,7 +24,7 @@ const RecordsPage = () => {
 
     return (
         <Fragment>
-            <div className="h-screen w-screen overflow-x-hidden bg-red-500">
+            <div className="h-screen w-screen overflow-x-hidden bg-black">
                 <AppBarComponent />
 
                 <div className="relative z-10 w-full flex items-center flex-col pl-10 pt-20">

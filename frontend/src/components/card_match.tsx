@@ -111,9 +111,9 @@ export function CardMatch({
                             ) : null;
                         })()}
                         <div className="flex flex-row items-center justify-center gap-1.5">
-                            <FaBasketball color="#fc3a45" size={isMobile ? 5 : 10} />
+                            <FaBasketball color="#000000" size={isMobile ? 5 : 10} />
                             <div
-                                className="sm:text-[12px] text-[5px] font-semibold text-black/80 hover:text-red-600 transition duration-200"
+                                className="sm:text-[12px] text-[5px] font-semibold text-black/80 hover:text-black transition duration-200"
                             >
                                 REPORT
                             </div>
@@ -156,7 +156,7 @@ export function CardMatch({
                             </button>
 
                             <button
-                                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700 transition"
+                                className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 transition"
                                 onClick={() => {
                                     window.location.href = "/";
                                     setShowModal(false);

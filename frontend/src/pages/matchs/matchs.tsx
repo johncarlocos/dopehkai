@@ -261,7 +261,7 @@ function MatchsPage() {
                                     <div className="sm:w-2/3 w-5/6 mx-auto items-start flex mb-6 mt-8">
 
                                         <div className="flex items-start w-screen">
-                                            <div className="w-1 bg-red-500 mr-2 self-stretch" />
+                                            <div className="w-1 bg-black mr-2 self-stretch" />
                                             <div className="flex flex-col justify-center space-y-2 text-white">
                                                 <p className="sm:text-2xl text-base sm:h-7 h-6 font-bold">
                                                     {d}
@@ -312,7 +312,7 @@ function MatchsPage() {
                     {userRole && (userRole === "admin" || userRole === "subadmin") &&
                         <a
                             href={`/api/match/match-data/all/generate`}
-                            className="sm:w-1/3 w-5/6 h-10 mt-5 mb-5 mx-auto bg-[#fc3a45] rounded-xl justify-center items-center flex text-white hover:text-white font-bold text-lg hover:bg-purple-600 transition"
+                            className="sm:w-1/3 w-5/6 h-10 mt-5 mb-5 mx-auto bg-black rounded-xl justify-center items-center flex text-white hover:text-white font-bold text-lg hover:bg-purple-600 transition"
                         >
                             {t('generate_excel')}
                         </a>

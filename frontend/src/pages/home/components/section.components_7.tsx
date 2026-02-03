@@ -120,7 +120,7 @@ export default function SectionComponent7({
 
     return (
         <section id="contact-us"
-            className="flex items-center justify-center sm:mt-0 p-3 pb-14 flex-col bg-[#fc3a45]  w-screen">
+            className="flex items-center justify-center sm:mt-0 p-3 pb-14 flex-col bg-black  w-screen">
 
 
 
@@ -160,7 +160,7 @@ export default function SectionComponent7({
                         const top = window.screen.height - height - 20;
                         window.open(url, "instagramWindow", `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
                     }} rel="noopener noreferrer">
-                        <FaInstagram className="hover:text-red-900 text-5xl text-white transition duration-300" />
+                        <FaInstagram className="hover:text-gray-400 text-5xl text-white transition duration-300" />
                     </a>
                     <a onClick={admin ? () => handleIconClick(config?.threads ?? "", "threads") : () => {
                         const url = config?.threads ?? "/";
@@ -170,7 +170,7 @@ export default function SectionComponent7({
                         const top = window.screen.height - height - 20;
                         window.open(url, "threadsWindow", `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
                     }} rel="noopener noreferrer">
-                        <FaThreads className="hover:text-red-900 text-5xl text-white transition duration-300" />
+                        <FaThreads className="hover:text-gray-400 text-5xl text-white transition duration-300" />
                     </a>
                     <a onClick={admin ? () => handleIconClick(config?.telegram ?? "", "telegram") : () => {
                         const url = config?.telegram ?? "/";
@@ -180,7 +180,7 @@ export default function SectionComponent7({
                         const top = window.screen.height - height - 20;
                         window.open(url, "telegramWindow", `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
                     }} rel="noopener noreferrer">
-                        <FaTelegramPlane className="hover:text-red-900 text-5xl text-white transition duration-300" />
+                        <FaTelegramPlane className="hover:text-gray-400 text-5xl text-white transition duration-300" />
                     </a>
                     <a
                         onClick={admin ? () => handleIconClick(config?.whatsapp ?? "", "whatsapp") : () => {

@@ -19,7 +19,7 @@ export default function SectionComponent1({
     const navigate = useNavigate();
 
     return (
-        <section className="flex flex-col bg-[#fc3a45]">
+        <section className="flex flex-col bg-black">
 
             {
                 isMobile
@@ -33,8 +33,8 @@ export default function SectionComponent1({
             <div className="relative z-10 w-full flex items-center flex-col sm:pl-10 pl-2 pr-5 sm:mb-14 sm:mt-0 mt-10">
                 <div className="relative z-10 w-full flex items-end h-[30vh]">
                     <div className="flex flex-1 items-center pl-5">
-                        <div className="w-5 bg-white mr-4 self-stretch" />
-                        <div className="flex flex-col justify-center space-y-2 text-white">
+                        <div className="w-5 bg-black mr-4 self-stretch" />
+                        <div className="flex flex-col justify-center space-y-2 text-black">
                             <p className="sm:text-1xl text-1xl font-bold leading-[1.1]">
                                 {t("Professional_Match_Data_Analysis").toUpperCase()}
                             </p>

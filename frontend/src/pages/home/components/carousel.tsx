@@ -51,7 +51,7 @@ export function HeroCarousel({
     ];
 
     return (
-        <div className="relative w-screen overflow-hiddenpb-96 bg-red-500">
+        <div className="relative w-screen overflow-hiddenpb-96 bg-black">
 
             <div
                 className={`absolute inset-0 h-[180vh] transition-opacity duration-1000 ease-in-out bg-center bg-cover z-0"
@@ -87,9 +87,9 @@ export function HeroCarousel({
                 }
             }}
                 className="relative z-10 w-full flex items-center m-9 pl-10">
-                <button className="mt-6 flex items-center gap-3 bg-neutral-900 hover:bg-red-500 border-none text-white uppercase font-semibold px-6 py-3 rounded-lg transition w-max">
+                <button className="mt-6 flex items-center gap-3 bg-neutral-900 hover:bg-black border-none text-white uppercase font-semibold px-6 py-3 rounded-lg transition w-max">
                     {userRole ? t("matches") : t("records")}
-                    <span className="text-red-500 text-xl">→</span>
+                    <span className="text-black text-xl">→</span>
                 </button>
             </div>
 

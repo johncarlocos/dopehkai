@@ -61,7 +61,7 @@ export function CardMatchComponent({
 
             <div className="relative z-10 flex items-stretch justify-between h-full">
 
-                <div className="flex flex-col text-center text-sm font-semibold bg-[#fc3a45] w-10 text-white justify-center h-full">
+                <div className="flex flex-col text-center text-sm font-semibold bg-black w-10 text-white justify-center h-full">
                     <div>{day}</div>
                     <div className="uppercase text-[9px] sm:text-xs">{month}</div>
                 </div>

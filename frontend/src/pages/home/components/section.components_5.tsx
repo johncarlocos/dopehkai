@@ -15,7 +15,7 @@ export default function SectionComponent5() {
                     <div />
 
                     <div className="flex space-x-4 sm:h-20 h-12 mt-7">
-                        <img src={AppAssets.card_img_4} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-red-500" />
+                        <img src={AppAssets.card_img_4} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-black" />
                         <div className="flex flex-col justify-center sm:text-2xl text-sm">
                             <h3 className="sm:text-2xl text-sm font-bold text-black">{t("User_Trust").toUpperCase()}</h3>
                             <p className="text-gray-600">≠≠
@@ -25,7 +25,7 @@ export default function SectionComponent5() {
                     </div>
 
                     <div className="flex space-x-4 sm:h-20 h-12">
-                        <img src={AppAssets.card_img_5} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-red-500" />
+                        <img src={AppAssets.card_img_5} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-black" />
                         <div className="flex flex-col justify-center sm:text-2xl text-sm">
                             <h3 className="sm:text-2xl text-sm font-bold text-black">
                                 {t("Analysis_Time_Saved").toUpperCase()}
@@ -37,7 +37,7 @@ export default function SectionComponent5() {
                     </div>
 
                     <div className="flex space-x-4 sm:h-20 h-12">
-                        <img src={AppAssets.card_img_1} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-red-500" />
+                        <img src={AppAssets.card_img_1} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-black" />
                         <div className="flex flex-col justify-center sm:text-2xl text-sm">
                             <h3 className="sm:text-2xl text-sm font-bold text-black">
                                 {t("Average_Earnings").toUpperCase()}
@@ -80,7 +80,7 @@ export default function SectionComponent5() {
 
                     <div />
                     <div className="flex space-x-4 sm:h-20 h-12">
-                        <img src={AppAssets.card_img_2} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-red-500" />
+                        <img src={AppAssets.card_img_2} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-black" />
                         <div className="flex flex-col justify-center sm:text-2xl text-sm">
                             <h3 className="sm:text-2xl text-sm font-bold text-black">
                                 {t("Successful_Predictions").toUpperCase()}
@@ -92,7 +92,7 @@ export default function SectionComponent5() {
                     </div>
 
                     <div className="flex space-x-4 sm:h-20 h-12">
-                        <img src={AppAssets.card_img_3} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-red-500" />
+                        <img src={AppAssets.card_img_3} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-black" />
                         <div className="flex flex-col justify-center sm:text-2xl text-sm">
                             <h3 className="sm:text-2xl text-sm font-bold text-black">
                                 {t("Matches_Analyzed").toUpperCase()}

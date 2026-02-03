@@ -248,7 +248,7 @@ function DetailsMatchPage() {
                         {userRole && (userRole === "admin" || userRole === "subadmin") &&
                             <a
                                 href={`/api/match/match-data/generate/${id}`}
-                                className="sm:w-2/3 w-5/6 h-16 mt-5 mx-auto bg-[#fc3a45] rounded-xl justify-center items-center flex text-white hover:text-white font-bold text-lg hover:bg-purple-600 transition"
+                                className="sm:w-2/3 w-5/6 h-16 mt-5 mx-auto bg-black rounded-xl justify-center items-center flex text-white hover:text-white font-bold text-lg hover:bg-purple-600 transition"
                             >
                                 {t('generate_excel')}
                             </a>

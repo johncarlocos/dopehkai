@@ -75,7 +75,7 @@ function AppBarComponent() {
                                 <li
                                     key={idx}
                                     onClick={item.path}
-                                    className={`cursor-pointer p-2 rounded-lg hover:bg-red-500 text-sm ${location.pathname === item.ur ? "text-white" : ""
+                                    className={`cursor-pointer p-2 rounded-lg hover:bg-black text-sm ${location.pathname === item.ur ? "text-white" : ""
                                         }`}
                                     style={{ color: item.ur.includes("admin") ? "orange" : "white" }}
                                 >
@@ -118,7 +118,7 @@ function AppBarComponent() {
                         ].map((s, i) => (
                             <span
                                 key={i}
-                                className="cursor-pointer hover:text-red-500"
+                                className="cursor-pointer hover:text-black"
                                 onClick={() => window.open(s.url ?? "/", "_blank")}
                             >
                                 {s.icon}
@@ -132,14 +132,14 @@ function AppBarComponent() {
                         {userRole ? (
                             <button
                                 onClick={logout}
-                                className="bg-red-900 hover:bg-red-600 rounded-lg text-xs px-4 py-2"
+                                className="bg-black hover:bg-gray-800 rounded-lg text-xs px-4 py-2"
                             >
                                 {t("logout").toUpperCase()}
                             </button>
                         ) : (
                             <button
                                 onClick={() => navigate("/login")}
-                                className="bg-red-500 hover:bg-red-900 rounded-lg text-sm px-4 py-2"
+                                className="bg-black hover:bg-gray-800 rounded-lg text-sm px-4 py-2"
                             >
                                 {t("login").toUpperCase()}
                             </button>
@@ -167,7 +167,7 @@ function AppBarComponent() {
                                             i18n.changeLanguage(lang.code);
                                             setLangOpen(false);
                                         }}
-                                        className="flex items-center gap-3 px-4 py-2 hover:bg-red-500 cursor-pointer text-sm"
+                                        className="flex items-center gap-3 px-4 py-2 hover:bg-black cursor-pointer text-sm"
                                     >
                                         <span>{lang.flag}</span>
                                         <span>{lang.label}</span>
@@ -198,7 +198,7 @@ function AppBarComponent() {
                                     item.path();
                                     setIsOpen(false);
                                 }}
-                                className="text-lg hover:text-red-500"
+                                className="text-lg hover:text-black"
                             >
                                 {item.label.toUpperCase()}
                             </div>
@@ -212,7 +212,7 @@ function AppBarComponent() {
                                     logout();
                                     setIsOpen(false);
                                 }}
-                                className="w-full bg-red-900 hover:bg-red-600 rounded-lg text-sm px-4 py-3 mb-4"
+                                className="w-full bg-black hover:bg-gray-800 rounded-lg text-sm px-4 py-3 mb-4"
                             >
                                 {t("logout").toUpperCase()}
                             </button>
@@ -222,7 +222,7 @@ function AppBarComponent() {
                                     navigate("/login");
                                     setIsOpen(false);
                                 }}
-                                className="w-full bg-red-500 hover:bg-red-900 rounded-lg text-sm px-4 py-3 mb-4"
+                                className="w-full bg-black hover:bg-gray-800 rounded-lg text-sm px-4 py-3 mb-4"
                             >
                                 {t("login").toUpperCase()}
                             </button>
@@ -237,7 +237,7 @@ function AppBarComponent() {
                                     i18n.changeLanguage(lang.code);
                                     setIsOpen(false);
                                 }}
-                                className="flex items-center gap-3 py-2 cursor-pointer hover:text-red-500"
+                                className="flex items-center gap-3 py-2 cursor-pointer hover:text-black"
                             >
                                 <span>{lang.flag}</span>
                                 <span>{lang.label}</span>

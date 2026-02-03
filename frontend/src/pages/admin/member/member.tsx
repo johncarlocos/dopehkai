@@ -311,7 +311,7 @@ function MembersPage() {
                         </ThemedText>
                         <button
                             style={{ border: "none", cursor: "pointer" }}
-                            className="bg-[#fc3a45] hover:bg-opacity-80 transition duration-200"
+                            className="bg-black hover:bg-opacity-80 transition duration-200"
                             onClick={handleDialogOpen}
                         >
                             <Add className="text-white text-2xl" />

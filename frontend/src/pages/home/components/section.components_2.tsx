@@ -56,7 +56,7 @@ export default function SectionComponent2() {
                         key={item.id}
                         className="flex w-full max-w-md bg-white rounded-xl overflow-hidden shadow-lg border transition-shadow duration-300 hover:shadow-2xl"
                     >
-                        <div className="bg-red-500 text-white flex flex-col justify-center items-center px-4 py-6" />
+                        <div className="bg-black text-white flex flex-col justify-center items-center px-4 py-6" />
 
                         <div className="flex flex-col justify-center px-6 py-4">
                             <h3 className="sm:text-3xl text-xl font-bold text-black">{item.title}</h3>

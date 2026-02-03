@@ -20,7 +20,7 @@ export function SectionComponent6() {
                 </div>
             </div>
 
-            <img src={AppAssets.logo} className="h-72" alt="Logo" />
+            <img src={AppAssets.logo_black} className="h-72" alt="Logo" />
 
             <p className="text-center mt-5 max-w-xl text-gray-700 text-xl">
                 {t("About_com").toUpperCase()}

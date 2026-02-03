@@ -38,7 +38,7 @@ function ForgetPasswordPage() {
                     <div className="bg-white sm:p-10 p-7 rounded-xl">
 
                         <div className="flex items-start w-screen">
-                            <div className="w-2 bg-red-500 mr-2 self-stretch" />
+                            <div className="w-2 bg-black mr-2 self-stretch" />
                             <div className="flex flex-col justify-center space-y-2 text-black">
                                 <p className="sm:text-xl text-base sm:h-7 h-5 font-bold">
                                     {t("forgot-password").toUpperCase()}
@@ -56,7 +56,7 @@ function ForgetPasswordPage() {
                                     type="email"
                                     id="email"
                                     name="email"
-                                    className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-[#fc3a45] focus:outline-none focus:ring-2 focus:ring-[#fc3a45]"
+                                    className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-black focus:outline-none focus:ring-2 focus:ring-black"
                                     placeholder={t('enterYourEmail')}
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -66,14 +66,14 @@ function ForgetPasswordPage() {
 
                             <button
                                 type="submit"
-                                className="w-full py-3 mt-12 text-white bg-[#fc3a45] hover:bg-red-700 focus:outline-none focus:ring-2 border-none"
+                                className="w-full py-3 mt-12 text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 border-none"
                                 disabled={loading}
                             >
                                 {loading ? t("send") + "..." : t("send")}
                             </button>
 
                             <div className="mt-4 text-center">
-                                <a href="/login" className="text-sm text-[#fc3a45] hover:underline">{t("I remembered the password")}</a>
+                                <a href="/login" className="text-sm text-black hover:underline">{t("I remembered the password")}</a>
                             </div>
 
                         </form>

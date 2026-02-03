@@ -1,5 +1,5 @@
 const AppColors = {
-    primary: "#fc3a45",
+    primary: "#000000",
     background: "#242424",
     error: "red",
     blue: "blue",
