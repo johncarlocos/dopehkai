@@ -68,6 +68,14 @@ app.use('/api', (req, res, next) => {
 
 app.use(express.json());
 
+// API routes must come BEFORE static files
+app.use("/api/home", homeRouter);
+app.use("/api/match", matchRouter);
+app.use("/api/user", usersRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/records", recordsRouter);
+app.use("/api/config", configRouter);
+
 // Static files with proper cache control
 // Hashed files (JS, CSS) can be cached for 1 year, index.html should not be cached
 const frontendDistPath = path.join(__dirname, "../../frontend/dist");
@@ -87,12 +95,6 @@ app.use(express.static(frontendDistPath, {
 }));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use("/api/home", homeRouter);
-app.use("/api/match", matchRouter);
-app.use("/api/user", usersRouter);
-app.use("/api/admin", adminRouter);
-app.use("/api/records", recordsRouter);
-app.use("/api/config", configRouter);
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
