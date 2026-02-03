@@ -7,7 +7,7 @@ const AppAssets = {
     less: "/assets/less-sign.png",
     artificial_intelligence: "/assets/artificial-intelligence.png",
     trophy: "/assets/trophy.png",
-    background_image: "/assets/hero_home_02.jpg",
+    background_image: "/assets/hero_home.jpg",
     hit: "/assets/hit.png",
     ball_grafic: "/assets/ball_grafic.png",
     brand: "/assets/brand.png",
