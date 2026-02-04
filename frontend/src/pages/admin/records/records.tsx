@@ -20,7 +20,7 @@ import { toast, ToastContainer } from "react-toastify";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { format } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import { zhTW } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import { useRecords } from "../../../hooks/useRecords";
 import { Records } from "../../../models/records";
@@ -152,7 +152,7 @@ function RecordsAdminPage() {
             cell: (props: any) => {
                 const date = props.getValue();
                 const formattedDate = format(new Date(date), "yyyy年M月d日(E)", {
-                    locale: zhCN,
+                    locale: zhTW,
                 });
                 return formattedDate;
             },

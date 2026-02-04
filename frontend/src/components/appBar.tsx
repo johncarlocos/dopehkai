@@ -7,7 +7,6 @@ import AppAssets from "../ultis/assets";
 import useAuthStore from "../store/userAuthStore";
 import { FaThreads } from "react-icons/fa6";
 import { useConfig } from "../hooks/useConfig";
-import i18n from "../i18n";
 
 function AppBarComponent() {
     const { t } = useTranslation();
@@ -44,15 +43,6 @@ function AppBarComponent() {
 
 
     const { data: config } = useConfig();
-
-    const languages = [
-        { code: "zh", label: "繁體中文", flag: "🇭🇰" },
-        { code: "zhCN", label: "简体中文", flag: "🇨🇳" },
-        { code: "en", label: "English", flag: "🇺🇸" },
-    ];
-    const [langOpen, setLangOpen] = useState(false);
-    const currentLang =
-        languages.find(l => l.code === i18n.language) || languages[0];
 
 
     return (
@@ -147,35 +137,6 @@ function AppBarComponent() {
 
 
                     </div>
-
-
-                    <div className="flex-col">
-                        <button
-                            onClick={() => setLangOpen(!langOpen)}
-                            className="flex items-center gap-2 bg-black/60 px-3 py-2 rounded-lg text-sm hover:bg-black"
-                        >
-                            <span>{currentLang.flag}</span>
-                            <span>{currentLang.label}</span>
-                        </button>
-
-                        {langOpen && (
-                            <div className="absolute top-full right-0 mt-2 bg-black rounded-lg shadow-lg overflow-hidden z-50">
-                                {languages.map(lang => (
-                                    <div
-                                        key={lang.code}
-                                        onClick={() => {
-                                            i18n.changeLanguage(lang.code);
-                                            setLangOpen(false);
-                                        }}
-                                        className="flex items-center gap-3 px-4 py-2 hover:bg-black cursor-pointer text-sm"
-                                    >
-                                        <span>{lang.flag}</span>
-                                        <span>{lang.label}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
                 </div>
 
                 <div className="md:hidden flex items-center gap-3">
@@ -227,22 +188,6 @@ function AppBarComponent() {
                                 {t("login").toUpperCase()}
                             </button>
                         )}
-                    </div>
-
-                    <div className="pt-4 border-t border-white/20">
-                        {languages.map(lang => (
-                            <div
-                                key={lang.code}
-                                onClick={() => {
-                                    i18n.changeLanguage(lang.code);
-                                    setIsOpen(false);
-                                }}
-                                className="flex items-center gap-3 py-2 cursor-pointer hover:text-gray-300 transition-colors"
-                            >
-                                <span>{lang.flag}</span>
-                                <span>{lang.label}</span>
-                            </div>
-                        ))}
                     </div>
                 </div>
             )}

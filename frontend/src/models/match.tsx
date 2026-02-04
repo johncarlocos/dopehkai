@@ -1,9 +1,11 @@
 import { Predictions, ResultIA } from "./probability"
 
 export interface TeamLanguages {
-  en: string;
-  zh: string;
-  zhCN: string;
+  // Traditional Chinese only (primary)
+  zh?: string;
+
+  // Allow backend-provided extra language keys without modeling them in the UI.
+  [key: string]: string | undefined;
 }
 
 export interface Match {

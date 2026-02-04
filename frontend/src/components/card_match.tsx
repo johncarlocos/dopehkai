@@ -6,8 +6,6 @@ import { useTranslation } from "react-i18next";
 import moment from 'moment-timezone';
 import { Probability } from "../models/probability";
 import useIsMobile from "../hooks/useIsMobile";
-import API from "../api/api";
-import AppGlobal from "../ultis/global";
 import Crown from "./crown";
 
 export type Props = {
@@ -96,7 +94,7 @@ export function CardMatch({
                     </div>
 
                     <div className="flex flex-col items-center justify-center">
-                        {/* Show crowns for the team with higher win rate above REPORT */}
+                        {/* Show crowns for the team with higher win rate above the label */}
                         {(() => {
                             const higherWinRate = homeWin && awayWin 
                                 ? (homeWin > awayWin ? homeWin : awayWin)
@@ -112,7 +110,7 @@ export function CardMatch({
                             <div
                                 className="sm:text-[12px] text-[5px] font-semibold text-black/80 hover:text-black transition duration-200"
                             >
-                                REPORT
+                                {t("resultStatistics")}
                             </div>
                         </div>
                     </div>
@@ -141,7 +139,7 @@ export function CardMatch({
                         onClick={e => e.stopPropagation()}
                     >
                         <p className="mb-4 text-center text-black font-semibold">
-                            {t("you_need_to_be_VIP") || "You need to be VIP member to see the analysis."}
+                            {t("you_need_to_be_VIP")}
                         </p>
 
                         <div className="flex justify-end space-x-4">

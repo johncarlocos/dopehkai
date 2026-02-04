@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import { zhTW } from "date-fns/locale";
 import { Box, IconButton } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 import { useRecords } from "../../hooks/useRecords";
@@ -134,7 +134,7 @@ const RecordList = ({ page, setPage, records, totalPages, loading, readMore, set
                                     </div>
                                     <div style={{ marginTop: 15 }}>
                                         <small className="text-muted" style={{ fontSize: 13, color: "black" }}>
-                                            {format(new Date(record.date), 'yyyy年M月d日(E)', { locale: zhCN })}
+                                            {format(new Date(record.date), 'yyyy年M月d日(E)', { locale: zhTW })}
                                         </small>
                                         <DescriptionBox record={record} readMore={readMore} />
                                         <div style={{ textAlign: 'left', marginBottom: -10 }}>

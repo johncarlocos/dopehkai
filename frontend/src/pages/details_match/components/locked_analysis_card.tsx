@@ -9,7 +9,7 @@ interface Props {
 }
 
 function LockedAnalysisCard({ kickOff }: Props) {
-    const { t } = useTranslation();
+    useTranslation();
     const [timeRemaining, setTimeRemaining] = useState<string>("00:00:00");
 
     useEffect(() => {

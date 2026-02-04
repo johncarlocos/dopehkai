@@ -3,7 +3,7 @@ import AppAssets from "../../../ultis/assets";
 import useIsMobile from "../../../hooks/useIsMobile";
 import { Records } from "../../../models/records";
 import { format } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import { zhTW } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
 import AppGlobal from "../../../ultis/global";
 
@@ -70,7 +70,7 @@ export default function SectionComponent1({
                         </div>
 
                         <div className="h-2/6 w-full p-3 flex flex-col justify-center text-white">
-                            <p className="text-[9px] text-black">{format(new Date(item.date), 'yyyy年M月d日(E)', { locale: zhCN })}</p>
+                            <p className="text-[9px] text-black">{format(new Date(item.date), 'yyyy年M月d日(E)', { locale: zhTW })}</p>
                             <h3 className="text-xs text-black mb-2 truncate"
                                 style={{ whiteSpace: "pre-wrap", margin: 0 }}>{item?.description.toUpperCase()}</h3>
                             <div style={{ textAlign: 'left', marginBottom: -10, marginTop: 10 }}>

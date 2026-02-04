@@ -15,7 +15,6 @@ import { Config } from "../../../models/config";
 import AppGlobal from "../../../ultis/global";
 import API from "../../../api/api";
 import { useNavigate } from "react-router-dom";
-import i18n from "../../../i18n";
 import { useQueryClient } from "@tanstack/react-query";
 
 export type Props = {
@@ -61,18 +60,6 @@ export default function SectionComponent7({
         setModalVisible(false);
     };
 
-    const handleWeChatClick = () => {
-        if (admin) {
-            // Admin: Show modal to edit
-            setUrlInput(config?.whatsapp ?? "https://wa.me/85266750460");
-            setUrlModalVisible(true);
-        } else {
-            // Client: Open WhatsApp link directly
-            const whatsappUrl = config?.whatsapp || "https://wa.me/85266750460";
-            window.open(whatsappUrl, "_blank");
-        }
-    };
-
     const handleUrlModalClose = () => {
         setUrlModalVisible(false);
         setUrlInput("");
@@ -110,14 +97,6 @@ export default function SectionComponent7({
 
     const admin = userRole && (userRole === "admin" || userRole === "subadmin");
 
-    const languages = [
-        { code: "zh", label: "繁體中文", flag: "🇭🇰" },
-        { code: "zhCN", label: "简体中文", flag: "🇨🇳" },
-        { code: "en", label: "English", flag: "🇺🇸" },
-    ];
-    const currentLang =
-        languages.find(l => l.code === i18n.language) || languages[0];
-
     return (
         <section id="contact-us"
             className="flex items-center justify-center sm:mt-0 p-3 pb-14 flex-col bg-black  w-screen">
@@ -138,20 +117,8 @@ export default function SectionComponent7({
             </div>
 
 
-            {currentLang.code === "zhCN" ? (
-                // For Simplified Chinese: Show whatsapp-blue.jpg image
-                <div className="flex gap-6 text-3xl text-gray-700">
-                    <img 
-                        src="/whatsapp-blue.jpg" 
-                        alt="WhatsApp" 
-                        className="w-12 h-12 object-contain cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={handleWeChatClick}
-                        style={{ borderRadius: '10px' }}
-                    />
-                </div>
-            ) : (
-                // For English and Traditional Chinese: Show the 4 icons
-                <div className="flex gap-6 text-3xl text-gray-700">
+            {/* Show the 4 icons for Traditional Chinese */}
+            <div className="flex gap-6 text-3xl text-gray-700">
                     <a onClick={admin ? () => handleIconClick(config?.instagram ?? "", "instagram") : () => {
                         const url = config?.instagram ?? "/";
                         const width = 1000;
@@ -195,8 +162,7 @@ export default function SectionComponent7({
                     >
                         <FaWhatsapp className="hover:text-green-600 text-5xl text-white transition duration-300" />
                     </a>
-                </div>
-            )}
+            </div>
 
 
                 {/* <a onClick={admin ? () => handleIconClick(config?.message ?? "", "message") : () => {
