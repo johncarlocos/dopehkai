@@ -46,7 +46,9 @@ export default function SectionComponent1({
                 </div>
             </div>
 
-            <div className="flex flex-wrap justify-center items-stretch gap-3 sm:gap-7 px-2 mb-20 mt-24 sm:m-0 m-10">
+            
+
+            <div className="flex flex-wrap justify-center items-stretch gap-3 sm:gap-7 px-2 mb-15 mt-24 sm:m-0 m-10">
 
                 {
                     data.length == 0
@@ -57,7 +59,7 @@ export default function SectionComponent1({
                 {data.filter((x) => x.media && x.media.length > 0).map((item: Records) => (
                     <div
                         key={item?.id}
-                        className="backdrop-blur-sm bg-white/100 border-none border-white/20 rounded-xl overflow-hidden w-[48%] sm:w-[300px] sm:h-80 h-64 shadow-lg hover:scale-105 transition-transform flex flex-col"
+                        className="backdrop-blur-sm bg-white/100 border-none border-white/20 rounded-xl overflow-hidden w-[48%] sm:w-[300px] sm:h-[25rem] h-80 shadow-lg hover:scale-105 transition-transform flex flex-col"
                     >
 
                         <div className="h-4/6 w-full">
@@ -94,6 +96,17 @@ export default function SectionComponent1({
                 ))}
             </div>
 
+            <div className="relative z-10 w-full flex items-center flex-col sm:pl-10 pl-2 pr-5 mb-28">
+                <div className="relative z-10 w-full flex items-center">
+                    <div className="flex flex-1 items-center pl-5">
+                        <div className="flex flex-col justify-center">
+                            <p className="sm:text-3xl text-2xl font-semibold text-black leading-tight">
+                                會員勁中紀錄
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <img
                 src={AppAssets.bottom_cover_white}

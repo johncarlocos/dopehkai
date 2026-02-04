@@ -44,8 +44,8 @@ function LockedAnalysisCard({ kickOff }: Props) {
     }, [kickOff]);
 
     return (
-        <div className="sm:w-2/3 w-5/6 mx-auto bg-white rounded-lg mt-5 p-6 flex items-center">
-            <div className="w-1 h-16 bg-blue-600 mr-4 rounded"></div>
+        <div className="sm:w-2/3 w-5/6 mx-auto bg-white rounded-lg mt-5 p-8 py-16 flex items-center min-h-[450px]">
+            <div className="w-1 h-full bg-blue-600 mr-4 rounded"></div>
             <div className="flex-1 flex flex-col items-center justify-center">
                 <ThemedText
                     className="text-lg font-bold text-black mb-4"
