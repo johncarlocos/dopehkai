@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import useAuthStore from "../../store/userAuthStore";
 import HeaderDetailsComponent from "./components/header_details";
 import { getTeamNameInCurrentLanguage } from "../../ultis/languageUtils";
+import LockedAnalysisCard from "./components/locked_analysis_card";
 
 
 function DetailsMatchPage() {
@@ -25,12 +26,22 @@ function DetailsMatchPage() {
     const { data, isLoading, error } = useProbability(id ?? "");
     const [loadingGenerate, setLoadingGenerate] = useState(false);
     const [hasGenerated, setHasGenerated] = useState(false);
+    const [isVip, setIsVip] = useState<boolean | null>(null);
     const navigate = useNavigate();
     const { userRole } = useAuthStore();
 
     useEffect(() => {
         if (!userRole) {
             navigate("/");
+        } else {
+            // Check VIP status
+            API.GET(AppGlobal.baseURL + "user/verify/vip")
+                .then((res) => {
+                    setIsVip(res.status === 200);
+                })
+                .catch(() => {
+                    setIsVip(false);
+                });
         }
     }, [userRole, navigate]);
 
@@ -158,6 +169,14 @@ function DetailsMatchPage() {
 
                         <HeaderDetailsComponent data={data} />
 
+                        {/* Show locked cards for non-VIP users */}
+                        {isVip === false && (
+                            <>
+                                <LockedAnalysisCard kickOff={data.kickOff} />
+                                <LockedAnalysisCard kickOff={data.kickOff} />
+                                <LockedAnalysisCard kickOff={data.kickOff} />
+                            </>
+                        )}
 
                         {!data.ia && loadingGenerate ?
                             <div style={{ marginTop: 30 }}>
@@ -227,7 +246,7 @@ function DetailsMatchPage() {
 
                                     <div style={{ width: "20%", height: 2, backgroundColor: AppColors.primary }} />
                                 </div>
-                            </div> : (data.predictions || data.ia) ?
+                            </div> : (data.predictions || data.ia) && isVip === true ?
                                 <DetailsCardComponent probability={data} />
                                 : <div />
                         }

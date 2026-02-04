@@ -62,12 +62,9 @@ export function CardMatch({
 
     const handleClick = async () => {
         if (id) {
-            const res = await API.GET(AppGlobal.baseURL + "user/verify/vip");
-            if (res.status === 200) {
-                navigate("/details-match/" + id);
-            } else {
-                setShowModal(true);
-            }
+            // Allow navigation to details page for all users
+            // VIP check will be done on the details page
+            navigate("/details-match/" + id);
         }
     };
 
