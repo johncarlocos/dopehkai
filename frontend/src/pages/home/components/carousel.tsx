@@ -9,6 +9,7 @@ import SectionComponent1 from "./section.components";
 import useAuthStore from "../../../store/userAuthStore";
 import { Records } from "../../../models/records";
 import { getTeamNameInCurrentLanguage } from "../../../ultis/languageUtils";
+import GlobeAnimation from "../../../components/globe_animation";
 
 
 export type Props = {
@@ -59,6 +60,15 @@ export function HeroCarousel({
 
                 style={{ backgroundImage: `url(${AppAssets.background_image})` }}
             />
+
+            {/* Globe Animation - Positioned on the right side */}
+            <div className="absolute inset-0 flex justify-end pointer-events-none z-[1] pr-10" style={{ opacity: 0.5 }}>
+                <GlobeAnimation 
+                    width="100%" 
+                    height="100%" 
+                    style={{ maxWidth: '800px', maxHeight: '800px' }}
+                />
+            </div>
 
 
             <div className="relative z-10 w-full flex items-center h-[50vh] flex-col sm:pl-10 pl-2 pr-5">

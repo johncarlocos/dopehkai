@@ -17,6 +17,7 @@ import useAuthStore from "../../store/userAuthStore";
 import HeaderDetailsComponent from "./components/header_details";
 import { getTeamNameInCurrentLanguage } from "../../ultis/languageUtils";
 import LockedAnalysisCard from "./components/locked_analysis_card";
+import GlobeAnimation from "../../components/globe_animation";
 
 
 function DetailsMatchPage() {
@@ -161,6 +162,14 @@ function DetailsMatchPage() {
                                 opacity: 0.1,
                             }}
                         ></div>
+                        {/* Globe Animation */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
+                            <GlobeAnimation 
+                                width="100%" 
+                                height="100%" 
+                                style={{ maxWidth: '800px', maxHeight: '800px' }}
+                            />
+                        </div>
                     </div>
 
                     <AppBarComponent />
