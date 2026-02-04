@@ -5,7 +5,7 @@ export function SectionComponent6() {
     const { t } = useTranslation();
     return (
         <section id="about-us"
-            className="flex items-center justify-center sm:mt-0 p-3 flex-col bg-gradient-to-b from-white to-white/95  w-screen">
+            className="flex items-center justify-center sm:mt-0 p-3 flex-col bg-white w-screen">
 
             <div className="relative z-10 w-full flex items-center flex-col pl-10 pb-5">
                 <div className="relative z-10 w-full flex items-end sm:h-[20vh] h-[18vh]">

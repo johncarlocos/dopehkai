@@ -15,6 +15,10 @@ export default function ImageSlider() {
         "/assets/slider-6.jpg",
         "/assets/slider-7.jpg",
         "/assets/slider-8.jpg",
+        "/assets/slider-9.jpg",
+        "/assets/slider-10.jpg",
+        "/assets/slider-11.jpg",
+        "/assets/slider-12.jpg",
     ];
 
     // Auto-advance slider

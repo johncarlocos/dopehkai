@@ -61,12 +61,12 @@ export function HeroCarousel({
                 style={{ backgroundImage: `url(${AppAssets.background_image})` }}
             />
 
-            {/* Globe Animation - Positioned on the right side */}
-            <div className="absolute inset-0 flex justify-end pointer-events-none z-[1] pr-10" style={{ opacity: 0.5 }}>
+            {/* Globe Animation - Positioned at top center */}
+            <div className="absolute inset-0 flex items-start justify-center pointer-events-none z-[1] -mt-32 sm:mt-0" style={{ opacity: 0.5 }}>
                 <GlobeAnimation 
                     width="100%" 
                     height="100%" 
-                    style={{ maxWidth: '800px', maxHeight: '800px' }}
+                    style={{ maxWidth: '1000px', maxHeight: '1000px', minWidth: '600px', minHeight: '600px' }}
                 />
             </div>
 

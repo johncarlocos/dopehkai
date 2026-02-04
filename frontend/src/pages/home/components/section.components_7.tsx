@@ -1,5 +1,5 @@
 import { FaThreads } from "react-icons/fa6";
-import { FaInstagram, FaTelegramPlane, FaWhatsapp } from "react-icons/fa";
+import { FaInstagram, FaTelegramPlane } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import {
@@ -50,7 +50,7 @@ export default function SectionComponent7({
             instagram: field == 'instagram' ? editedURL : config?.instagram ?? "",
             threads: field == 'threads' ? editedURL : config?.threads ?? "",
             telegram: field == 'telegram' ? editedURL : config?.telegram ?? "",
-            whatsapp: field == 'whatsapp' ? editedURL : config?.whatsapp ?? "",
+            whatsapp: config?.whatsapp ?? "",
             message: field === "message" ? editedURL : config?.message ?? ""
         };
         const res = await API.POST(`${AppGlobal.baseURL}config`, data);
@@ -72,8 +72,8 @@ export default function SectionComponent7({
                 const data = {
                     instagram: config?.instagram ?? "",
                     threads: config?.threads ?? "",
-                    telegram: config?.telegram ?? "",
-                    whatsapp: urlInput.trim(),
+                    telegram: urlInput.trim(),
+                    whatsapp: config?.whatsapp ?? "",
                     message: config?.message ?? ""
                 };
                 const res = await API.POST(`${AppGlobal.baseURL}config`, data);
@@ -119,48 +119,23 @@ export default function SectionComponent7({
 
             {/* Show the 4 icons for Traditional Chinese */}
             <div className="flex gap-6 text-3xl text-gray-700">
-                    <a onClick={admin ? () => handleIconClick(config?.instagram ?? "", "instagram") : () => {
-                        const url = config?.instagram ?? "/";
-                        const width = 1000;
-                        const height = 1000;
-                        const left = window.screen.width - width - 20;
-                        const top = window.screen.height - height - 20;
-                        window.open(url, "instagramWindow", `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
-                    }} rel="noopener noreferrer">
+                    <a onClick={admin ? () => handleIconClick(config?.instagram || "https://www.instagram.com/dopehk.ai/", "instagram") : () => {
+                        const url = config?.instagram || "https://www.instagram.com/dopehk.ai/";
+                        window.open(url, "_blank", "noopener,noreferrer");
+                    }} rel="noopener noreferrer" style={{ cursor: "pointer" }}>
                         <FaInstagram className="hover:text-gray-400 text-5xl text-white transition duration-300" />
                     </a>
-                    <a onClick={admin ? () => handleIconClick(config?.threads ?? "", "threads") : () => {
-                        const url = config?.threads ?? "/";
-                        const width = 1000;
-                        const height = 1000;
-                        const left = window.screen.width - width - 20;
-                        const top = window.screen.height - height - 20;
-                        window.open(url, "threadsWindow", `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
-                    }} rel="noopener noreferrer">
+                    <a onClick={admin ? () => handleIconClick(config?.threads || "https://www.threads.com/@dopehk.ai", "threads") : () => {
+                        const url = config?.threads || "https://www.threads.com/@dopehk.ai";
+                        window.open(url, "_blank", "noopener,noreferrer");
+                    }} rel="noopener noreferrer" style={{ cursor: "pointer" }}>
                         <FaThreads className="hover:text-gray-400 text-5xl text-white transition duration-300" />
                     </a>
-                    <a onClick={admin ? () => handleIconClick(config?.telegram ?? "", "telegram") : () => {
-                        const url = config?.telegram ?? "/";
-                        const width = 1000;
-                        const height = 1000;
-                        const left = window.screen.width - width - 20;
-                        const top = window.screen.height - height - 20;
-                        window.open(url, "telegramWindow", `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
-                    }} rel="noopener noreferrer">
+                    <a onClick={admin ? () => handleIconClick(config?.telegram || "https://t.me/Dopehkai", "telegram") : () => {
+                        const url = config?.telegram || "https://t.me/Dopehkai";
+                        window.open(url, "_blank", "noopener,noreferrer");
+                    }} rel="noopener noreferrer" style={{ cursor: "pointer" }}>
                         <FaTelegramPlane className="hover:text-gray-400 text-5xl text-white transition duration-300" />
-                    </a>
-                    <a
-                        onClick={admin ? () => handleIconClick(config?.whatsapp ?? "", "whatsapp") : () => {
-                            const url = config?.whatsapp ?? "/";
-                            const width = 1000;
-                            const height = 1000;
-                            const left = window.screen.width - width - 20;
-                            const top = window.screen.height - height - 20;
-                            window.open(url, "whatsappWindow", `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`);
-                        }}
-                        rel="noopener noreferrer"
-                    >
-                        <FaWhatsapp className="hover:text-green-600 text-5xl text-white transition duration-300" />
                     </a>
             </div>
 
@@ -240,11 +215,11 @@ export default function SectionComponent7({
                             borderRadius: "8px",
                         }
                     }}>
-                    <DialogTitle>WhatsApp URL</DialogTitle>
+                    <DialogTitle>Telegram URL</DialogTitle>
                     <DialogContent>
                         <TextField
                             fullWidth
-                            label="WhatsApp URL"
+                            label="Telegram URL"
                             value={urlInput}
                             onChange={(e) => setUrlInput(e.target.value)}
                             margin="dense"

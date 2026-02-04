@@ -13,9 +13,9 @@ class ConfigController {
             if (!configSnap.exists()) {
                 // Return default config if not found
                 const defaultConfig = {
-                    instagram: '',
-                    threads: '',
-                    telegram: '',
+                    instagram: 'https://www.instagram.com/dopehk.ai/',
+                    threads: 'https://www.threads.com/@dopehk.ai',
+                    telegram: 'https://t.me/Dopehkai',
                     whatsapp: 'https://wa.me/85266750460',
                     message: ''
                 };

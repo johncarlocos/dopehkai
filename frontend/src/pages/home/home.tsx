@@ -10,7 +10,7 @@ import { useRecords } from "../../hooks/useRecords";
 import useIsMobile from "../../hooks/useIsMobile";
 import { useConfig } from "../../hooks/useConfig";
 import SectionComponent7 from "./components/section.components_7";
-import { FaTelegramPlane, FaWhatsapp } from "react-icons/fa";
+import { FaTelegramPlane } from "react-icons/fa";
 import { useState } from "react";
 import {
     Dialog,
@@ -55,8 +55,8 @@ export default function HomePage() {
                 const data = {
                     instagram: config?.instagram ?? "",
                     threads: config?.threads ?? "",
-                    telegram: config?.telegram ?? "",
-                    whatsapp: urlInput.trim(),
+                    telegram: urlInput.trim(),
+                    whatsapp: config?.whatsapp ?? "",
                     message: config?.message ?? ""
                 };
                 const res = await API.POST(`${AppGlobal.baseURL}config`, data);
@@ -110,59 +110,24 @@ export default function HomePage() {
 
             {/* Show the 2 floating buttons for Traditional Chinese */}
             <>
-                {config?.whatsapp ? (
-                    <button
-                        onClick={() => {
-                            const width = 600;
-                            const height = 800;
-                            const left = window.screen.width - width - 20;
-                            const top = window.screen.height - height - 100;
-                            window.open(
-                                config.whatsapp,
-                                "whatsappWindow",
-                                `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`
-                            );
-                        }}
-                        className="
+                <button
+                    onClick={() => {
+                        const url = config?.telegram || "https://t.me/Dopehkai";
+                        window.open(url, "_blank", "noopener,noreferrer");
+                    }}
+                    className="
                   fixed sm:bottom-52 bottom-36 sm:right-10 right-5 z-50 
-              bg-green-500 sm:p-5 p-3 rounded-full shadow-lg
-              hover:bg-green-600 transition-colors
+              bg-[#229ED9] sm:p-5 p-3 rounded-full shadow-lg
+              hover:bg-[#1e8cc4] transition-colors
               flex items-center justify-center
               transform
               opacity-0 scale-90
               animate-fadeInScale
             "
-                    >
-                        <FaWhatsapp className="text-white sm:text-4xl text-3xl pl-[3px]" />
-                    </button>
-                ) : undefined}
+                >
+                    <FaTelegramPlane className="text-white sm:text-4xl text-3xl pr-1" />
+                </button>
 
-                {config?.telegram ? (
-                    <button
-                        onClick={() => {
-                            const width = 600;
-                            const height = 800;
-                            const left = window.screen.width - width - 20;
-                            const top = window.screen.height - height - 20;
-                            window.open(
-                                config.telegram,
-                                "telegramWindow",
-                                `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes`
-                            );
-                        }}
-                        className="
-                fixed sm:bottom-28 bottom-20 sm:right-10 right-5 z-50
-              bg-[#229ED9] sm:p-5 p-3 rounded-full shadow-lg 
-              hover:bg-[#1e4555] transition-colors 
-              flex items-center justify-center
-              transform 
-              opacity-0 scale-90 
-              animate-fadeInScale
-            "
-                    >
-                        <FaTelegramPlane className="text-white sm:text-4xl text-3xl pr-1" />
-                    </button>
-                ) : undefined}
             </>
 
 
@@ -205,11 +170,11 @@ export default function HomePage() {
                             borderRadius: "8px",
                         }
                     }}>
-                    <DialogTitle>WhatsApp URL</DialogTitle>
+                    <DialogTitle>Telegram URL</DialogTitle>
                     <DialogContent>
                         <TextField
                             fullWidth
-                            label="WhatsApp URL"
+                            label="Telegram URL"
                             value={urlInput}
                             onChange={(e) => setUrlInput(e.target.value)}
                             margin="dense"

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FaInstagram, FaTelegramPlane, FaWhatsapp } from "react-icons/fa";
+import { FaInstagram, FaTelegramPlane } from "react-icons/fa";
 import { HiMenu, HiX } from "react-icons/hi";
 import AppAssets from "../ultis/assets";
 import useAuthStore from "../store/userAuthStore";
@@ -82,10 +82,9 @@ function AppBarComponent() {
 
                     {
                         [
-                            { icon: <FaInstagram />, url: config?.instagram },
-                            { icon: <FaThreads />, url: config?.threads },
-                            { icon: <FaTelegramPlane />, url: config?.telegram },
-                            { icon: <FaWhatsapp />, url: config?.whatsapp },
+                            { icon: <FaInstagram />, url: config?.instagram || "https://www.instagram.com/dopehk.ai/" },
+                            { icon: <FaThreads />, url: config?.threads || "https://www.threads.com/@dopehk.ai" },
+                            { icon: <FaTelegramPlane />, url: config?.telegram || "https://t.me/Dopehkai" },
                             {
                                 icon: <svg
                                     xmlns="http://www.w3.org/2000/svg"
