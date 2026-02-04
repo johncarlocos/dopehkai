@@ -176,26 +176,44 @@ function MatchsPage() {
 
                     <div className="w-screen flex flex-col items-start mt-20">
                         <div
-                            className="sm:w-2/3 w-5/6 mx-auto bg-white/70 mt-5 rounded justify-center items-center flex flex-wrap gap-2 p-2"
+                            className="sm:w-2/3 w-5/6 mx-auto bg-white mt-5 rounded-lg justify-center items-center flex flex-wrap gap-3 p-3 shadow-lg"
                             style={{
-                                backgroundColor: "black",
-                                // background: AppStyle.backgroundGradient
+                                backgroundColor: "white",
                             }}
                         >
                             <div
                                 onClick={() => setSelectedDay(undefined)}
                                 style={{
-                                    backgroundColor: !selectedDay ? AppColors.primary : AppColors.background,
+                                    backgroundColor: !selectedDay ? AppColors.primary : "white",
+                                    border: !selectedDay ? "none" : "2px solid #e5e7eb",
                                 }}
-                                className="p-4 rounded cursor-pointer transform transition-transform duration-300 hover:scale-105 text-white"
+                                className={`px-5 py-3 rounded-lg cursor-pointer transform transition-all duration-300 hover:scale-105 flex items-center gap-2 font-semibold ${
+                                    !selectedDay 
+                                        ? "text-white shadow-md" 
+                                        : "text-black hover:bg-gray-50 hover:border-gray-300"
+                                }`}
                             >
                                 <ThemedText
                                     type="subtitle"
-                                    className="text-[10px] sm:text-sm text-white"
-                                    colorText="white"
+                                    className={`text-xs sm:text-sm flex items-center ${!selectedDay ? "text-white" : "text-black"}`}
+                                    colorText={!selectedDay ? "white" : "black"}
                                 >
                                     {t("all")}
                                 </ThemedText>
+                                <svg 
+                                    className={`w-4 h-4 flex-shrink-0 ${!selectedDay ? "text-white" : "text-black"}`}
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    viewBox="0 0 24 24"
+                                    style={{ display: "block" }}
+                                >
+                                    <path 
+                                        strokeLinecap="round" 
+                                        strokeLinejoin="round" 
+                                        strokeWidth={2.5} 
+                                        d="M9 5l7 7-7 7" 
+                                    />
+                                </svg>
                             </div>
 
                             {days.map((day, index) => (
@@ -203,17 +221,36 @@ function MatchsPage() {
                                     key={index}
                                     onClick={() => setSelectedDay(day)}
                                     style={{
-                                        backgroundColor: selectedDay === day ? AppColors.primary : AppColors.background,
+                                        backgroundColor: selectedDay === day ? AppColors.primary : "white",
+                                        border: selectedDay === day ? "none" : "2px solid #e5e7eb",
                                     }}
-                                    className="p-4 rounded cursor-pointer transform transition-transform duration-300 hover:scale-105 text-white"
+                                    className={`px-5 py-3 rounded-lg cursor-pointer transform transition-all duration-300 hover:scale-105 flex items-center gap-2 font-semibold ${
+                                        selectedDay === day 
+                                            ? "text-white shadow-md" 
+                                            : "text-black hover:bg-gray-50 hover:border-gray-300"
+                                    }`}
                                 >
                                     <ThemedText
                                         type="title"
-                                        className="text-[10px] sm:text-base font-body text-white"
-                                        colorText="white"
+                                        className={`text-xs sm:text-sm font-body flex items-center ${selectedDay === day ? "text-white" : "text-black"}`}
+                                        colorText={selectedDay === day ? "white" : "black"}
                                     >
                                         {day}
                                     </ThemedText>
+                                    <svg 
+                                        className={`w-4 h-4 flex-shrink-0 ${selectedDay === day ? "text-white" : "text-black"}`}
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        viewBox="0 0 24 24"
+                                        style={{ display: "block" }}
+                                    >
+                                        <path 
+                                            strokeLinecap="round" 
+                                            strokeLinejoin="round" 
+                                            strokeWidth={2.5} 
+                                            d="M9 5l7 7-7 7" 
+                                        />
+                                    </svg>
                                 </div>
                             ))}
                         </div>

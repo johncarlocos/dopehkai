@@ -180,7 +180,7 @@ function AppBarComponent() {
 
                 <div className="md:hidden flex items-center gap-3">
                     <button
-                        className="text-3xl"
+                        className="text-3xl text-white bg-black border-2 border-black rounded-lg p-2 hover:bg-gray-900 transition-colors"
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? <HiX /> : <HiMenu />}
@@ -198,7 +198,7 @@ function AppBarComponent() {
                                     item.path();
                                     setIsOpen(false);
                                 }}
-                                className="text-lg hover:text-black"
+                                className="text-lg hover:text-gray-300 cursor-pointer transition-colors"
                             >
                                 {item.label.toUpperCase()}
                             </div>
@@ -212,7 +212,7 @@ function AppBarComponent() {
                                     logout();
                                     setIsOpen(false);
                                 }}
-                                className="w-full bg-black hover:bg-gray-800 rounded-lg text-sm px-4 py-3 mb-4"
+                                className="w-full bg-white hover:bg-gray-100 text-black border-2 border-black rounded-lg text-sm px-4 py-3 mb-4 font-semibold transition-colors"
                             >
                                 {t("logout").toUpperCase()}
                             </button>
@@ -222,7 +222,7 @@ function AppBarComponent() {
                                     navigate("/login");
                                     setIsOpen(false);
                                 }}
-                                className="w-full bg-black hover:bg-gray-800 rounded-lg text-sm px-4 py-3 mb-4"
+                                className="w-full bg-white hover:bg-gray-100 text-black border-2 border-black rounded-lg text-sm px-4 py-3 mb-4 font-semibold transition-colors"
                             >
                                 {t("login").toUpperCase()}
                             </button>
@@ -237,7 +237,7 @@ function AppBarComponent() {
                                     i18n.changeLanguage(lang.code);
                                     setIsOpen(false);
                                 }}
-                                className="flex items-center gap-3 py-2 cursor-pointer hover:text-black"
+                                className="flex items-center gap-3 py-2 cursor-pointer hover:text-gray-300 transition-colors"
                             >
                                 <span>{lang.flag}</span>
                                 <span>{lang.label}</span>

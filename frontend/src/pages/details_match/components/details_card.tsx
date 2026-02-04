@@ -91,7 +91,7 @@ function DetailsCardComponent({
                                 className="h-full"
                                 style={{
                                     width: `${homeWin}%`,
-                                    background: 'linear-gradient(to right, rgba(255,0,0,0.1), rgba(255,0,0,0.6), rgba(255,0,0,1))',
+                                    background: 'linear-gradient(to right, rgba(255,193,7,0.1), rgba(255,193,7,0.6), rgba(255,193,7,1))',
                                     borderRadius: 'inherit',
                                 }}
                             />
@@ -146,7 +146,7 @@ function DetailsCardComponent({
                                 className="h-full"
                                 style={{
                                     width: `${awayWin}%`,
-                                    background: 'linear-gradient(to right, rgba(255,0,0,0.1), rgba(255,0,0,0.6), rgba(255,0,0,1))',
+                                    background: 'linear-gradient(to right, rgba(255,193,7,0.1), rgba(255,193,7,0.6), rgba(255,193,7,1))',
                                     borderRadius: 'inherit',
                                 }}
                             />
