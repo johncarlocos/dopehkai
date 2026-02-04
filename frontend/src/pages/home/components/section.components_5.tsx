@@ -18,7 +18,7 @@ export default function SectionComponent5() {
                         <img src={AppAssets.card_img_4} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-black" />
                         <div className="flex flex-col justify-center sm:text-2xl text-sm">
                             <h3 className="sm:text-2xl text-sm font-bold text-black">{t("User_Trust").toUpperCase()}</h3>
-                            <p className="text-gray-600">≠≠
+                            <p className="text-gray-600">
                                 {t("Accurate_Analysis_that_Enhancesr").toUpperCase()}
                             </p>
                         </div>
@@ -32,18 +32,6 @@ export default function SectionComponent5() {
                             </h3>
                             <p className="text-gray-600">
                                 {t("10,000+_hours").toUpperCase()}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex space-x-4 sm:h-20 h-12">
-                        <img src={AppAssets.card_img_1} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-black" />
-                        <div className="flex flex-col justify-center sm:text-2xl text-sm">
-                            <h3 className="sm:text-2xl text-sm font-bold text-black">
-                                {t("Average_Earnings").toUpperCase()}
-                            </h3>
-                            <p className="text-gray-600 text-lg">
-                                {t("130.000+_HKD").toUpperCase()}
                             </p>
                         </div>
                     </div>
@@ -80,24 +68,24 @@ export default function SectionComponent5() {
 
                     <div />
                     <div className="flex space-x-4 sm:h-20 h-12">
+                        <img src={AppAssets.card_img_1} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-black" />
+                        <div className="flex flex-col justify-center sm:text-2xl text-sm">
+                            <h3 className="sm:text-2xl text-sm font-bold text-black">
+                                {t("Average_Earnings").toUpperCase()}
+                            </h3>
+                            <p className="text-gray-600 text-lg">
+                                {t("130.000+_HKD").toUpperCase()}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex space-x-4 sm:h-20 h-12">
                         <img src={AppAssets.card_img_2} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-black" />
                         <div className="flex flex-col justify-center sm:text-2xl text-sm">
                             <h3 className="sm:text-2xl text-sm font-bold text-black">
                                 {t("Successful_Predictions").toUpperCase()}
                             </h3>
                             <p className="text-gray-600">
-                                {t("25,000+_times").toUpperCase()}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex space-x-4 sm:h-20 h-12">
-                        <img src={AppAssets.card_img_3} alt="Trophy" className="sm:w-24 sm:h-24 w-14 h-14 text-black" />
-                        <div className="flex flex-col justify-center sm:text-2xl text-sm">
-                            <h3 className="sm:text-2xl text-sm font-bold text-black">
-                                {t("Matches_Analyzed").toUpperCase()}
-                            </h3>
-                            <p className="text-gray-600 text-lg">
                                 {t("25,000+_times").toUpperCase()}
                             </p>
                         </div>
