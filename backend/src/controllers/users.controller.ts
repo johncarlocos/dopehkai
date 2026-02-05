@@ -79,12 +79,12 @@ class UsersController {
                     if (!passwordMatch) {
                         return res.status(401).json({ error: "Invalid password." });
                     }
-                    const sessionId = await SessionService.createSession(userId);
+                    const sessionId = await SessionService.createSession(userId, 7); // 7 days for admin
                     res.cookie('sessionId', sessionId, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         sameSite: 'lax',
-                        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+                        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days for admin
                     });
                     return res.json({
                         user: {
