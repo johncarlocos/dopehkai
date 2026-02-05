@@ -7,9 +7,11 @@ import SectionComponent5 from "./components/section.components_5";
 import { SectionComponent6 } from "./components/section.components_6";
 import { SectionComponent8 } from "./components/section.components_8";
 import { useRecords } from "../../hooks/useRecords";
+import { useRecords2 } from "../../hooks/useRecords2";
 import useIsMobile from "../../hooks/useIsMobile";
 import { useConfig } from "../../hooks/useConfig";
 import SectionComponent7 from "./components/section.components_7";
+import SectionComponentRecords2 from "./components/section.components_records2";
 import { FaTelegramPlane } from "react-icons/fa";
 import { useState } from "react";
 import {
@@ -32,6 +34,7 @@ export default function HomePage() {
     const isMobile = useIsMobile();
     const { data, isLoading } = useMatchs();
     const { data: records, isError } = useRecords(1, isMobile ? 4 : 6);
+    const { data: records2, isError: isError2 } = useRecords2(1, isMobile ? 4 : 6);
     const { data: config } = useConfig();
     const { t } = useTranslation();
     const { userRole } = useAuthStore();
@@ -91,6 +94,8 @@ export default function HomePage() {
             ) : (
                 <>
                     <HeroCarousel match={data ?? []} data={!isError ? records.data ?? [] : []} />
+
+                    <SectionComponentRecords2 data={!isError2 ? records2.data ?? [] : []} />
 
                     <SectionComponent2 />
 

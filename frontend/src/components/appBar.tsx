@@ -23,14 +23,17 @@ function AppBarComponent() {
     }
     if (userRole) {
         menuItems.push({ label: t("matches"), ur: "/matches", path: () => navigate("/matches") });
-        menuItems.push({ label: '分析紀錄', ur: "/records", path: () => navigate("/records") });
+        menuItems.push({ label: '分析紀錄1', ur: "/records", path: () => navigate("/records") });
+        menuItems.push({ label: '分析紀錄2', ur: "/records2", path: () => navigate("/records2") });
     } else {
-        menuItems.push({ label: '分析紀錄', ur: "/records", path: () => navigate("/records") });
+        menuItems.push({ label: '分析紀錄1', ur: "/records", path: () => navigate("/records") });
+        menuItems.push({ label: '分析紀錄2', ur: "/records2", path: () => navigate("/records2") });
     }
     if (userRole && (userRole === "admin" || userRole === "subadmin")) {
         menuItems.push({ label: '', ur: "", path: () => navigate("/") });
         menuItems.push({ label: t("members"), ur: "/admin/members", path: () => navigate("/admin/members") });
         menuItems.push({ label: t("records"), ur: "/admin/records", path: () => navigate("/admin/records") });
+        menuItems.push({ label: "記錄2", ur: "/admin/records2", path: () => navigate("/admin/records2") });
         menuItems.push({ label: t("admins"), ur: "/admin/admins", path: () => navigate("/admin/admins") });
     }
 

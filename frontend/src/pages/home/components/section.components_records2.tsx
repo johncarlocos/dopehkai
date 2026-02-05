@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import useIsMobile from "../../../hooks/useIsMobile";
+import AppAssets from "../../../ultis/assets";
 import { Records } from "../../../models/records";
 import { format } from "date-fns";
 import { zhTW } from "date-fns/locale";
@@ -10,24 +10,14 @@ export type Props = {
     data: Records[]
 };
 
-export default function SectionComponent1({
+export default function SectionComponentRecords2({
     data
 }: Props) {
-    const isMobile = useIsMobile();
     const { t } = useTranslation();
     const navigate = useNavigate();
 
     return (
         <section className="flex flex-col bg-white">
-
-            {
-                isMobile
-                    ? <div className="h-48" />
-                    : <div className="w-screen items-center z-0 justify-center flex mt-24">
-                        <div className="h-1 w-11/12 bg-white/60" />
-                    </div>
-            }
-
 
             <div className="relative z-10 w-full flex items-center flex-col sm:pl-10 pl-2 pr-5 sm:mb-8 sm:mt-0 mt-8">
                 <div className="relative z-10 w-full flex items-end h-[20vh] sm:h-[20vh]">
@@ -38,7 +28,7 @@ export default function SectionComponent1({
                                 {t("Professional_Match_Data_Analysis").toUpperCase()}
                             </p>
                             <p className="sm:text-5xl text-3xl font-semibold leading-tight">
-                                {t("Based_on_Multidimensional_Metrics").toUpperCase()}
+                                $500上$10萬紀錄
                             </p>
                         </div>
                     </div>
@@ -46,7 +36,6 @@ export default function SectionComponent1({
             </div>
 
             
-
             <div className="flex flex-wrap justify-center items-stretch gap-3 sm:gap-7 px-2 mb-15 mt-8 sm:m-0 m-8 bg-white pb-12">
 
                 {
@@ -84,7 +73,7 @@ export default function SectionComponent1({
                                     }}
                                     className="text-decoration-underline"
                                     onClick={() => {
-                                        navigate("records");
+                                        navigate("records2");
                                     }}
                                 >
                                     {t("閱讀更多")}
@@ -95,7 +84,7 @@ export default function SectionComponent1({
                 ))}
             </div>
 
-            {/* <div className="relative z-10 w-full flex items-center flex-col sm:pl-10 pl-2 pr-5 ">
+            <div className="relative z-10 w-full flex items-center flex-col sm:pl-10 pl-2 pr-5 ">
                 <div className="relative z-10 w-full flex items-center">
                     <div className="flex flex-1 items-center pl-5">
                         <div className="flex flex-col justify-center">
@@ -105,7 +94,13 @@ export default function SectionComponent1({
                         </div>
                     </div>
                 </div>
-            </div> */}
+            </div>
+
+            <img
+                src={AppAssets.bottom_cover_white}
+                className="w-full"
+            />
         </section>
     );
 }
+

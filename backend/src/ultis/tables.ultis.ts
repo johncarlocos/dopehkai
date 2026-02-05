@@ -4,6 +4,7 @@ const Tables = {
     admins: "admins",
     sessions: "sessions",
     records: "records",
+    records2: "records2",
     config: "config",
 }
 

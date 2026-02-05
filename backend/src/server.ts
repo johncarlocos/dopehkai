@@ -9,6 +9,7 @@ import { usersRouter } from './routes/users.routes';
 import { adminRouter } from './routes/admin.routes';
 import { homeRouter } from './routes/home.routes copy';
 import { recordsRouter } from './routes/records.routes';
+import { records2Router } from './routes/records2.routes';
 import { configRouter } from './routes/config.routes';
 
 const app = express();
@@ -74,6 +75,7 @@ app.use("/api/match", matchRouter);
 app.use("/api/user", usersRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/records", recordsRouter);
+app.use("/api/records2", records2Router);
 app.use("/api/config", configRouter);
 
 // Static files with proper cache control
