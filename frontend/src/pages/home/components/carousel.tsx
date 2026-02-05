@@ -6,7 +6,6 @@ import { Match } from "../../../models/match";
 import { useNavigate } from "react-router-dom";
 import AppAssets from "../../../ultis/assets";
 import SectionComponent1 from "./section.components";
-import useAuthStore from "../../../store/userAuthStore";
 import { Records } from "../../../models/records";
 import { getTeamNameInCurrentLanguage } from "../../../ultis/languageUtils";
 import GlobeAnimation from "../../../components/globe_animation";
@@ -24,7 +23,6 @@ export function HeroCarousel({
     const navigate = useNavigate();
     const [current, setCurrent] = useState(0);
     const isMobile = useIsMobile();
-    const { userRole } = useAuthStore();
 
     useEffect(() => {
         const timer = setInterval(() => {
