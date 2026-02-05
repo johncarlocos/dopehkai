@@ -7,18 +7,18 @@ export default function ImageSlider() {
     
     // Array of slider images
     const sliderImages = [
-        "/assets/slider-1.jpg",
-        "/assets/slider-2.jpg",
-        "/assets/slider-3.jpg",
-        "/assets/slider-4.jpg",
-        "/assets/slider-5.jpg",
-        "/assets/slider-6.jpg",
-        "/assets/slider-7.jpg",
-        "/assets/slider-8.jpg",
-        "/assets/slider-9.jpg",
-        "/assets/slider-10.jpg",
-        "/assets/slider-11.jpg",
-        "/assets/slider-12.jpg",
+        "/assets/slid-1.jpg",
+        "/assets/slid-2.jpg",
+        "/assets/slid-3.jpg",
+        "/assets/slid-4.jpg",
+        "/assets/slid-5.jpg",
+        "/assets/slid-6.jpg",
+        "/assets/slid-7.jpg",
+        "/assets/slid-8.jpg",
+        "/assets/slid-9.jpg",
+        "/assets/slid-10.jpg",
+        "/assets/slid-11.jpg",
+        "/assets/slid-12.jpg",
     ];
 
     // Auto-advance slider
