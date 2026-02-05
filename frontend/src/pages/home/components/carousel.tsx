@@ -90,15 +90,11 @@ export function HeroCarousel({
 
 
             <div onClick={() => {
-                if (userRole) {
-                    navigate("/matches");
-                } else {
-                    navigate("/records");
-                }
+                navigate("/records");
             }}
                 className="relative z-10 w-full flex items-center m-9 pl-10">
                 <button className="mt-6 flex items-center gap-3 bg-neutral-900 hover:bg-black border-none text-white uppercase font-semibold px-6 py-3 rounded-lg transition w-max">
-                    {userRole ? t("matches") : t("records")}
+                    記錄1
                     <span className="text-white text-xl flex items-center justify-center leading-none mb-2">→</span>
                 </button>
             </div>
