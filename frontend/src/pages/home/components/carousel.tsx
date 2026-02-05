@@ -92,7 +92,7 @@ export function HeroCarousel({
             }}
                 className="relative z-10 w-full flex items-center m-9 pl-10">
                 <button className="mt-6 flex items-center gap-3 bg-neutral-900 hover:bg-black border-none text-white uppercase font-semibold px-6 py-3 rounded-lg transition w-max">
-                    記錄1
+                每日紀錄
                     <span className="text-white text-xl flex items-center justify-center leading-none mb-2">→</span>
                 </button>
             </div>
