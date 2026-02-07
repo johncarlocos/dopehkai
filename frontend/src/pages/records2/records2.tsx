@@ -33,7 +33,7 @@ const Records2Page = () => {
                             <div className="w-5 bg-white mr-4 self-stretch" />
                             <div className="flex flex-col justify-center space-y-2 text-white">
                                 <p className="sm:text-5xl text-3xl font-semibold leading-tight">
-                                    {t("Explore_our_analysis").toUpperCase()}
+                                    $500上$10萬紀錄
                                 </p>
                             </div>
                         </div>

@@ -23,11 +23,11 @@ function AppBarComponent() {
     }
     if (userRole) {
         menuItems.push({ label: t("matches"), ur: "/matches", path: () => navigate("/matches") });
-        menuItems.push({ label: '分析紀錄1', ur: "/records", path: () => navigate("/records") });
-        menuItems.push({ label: '分析紀錄2', ur: "/records2", path: () => navigate("/records2") });
+        menuItems.push({ label: '每日紀錄', ur: "/records", path: () => navigate("/records") });
+        menuItems.push({ label: '$500上$10萬紀錄', ur: "/records2", path: () => navigate("/records2") });
     } else {
-        menuItems.push({ label: '分析紀錄1', ur: "/records", path: () => navigate("/records") });
-        menuItems.push({ label: '分析紀錄2', ur: "/records2", path: () => navigate("/records2") });
+        menuItems.push({ label: '每日紀錄', ur: "/records", path: () => navigate("/records") });
+        menuItems.push({ label: '$500上$10萬紀錄', ur: "/records2", path: () => navigate("/records2") });
     }
     if (userRole && (userRole === "admin" || userRole === "subadmin")) {
         menuItems.push({ label: '', ur: "", path: () => navigate("/") });
