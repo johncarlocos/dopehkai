@@ -256,7 +256,6 @@ const RenderMediaItem = ({ mediaItem, index, setExpandedImage, height, width }: 
                 poster={isLoading ? "images/gallery/image5.png" : ""}
                 onCanPlayThrough={handleCanPlay}
                 onError={handleError}
-                loading="lazy"
             />
         </div>
     ) : (

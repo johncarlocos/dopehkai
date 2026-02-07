@@ -20,8 +20,6 @@ const Records2Page = () => {
     const records = data?.data || [];
     const totalPages = data?.totalPages || 1;
 
-    const { t } = useTranslation();
-
     return (
         <Fragment>
             <div className="h-screen w-screen overflow-x-hidden bg-black">
@@ -256,7 +254,6 @@ const RenderMediaItem = ({ mediaItem, index, setExpandedImage, height, width }: 
                 poster={isLoading ? "images/gallery/image5.png" : ""}
                 onCanPlayThrough={handleCanPlay}
                 onError={handleError}
-                loading="lazy"
             />
         </div>
     ) : (
