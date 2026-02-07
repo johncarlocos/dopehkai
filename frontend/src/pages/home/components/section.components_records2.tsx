@@ -56,6 +56,10 @@ export default function SectionComponentRecords2({
                                 className="w-full h-full object-cover"
                                 loading="lazy"
                                 decoding="async"
+                                onError={(e) => {
+                                    console.error('Failed to load image:', item?.media[0]);
+                                    e.currentTarget.style.display = 'none';
+                                }}
                             />
                         </div>
 

@@ -248,7 +248,7 @@ const RenderMediaItem = ({ mediaItem, index, setExpandedImage, height, width }: 
             <video
                 ref={videoRef}
                 key={index}
-                preload="auto"
+                preload="metadata"
                 autoPlay={isIPhoneSafari()}
                 src={AppGlobal.baseURL.replace("/api/", "") + mediaItem}
                 controls
@@ -256,6 +256,7 @@ const RenderMediaItem = ({ mediaItem, index, setExpandedImage, height, width }: 
                 poster={isLoading ? "images/gallery/image5.png" : ""}
                 onCanPlayThrough={handleCanPlay}
                 onError={handleError}
+                loading="lazy"
             />
         </div>
     ) : (
@@ -265,6 +266,12 @@ const RenderMediaItem = ({ mediaItem, index, setExpandedImage, height, width }: 
             alt={`media-${index}`}
             style={commonStyle}
             onClick={() => setExpandedImage(AppGlobal.baseURL.replace("/api/", "") + mediaItem)}
+            loading="lazy"
+            decoding="async"
+            onError={(e) => {
+                console.error('Failed to load image:', mediaItem);
+                e.currentTarget.style.display = 'none';
+            }}
         />
     );
 };
