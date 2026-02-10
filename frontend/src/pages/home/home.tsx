@@ -102,9 +102,9 @@ export default function HomePage() {
                 <Loading />
             ) : (
                 <>
-                    <HeroCarousel match={data ?? []} data={!isError ? records.data ?? [] : []} />
+                    <HeroCarousel match={data ?? []} data={!isError && records?.data ? records.data : []} />
 
-                    <SectionComponentRecords2 data={!isError2 ? records2.data ?? [] : []} />
+                    <SectionComponentRecords2 data={!isError2 && records2?.data ? records2.data : []} />
 
                     <SectionComponent2 />
 
