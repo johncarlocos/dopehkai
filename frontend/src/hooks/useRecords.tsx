@@ -9,11 +9,18 @@ export const useRecords = (
     return useQuery<any, Error>({
         queryKey: ["records", page, limit],
         queryFn: async () => {
-            const res = await API.GET(`${AppGlobal.baseURL}records?page=${page}&limit=${limit}`);
-            if (res.status === 200 && res.data) return res.data;
-            throw new Error("Failed to fetch members");
+            try {
+                const res = await API.GET(`${AppGlobal.baseURL}records?page=${page}&limit=${limit}`);
+                if (res.status === 200 && res.data) return res.data;
+                throw new Error("Failed to fetch records");
+            } catch (error) {
+                console.error('Error fetching records:', error);
+                throw error;
+            }
         },
         staleTime: 2 * 60 * 1000, // Cache records for 2 minutes
         refetchOnMount: false, // Don't block initial render
+        retry: 2, // Retry failed requests
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     });
 };

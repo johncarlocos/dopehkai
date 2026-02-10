@@ -24,10 +24,18 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
+        // Handle 401 unauthorized - redirect to login
         if (error.response?.status === 401) {
-            Cookies.remove("sessionId");
-            logout();
-            window.location.href = "/";
+            try {
+                Cookies.remove("sessionId");
+                logout();
+                // Only redirect if we're not already on the login page
+                if (window.location.pathname !== '/login') {
+                    window.location.href = "/";
+                }
+            } catch (e) {
+                console.error('Error handling 401:', e);
+            }
         }
         // Handle timeout errors
         if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
@@ -37,6 +45,8 @@ axios.interceptors.response.use(
         if (!error.response && error.request) {
             console.error('Network error - please check your connection');
         }
+        // Always return a rejected promise to allow error handling upstream
+        // But ensure the error is properly formatted
         return Promise.reject(error);
     }
 );

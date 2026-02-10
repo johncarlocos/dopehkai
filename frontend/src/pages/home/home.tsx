@@ -54,26 +54,35 @@ export default function HomePage() {
     const handleUrlSave = async () => {
         if (urlInput.trim()) {
             if (admin) {
-                // Admin: Save to config
-                const data = {
-                    instagram: config?.instagram ?? "",
-                    threads: config?.threads ?? "",
-                    telegram: urlInput.trim(),
-                    whatsapp: config?.whatsapp ?? "",
-                    message: config?.message ?? ""
-                };
-                const res = await API.POST(`${AppGlobal.baseURL}config`, data);
-                if (res.status == 200 || res.status == 201) {
-                    queryClient.invalidateQueries({ queryKey: ["config"] });
-                    navigate("/success");
+                try {
+                    // Admin: Save to config
+                    const data = {
+                        instagram: config?.instagram ?? "",
+                        threads: config?.threads ?? "",
+                        telegram: urlInput.trim(),
+                        whatsapp: config?.whatsapp ?? "",
+                        message: config?.message ?? ""
+                    };
+                    const res = await API.POST(`${AppGlobal.baseURL}config`, data);
+                    if (res.status == 200 || res.status == 201) {
+                        queryClient.invalidateQueries({ queryKey: ["config"] });
+                        navigate("/success");
+                    }
+                } catch (error) {
+                    console.error('Error saving config:', error);
+                    // Don't crash - just close the modal
                 }
             } else {
-                // Client: Just open the URL
-                const url = urlInput.trim();
-                if (!url.startsWith("http://") && !url.startsWith("https://")) {
-                    window.open(`https://${url}`, "_blank");
-                } else {
-                    window.open(url, "_blank");
+                try {
+                    // Client: Just open the URL
+                    const url = urlInput.trim();
+                    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                        window.open(`https://${url}`, "_blank");
+                    } else {
+                        window.open(url, "_blank");
+                    }
+                } catch (error) {
+                    console.error('Error opening URL:', error);
                 }
             }
         }
