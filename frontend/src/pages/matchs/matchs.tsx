@@ -25,7 +25,11 @@ function MatchsPage() {
     const { data, isLoading, error } = useMatchs();
 
     useEffect(() => {
-        if (!data) return;
+        // Ensure data is an array before processing
+        if (!data || !Array.isArray(data)) {
+            setDays([]);
+            return;
+        }
         const allMatches: Match[] = data;
         console.log('[MatchsPage] Total matches received:', allMatches.length);
         // Log unique dates found
@@ -37,7 +41,8 @@ function MatchsPage() {
     }, [data]);
 
     useEffect(() => {
-        if (!data) {
+        // Ensure data is an array before processing
+        if (!data || !Array.isArray(data)) {
             setMatchs([]);
             return;
         }
@@ -137,6 +142,9 @@ function MatchsPage() {
         // Return dates in ascending order (earliest first)
         return datasUnicas;
     }
+
+    // Ensure data is an array for rendering
+    const matchesData = Array.isArray(data) ? data : [];
 
     return (
         error ?
@@ -261,55 +269,9 @@ function MatchsPage() {
                     {
                         selectedDay
                             ? <div style={{ marginTop: 20 }}>
-                                {matchs
-                                    .filter((x) => x.matchDateFormated === selectedDay)
-                                    .sort((a, b) => {
-                                        // Handle both "YYYY-MM-DD HH:mm" and ISO format
-                                        const momentA = a.kickOff.includes('T') 
-                                            ? moment(a.kickOff) 
-                                            : moment(a.kickOff, 'YYYY-MM-DD HH:mm');
-                                        const momentB = b.kickOff.includes('T') 
-                                            ? moment(b.kickOff) 
-                                            : moment(b.kickOff, 'YYYY-MM-DD HH:mm');
-                                        return momentA.valueOf() - momentB.valueOf();
-                                    })
-                                    .map((m) => {
-                                        const matchId = m.id || (m as any).eventId;
-                                        if (!matchId) {
-                                            console.warn('Match missing id:', m);
-                                            return null;
-                                        }
-                                        return (
-                                            <div key={matchId} className="mb-2 sm:w-2/3 w-5/6 mx-auto">
-                                                <CardMatch
-                                                    widht={"100%"}
-                                                    id={matchId}
-                                                    navigate={navigate}
-                                                    match={m}
-                                                    teams={[getTeamNameInCurrentLanguage(m.homeLanguages, m.homeTeamName), getTeamNameInCurrentLanguage(m.awayLanguages, m.awayTeamName)]}
-                                                />
-                                            </div>
-                                        );
-                                    })
-                                    .filter(Boolean)}
-                            </div>
-                            : days.map((d) => {
-                                return <div key={d}>
-                                    <div className="sm:w-2/3 w-5/6 mx-auto items-start flex mb-6 mt-8">
-
-                                        <div className="flex items-start w-screen">
-                                            <div className="w-1 bg-black mr-2 self-stretch" />
-                                            <div className="flex flex-col justify-center space-y-2 text-white">
-                                                <p className="sm:text-2xl text-base sm:h-7 h-6 font-bold">
-                                                    {d}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                    {matchs
-                                        .filter((x) => x.matchDateFormated === d)
+                                {matchs && matchs.length > 0 ? (
+                                    matchs
+                                        .filter((x) => x.matchDateFormated === selectedDay)
                                         .sort((a, b) => {
                                             // Handle both "YYYY-MM-DD HH:mm" and ISO format
                                             const momentA = a.kickOff.includes('T') 
@@ -338,11 +300,73 @@ function MatchsPage() {
                                                 </div>
                                             );
                                         })
-                                        .filter(Boolean)}
+                                        .filter(Boolean)
+                                ) : (
+                                    <div className="text-center text-white mt-10">
+                                        <ThemedText type="subtitle" className="text-lg">
+                                            {t('noMatchesFound') || 'No matches found for this date'}
+                                        </ThemedText>
+                                    </div>
+                                )}
+                            </div>
+                            : days && days.length > 0 ? days.map((d) => {
+                                return <div key={d}>
+                                    <div className="sm:w-2/3 w-5/6 mx-auto items-start flex mb-6 mt-8">
+
+                                        <div className="flex items-start w-screen">
+                                            <div className="w-1 bg-black mr-2 self-stretch" />
+                                            <div className="flex flex-col justify-center space-y-2 text-white">
+                                                <p className="sm:text-2xl text-base sm:h-7 h-6 font-bold">
+                                                    {d}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    {matchs && matchs.length > 0 ? (
+                                        matchs
+                                            .filter((x) => x.matchDateFormated === d)
+                                            .sort((a, b) => {
+                                                // Handle both "YYYY-MM-DD HH:mm" and ISO format
+                                                const momentA = a.kickOff.includes('T') 
+                                                    ? moment(a.kickOff) 
+                                                    : moment(a.kickOff, 'YYYY-MM-DD HH:mm');
+                                                const momentB = b.kickOff.includes('T') 
+                                                    ? moment(b.kickOff) 
+                                                    : moment(b.kickOff, 'YYYY-MM-DD HH:mm');
+                                                return momentA.valueOf() - momentB.valueOf();
+                                            })
+                                            .map((m) => {
+                                                const matchId = m.id || (m as any).eventId;
+                                                if (!matchId) {
+                                                    console.warn('Match missing id:', m);
+                                                    return null;
+                                                }
+                                                return (
+                                                    <div key={matchId} className="mb-2 sm:w-2/3 w-5/6 mx-auto">
+                                                        <CardMatch
+                                                            widht={"100%"}
+                                                            id={matchId}
+                                                            navigate={navigate}
+                                                            match={m}
+                                                            teams={[getTeamNameInCurrentLanguage(m.homeLanguages, m.homeTeamName), getTeamNameInCurrentLanguage(m.awayLanguages, m.awayTeamName)]}
+                                                        />
+                                                    </div>
+                                                );
+                                            })
+                                            .filter(Boolean)
+                                    ) : null}
 
 
                                 </div>
-                            })
+                            }) : (
+                                <div className="text-center text-white mt-10">
+                                    <ThemedText type="subtitle" className="text-lg">
+                                        {t('noMatchesFound') || 'No matches available'}
+                                    </ThemedText>
+                                </div>
+                            )
                     }
 
 

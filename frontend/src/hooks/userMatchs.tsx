@@ -13,12 +13,33 @@ export const useMatchs = (
       try {
         const url = AppGlobal.baseURL + "match/match-data";
         const res = await API.GET(url);
+        console.log('[useMatchs] API response status:', res.status);
+        console.log('[useMatchs] API response data type:', typeof res.data);
+        console.log('[useMatchs] API response is array:', Array.isArray(res.data));
+        
         if (res.status === 200 && res.data) {
-          return Array.isArray(res.data) ? res.data : [];
+          if (Array.isArray(res.data)) {
+            console.log('[useMatchs] Returning', res.data.length, 'matches');
+            return res.data;
+          } else {
+            console.warn('[useMatchs] Response data is not an array:', res.data);
+            return [];
+          }
         }
-        throw new Error(`Failed to fetch matches: ${res.status}`);
+        
+        // Handle error responses
+        if (res.status !== 200) {
+          console.error('[useMatchs] API returned error status:', res.status, res.data);
+          throw new Error(`Failed to fetch matches: ${res.status} - ${res.data?.error || res.data?.message || 'Unknown error'}`);
+        }
+        
+        // If no data, return empty array instead of throwing
+        console.warn('[useMatchs] No data in response, returning empty array');
+        return [];
       } catch (error) {
-        console.error('Error fetching matches:', error);
+        console.error('[useMatchs] Error fetching matches:', error);
+        // Return empty array on error instead of throwing to prevent crashes
+        // React Query will still mark it as an error state
         throw error;
       }
     },
