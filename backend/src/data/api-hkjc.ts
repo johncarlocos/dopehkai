@@ -5,68 +5,76 @@ export const ApiHKJC = async (): Promise<HKJC[]> => {
     try {
         console.log("[ApiHKJC] Fetching all matches from HKJC API");
         
-        // To get all matches like the website shows, we need to include all common odds types
-        // Common HKJC odds types: HDC (Handicap), EDC (European Handicap), HAD (Home/Draw/Away), 
-        // HIL (Half-Time/Full-Time), OOE (Odd/Even), CS (Correct Score), etc.
-        // When showAllMatch is true, it should return all matches regardless, but including more odds types helps
-        const allOddsTypes = ["HDC", "EDC", "HAD", "HIL", "OOE", "CS", "TG", "FT1X2", "HT1X2"];
+        // Strategy: Make multiple queries with different odds types and merge results
+        // This ensures we get ALL matches, not just those with specific odds types
+        // Common odds types: HAD (most common), HDC, EDC, HIL, OOE, CS, TG
+        const oddsTypeGroups = [
+            ["HAD"], // Home/Draw/Away - most matches have this
+            ["HDC"], // Handicap
+            ["EDC"], // European Handicap
+            ["HIL"], // Half-Time/Full-Time
+            ["OOE"], // Odd/Even
+            ["CS"],  // Correct Score
+            ["TG"]   // Total Goals
+        ];
         
-        const queryWithDates = {
-            ...base,
-            variables: {
-                ...base.variables,
-                startDate: null, // null means get all matches (not filtered by date)
-                endDate: null,   // null means get all matches (not filtered by date)
-                startIndex: 1,
-                endIndex: 500,   // Increased to get more matches (max 500 recommended)
-                showAllMatch: true, // Show all matches regardless of odds types availability
-                fbOddsTypesM: allOddsTypes, // Include all odds types to get maximum matches
-                featuredMatchesOnly: false,
-                inplayOnly: false
-            }
-        };
+        const allMatchesMap = new Map<string, HKJC>();
         
-        console.log("[ApiHKJC] Request payload:", JSON.stringify(queryWithDates, null, 2));
-        const res = await API.POST("https://info.cld.hkjc.com/graphql/base/", queryWithDates);
-        
-        console.log("[ApiHKJC] Response status:", res.status);
-        console.log("[ApiHKJC] Response data keys:", res.data ? Object.keys(res.data) : 'no data');
-        
-        if (res.status == 200) {
-            // Check response structure
-            if (res.data && res.data.data) {
-                console.log("[ApiHKJC] Response data.data keys:", Object.keys(res.data.data));
-                const matches = res.data.data.matches || [];
-                console.log("[ApiHKJC] Received", matches.length, "matches from HKJC API");
-                
-                // Log full response structure if no matches
-                if (matches.length === 0) {
-                    console.log("[ApiHKJC] Full response structure:", JSON.stringify(res.data, null, 2).substring(0, 1000));
-                    console.log("[ApiHKJC] Checking if matches array exists:", Array.isArray(res.data.data.matches));
-                    console.log("[ApiHKJC] matches value:", res.data.data.matches);
-                }
-                
-                // Log date range of matches
-                if (matches.length > 0) {
-                    const dates = matches.map((m: HKJC): string | undefined => {
-                        const date = m.matchDate?.split('+')[0]?.split('T')[0];
-                        return date;
-                    }).filter((date: string | undefined): date is string => Boolean(date))
-                      .filter((v: string, i: number, a: string[]) => a.indexOf(v) === i)
-                      .sort();
-                    if (dates.length > 0) {
-                        console.log("[ApiHKJC] Match dates range:", dates[0], "to", dates[dates.length - 1], "(" + dates.length + " unique dates)");
+        // Query with each odds type group and merge results
+        for (const oddsTypes of oddsTypeGroups) {
+            try {
+                const queryWithDates = {
+                    ...base,
+                    variables: {
+                        ...base.variables,
+                        startDate: null,
+                        endDate: null,
+                        startIndex: 1,
+                        endIndex: 500,
+                        showAllMatch: true,
+                        fbOddsTypesM: oddsTypes,
+                        featuredMatchesOnly: false,
+                        inplayOnly: false
                     }
+                };
+                
+                console.log(`[ApiHKJC] Querying with odds types: ${oddsTypes.join(', ')}`);
+                const res = await API.POST("https://info.cld.hkjc.com/graphql/base/", queryWithDates);
+                
+                if (res.status == 200 && res.data && res.data.data) {
+                    const matches = res.data.data.matches || [];
+                    console.log(`[ApiHKJC] Received ${matches.length} matches for odds types: ${oddsTypes.join(', ')}`);
+                    
+                    // Add matches to map (deduplicated by id)
+                    matches.forEach((match: HKJC) => {
+                        if (match.id && !allMatchesMap.has(match.id)) {
+                            allMatchesMap.set(match.id, match);
+                        }
+                    });
                 }
-                return matches;
-            } else {
-                console.error("[ApiHKJC] Unexpected response structure. Full response:", JSON.stringify(res.data, null, 2).substring(0, 2000));
-                return [];
+            } catch (error) {
+                console.warn(`[ApiHKJC] Error querying with odds types ${oddsTypes.join(', ')}:`, error);
+                // Continue with next odds type group
             }
         }
-        console.warn("[ApiHKJC] API returned status", res.status);
-        console.warn("[ApiHKJC] Response data:", res.data ? JSON.stringify(res.data, null, 2).substring(0, 1000) : 'no data');
-        return [];
+        
+        const allMatches = Array.from(allMatchesMap.values());
+        console.log("[ApiHKJC] Total unique matches after merging:", allMatches.length);
+        
+        // Log date range of matches
+        if (allMatches.length > 0) {
+            const dates = allMatches.map((m: HKJC): string | undefined => {
+                const date = m.matchDate?.split('+')[0]?.split('T')[0];
+                return date;
+            }).filter((date: string | undefined): date is string => Boolean(date))
+              .filter((v: string, i: number, a: string[]) => a.indexOf(v) === i)
+              .sort();
+            if (dates.length > 0) {
+                console.log("[ApiHKJC] Match dates range:", dates[0], "to", dates[dates.length - 1], "(" + dates.length + " unique dates)");
+            }
+        }
+        
+        return allMatches;
     } catch (error) {
         console.error("[ApiHKJC] Error fetching matches:", error);
         return [];
