@@ -1534,19 +1534,53 @@ class MatchController {
                 matchData.ia = existingMatchData.ia;
             }
 
-            let homeWin = Math.round(matchData.ia?.home ?? matchData.predictions?.homeWinRate ?? 0);
-            let awayWin = Math.round(matchData.ia?.away ?? matchData.predictions?.awayWinRate ?? 0);
+            let homeWin = matchData.ia?.home ?? matchData.predictions?.homeWinRate ?? null;
+            let awayWin = matchData.ia?.away ?? matchData.predictions?.awayWinRate ?? null;
 
-            if (homeWin >= awayWin) {
-                awayWin = Math.abs(homeWin - 100);
-            } else {
-                homeWin = Math.abs(awayWin - 100);
+            // If both are null/0, set default 50/50 split
+            if ((!homeWin || homeWin === 0) && (!awayWin || awayWin === 0)) {
+                homeWin = 50;
+                awayWin = 50;
+            } else if (!homeWin || homeWin === 0) {
+                // If only homeWin is missing, calculate from awayWin
+                homeWin = Math.max(0, Math.min(100, 100 - awayWin));
+            } else if (!awayWin || awayWin === 0) {
+                // If only awayWin is missing, calculate from homeWin
+                awayWin = Math.max(0, Math.min(100, 100 - homeWin));
             }
 
-            if (matchData.ia?.home && matchData.ia?.away) {
+            // Normalize to ensure they sum to 100%
+            const total = homeWin + awayWin;
+            if (total > 0 && total !== 100) {
+                // Scale both values proportionally to sum to 100%
+                homeWin = (homeWin / total) * 100;
+                awayWin = (awayWin / total) * 100;
+            }
+
+            // Round to integers
+            homeWin = Math.round(homeWin);
+            awayWin = Math.round(awayWin);
+
+            // Final check: ensure they sum to exactly 100%
+            const finalTotal = homeWin + awayWin;
+            if (finalTotal !== 100) {
+                // Adjust the larger value to make sum exactly 100
+                if (homeWin >= awayWin) {
+                    homeWin = 100 - awayWin;
+                } else {
+                    awayWin = 100 - homeWin;
+                }
+            }
+
+            // Ensure values are within valid range
+            homeWin = Math.max(0, Math.min(100, homeWin));
+            awayWin = Math.max(0, Math.min(100, awayWin));
+
+            if (matchData.ia) {
                 matchData.ia.home = homeWin;
                 matchData.ia.away = awayWin;
-            } else if (matchData.predictions?.homeWinRate && matchData.predictions?.awayWinRate) {
+            }
+            if (matchData.predictions) {
                 matchData.predictions.homeWinRate = homeWin;
                 matchData.predictions.awayWinRate = awayWin;
             }

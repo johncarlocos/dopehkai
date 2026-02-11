@@ -16,8 +16,44 @@ function DetailsCardComponent({
 }: Props) {
     const { t } = useTranslation();
 
-    const homeWin = probability.ia && probability.ia.home ? probability.ia.home : (probability.predictions?.homeWinRate ?? 0);
-    const awayWin = probability.ia && probability.ia.away ? probability.ia.away : (probability.predictions?.awayWinRate ?? 0);
+    let homeWin = probability.ia && probability.ia.home ? probability.ia.home : (probability.predictions?.homeWinRate ?? 0);
+    let awayWin = probability.ia && probability.ia.away ? probability.ia.away : (probability.predictions?.awayWinRate ?? 0);
+
+    // Ensure percentages are valid and sum to 100%
+    // If both are 0 or invalid, set default 50/50
+    if ((!homeWin || homeWin === 0) && (!awayWin || awayWin === 0)) {
+        homeWin = 50;
+        awayWin = 50;
+    } else if (!homeWin || homeWin === 0) {
+        // If only homeWin is missing, calculate from awayWin
+        homeWin = Math.max(0, Math.min(100, 100 - awayWin));
+    } else if (!awayWin || awayWin === 0) {
+        // If only awayWin is missing, calculate from homeWin
+        awayWin = Math.max(0, Math.min(100, 100 - homeWin));
+    }
+
+    // Normalize to ensure they sum to 100%
+    const total = homeWin + awayWin;
+    if (total > 0 && Math.abs(total - 100) > 0.01) {
+        // Scale both values proportionally to sum to 100%
+        homeWin = (homeWin / total) * 100;
+        awayWin = (awayWin / total) * 100;
+    }
+
+    // Final check: ensure they sum to exactly 100%
+    const finalTotal = homeWin + awayWin;
+    if (Math.abs(finalTotal - 100) > 0.01) {
+        // Adjust the larger value to make sum exactly 100
+        if (homeWin >= awayWin) {
+            homeWin = 100 - awayWin;
+        } else {
+            awayWin = 100 - homeWin;
+        }
+    }
+
+    // Ensure values are within valid range
+    homeWin = Math.max(0, Math.min(100, homeWin));
+    awayWin = Math.max(0, Math.min(100, awayWin));
 
     //HOME
     const homeStats = probability.lastGames.homeTeam;
