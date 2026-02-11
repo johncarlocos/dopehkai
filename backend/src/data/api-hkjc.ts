@@ -5,9 +5,10 @@ export const ApiHKJC = async (): Promise<HKJC[]> => {
     try {
         console.log("[ApiHKJC] Fetching all matches from HKJC API");
         
-        // Strategy: Make multiple queries with different odds types and merge results
+        // Based on working implementation in topx-betting-mern:
+        // Strategy: Make multiple parallel queries with different odds types and merge results
         // This ensures we get ALL matches, not just those with specific odds types
-        // Common odds types: HAD (most common), HDC, EDC, HIL, OOE, CS, TG
+        // Common odds types: HAD (most common - almost all matches have this), HDC, EDC, HIL, OOE, CS, TG
         const oddsTypeGroups = [
             ["HAD"], // Home/Draw/Away - most matches have this
             ["HDC"], // Handicap
@@ -18,10 +19,8 @@ export const ApiHKJC = async (): Promise<HKJC[]> => {
             ["TG"]   // Total Goals
         ];
         
-        const allMatchesMap = new Map<string, HKJC>();
-        
-        // Query with each odds type group and merge results
-        for (const oddsTypes of oddsTypeGroups) {
+        // Make all queries in parallel for better performance
+        const queryPromises = oddsTypeGroups.map(async (oddsTypes) => {
             try {
                 const queryWithDates = {
                     ...base,
@@ -30,8 +29,8 @@ export const ApiHKJC = async (): Promise<HKJC[]> => {
                         startDate: null,
                         endDate: null,
                         startIndex: 1,
-                        endIndex: 500,
-                        showAllMatch: true,
+                        endIndex: 500, // Increased from 120 to get more matches
+                        showAllMatch: false, // Match working implementation
                         fbOddsTypesM: oddsTypes,
                         featuredMatchesOnly: false,
                         inplayOnly: false
@@ -44,19 +43,27 @@ export const ApiHKJC = async (): Promise<HKJC[]> => {
                 if (res.status == 200 && res.data && res.data.data) {
                     const matches = res.data.data.matches || [];
                     console.log(`[ApiHKJC] Received ${matches.length} matches for odds types: ${oddsTypes.join(', ')}`);
-                    
-                    // Add matches to map (deduplicated by id)
-                    matches.forEach((match: HKJC) => {
-                        if (match.id && !allMatchesMap.has(match.id)) {
-                            allMatchesMap.set(match.id, match);
-                        }
-                    });
+                    return matches;
                 }
+                return [];
             } catch (error) {
                 console.warn(`[ApiHKJC] Error querying with odds types ${oddsTypes.join(', ')}:`, error);
-                // Continue with next odds type group
+                return [];
             }
-        }
+        });
+        
+        // Wait for all queries to complete
+        const results = await Promise.all(queryPromises);
+        
+        // Merge and deduplicate matches by id
+        const allMatchesMap = new Map<string, HKJC>();
+        results.forEach((matches) => {
+            matches.forEach((match: HKJC) => {
+                if (match.id && !allMatchesMap.has(match.id)) {
+                    allMatchesMap.set(match.id, match);
+                }
+            });
+        });
         
         const allMatches = Array.from(allMatchesMap.values());
         console.log("[ApiHKJC] Total unique matches after merging:", allMatches.length);
