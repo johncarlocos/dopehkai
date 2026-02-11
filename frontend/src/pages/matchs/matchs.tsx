@@ -143,9 +143,6 @@ function MatchsPage() {
         return datasUnicas;
     }
 
-    // Ensure data is an array for rendering
-    const matchesData = Array.isArray(data) ? data : [];
-
     return (
         error ?
             <Loading />
