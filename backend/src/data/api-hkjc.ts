@@ -5,14 +5,24 @@ export const ApiHKJC = async (): Promise<HKJC[]> => {
     try {
         console.log("[ApiHKJC] Fetching all matches from HKJC API");
         
+        // To get all matches like the website shows, we need to include all common odds types
+        // Common HKJC odds types: HDC (Handicap), EDC (European Handicap), HAD (Home/Draw/Away), 
+        // HIL (Half-Time/Full-Time), OOE (Odd/Even), CS (Correct Score), etc.
+        // When showAllMatch is true, it should return all matches regardless, but including more odds types helps
+        const allOddsTypes = ["HDC", "EDC", "HAD", "HIL", "OOE", "CS", "TG", "FT1X2", "HT1X2"];
+        
         const queryWithDates = {
             ...base,
             variables: {
                 ...base.variables,
                 startDate: null, // null means get all matches (not filtered by date)
                 endDate: null,   // null means get all matches (not filtered by date)
+                startIndex: 1,
                 endIndex: 500,   // Increased to get more matches (max 500 recommended)
-                showAllMatch: true // Show all matches regardless of odds types availability
+                showAllMatch: true, // Show all matches regardless of odds types availability
+                fbOddsTypesM: allOddsTypes, // Include all odds types to get maximum matches
+                featuredMatchesOnly: false,
+                inplayOnly: false
             }
         };
         
