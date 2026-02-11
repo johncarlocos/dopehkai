@@ -485,19 +485,38 @@ class MatchController {
             const matchesCol = collection(db, Tables.matches);
             const matchesSnapshot = await getDocs(matchesCol);
             const dbMatchesMap = new Map<string, any>();
+            let oldestMatchTimestamp: Date | null = null;
             matchesSnapshot.docs.forEach(doc => {
                 const data = doc.data();
-                dbMatchesMap.set(data.eventId || doc.id, {
+                const matchData = {
                     id: doc.id,
                     kickOff: data.kickOff,
                     ...data
-                });
+                };
+                dbMatchesMap.set(data.eventId || doc.id, matchData);
+                
+                // Track the oldest match timestamp for cache expiration check
+                if (data.updatedAt) {
+                    const updatedAt = data.updatedAt.toDate ? data.updatedAt.toDate() : new Date(data.updatedAt);
+                    if (!oldestMatchTimestamp || updatedAt < oldestMatchTimestamp) {
+                        oldestMatchTimestamp = updatedAt;
+                    }
+                }
             });
             console.log("[getMatchs] Found", dbMatchesMap.size, "matches in database");
+            
+            // Check if cache is stale (older than 30 minutes) - force refresh
+            const cacheExpirationTime = 30 * 60 * 1000; // 30 minutes
+            const isCacheStale = oldestMatchTimestamp && 
+                (Date.now() - oldestMatchTimestamp.getTime()) > cacheExpirationTime;
+            
+            if (isCacheStale) {
+                console.log("[getMatchs] Cache is stale (older than 30 minutes), forcing refresh...");
+            }
 
-            // If not refreshing and we have matches in DB, check if HKJC has newer dates
+            // If not refreshing and we have matches in DB, check if HKJC has newer dates or more matches
             const dbMatchesArray = Array.from(dbMatchesMap.values());
-            if (!refresh && dbMatchesArray.length > 0) {
+            if (!refresh && !isCacheStale && dbMatchesArray.length > 0) {
                 // Get the latest date from database
                 const dbDates = dbMatchesArray.map(m => m.kickOff?.split(' ')[0]).filter(Boolean).sort();
                 const latestDbDate = dbDates[dbDates.length - 1];
@@ -506,9 +525,21 @@ class MatchController {
                 const hkjcDates = hkjc.map(m => m.matchDate?.split('+')[0]?.split('T')[0]).filter(Boolean).sort();
                 const latestHkjcDate = hkjcDates[hkjcDates.length - 1];
                 
-                // If HKJC has matches for dates beyond what's in DB, or if refresh is requested, fetch fresh data
-                if (latestHkjcDate && latestDbDate && latestHkjcDate > latestDbDate) {
-                    console.log("[getMatchs] HKJC has newer matches (latest:", latestHkjcDate, "vs DB:", latestDbDate, "), fetching fresh data...");
+                // Check if HKJC has significantly more matches than DB (indicates DB is outdated)
+                const hkjcMatchCount = hkjc.length;
+                const dbMatchCount = dbMatchesArray.length;
+                const matchCountDifference = hkjcMatchCount - dbMatchCount;
+                const shouldRefreshByCount = matchCountDifference > 5; // If HKJC has 5+ more matches, refresh
+                
+                console.log("[getMatchs] Match count comparison - HKJC:", hkjcMatchCount, "DB:", dbMatchCount, "Difference:", matchCountDifference);
+                
+                // If HKJC has matches for dates beyond what's in DB, significantly more matches, or refresh is requested, fetch fresh data
+                if ((latestHkjcDate && latestDbDate && latestHkjcDate > latestDbDate) || shouldRefreshByCount) {
+                    if (shouldRefreshByCount) {
+                        console.log("[getMatchs] HKJC has significantly more matches (", hkjcMatchCount, "vs DB:", dbMatchCount, "), forcing refresh...");
+                    } else {
+                        console.log("[getMatchs] HKJC has newer matches (latest:", latestHkjcDate, "vs DB:", latestDbDate, "), fetching fresh data...");
+                    }
                     // Continue to fetch fresh data below
                 } else {
                     // Filter out past matches (like 111 project - only show future matches)
