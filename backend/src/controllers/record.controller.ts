@@ -16,7 +16,7 @@ class RecordController {
             const recordsRef = collection(db, table);
             const totalSnapshot = await getCountFromServer(recordsRef);
             const total = totalSnapshot.data().count;
-            const recordsQuery = query(recordsRef, orderBy("created_at", "desc"));
+            const recordsQuery = query(recordsRef, orderBy("date", "desc"));
             const snapshot = await getDocs(recordsQuery);
             const docs = snapshot.docs;
             const start = (page - 1) * pageSize;
