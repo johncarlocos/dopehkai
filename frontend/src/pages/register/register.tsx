@@ -3,10 +3,10 @@ import AppAssets from "../../ultis/assets";
 import API from "../../api/api";
 import AppGlobal from "../../ultis/global";
 import useAuthStore from "../../store/userAuthStore";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import ThemedText from "../../components/themedText";
 import { useTranslation } from "react-i18next";
-import { FormControl, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select, TextField, Checkbox, FormControlLabel } from "@mui/material";
 
 function RegisterPage() {
     const { t } = useTranslation();
@@ -16,15 +16,17 @@ function RegisterPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [ageRange, setAgeRange] = useState("");
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
 
     const [errors, setErrors] = useState({
         email: "",
-        password: ""
+        password: "",
+        terms: ""
     });
 
     const validateForm = () => {
         let isValid = true;
-        let tempErrors = { email: "", password: "", price: "", date: "" };
+        let tempErrors = { email: "", password: "", terms: "" };
         if (!email) {
             tempErrors.email = t("usernameRequired");
             isValid = false;
@@ -39,6 +41,10 @@ function RegisterPage() {
         if (!ageRange) {
             isValid = false;
             alert(t("selectAgeRange") || "選擇年齡範圍");
+        }
+        if (!agreedToTerms) {
+            tempErrors.terms = "請同意服務條款";
+            isValid = false;
         }
 
         setErrors(tempErrors);
@@ -75,15 +81,15 @@ function RegisterPage() {
 
     return (
         <div className="overflow-hidden h-screen w-screen flex items-center justify-center bg-black" >
-            <div className="w-full max-w-lg p-8 items-center">
-                <div className="w-full max-w-lg sm:p-8 p-4 space-y-4 rounded-lg shadow-xl">
+            <div className="w-full max-w-xl p-8 items-center">
+                <div className="w-full max-w-xl sm:p-8 p-4 space-y-4 rounded-lg shadow-xl">
                     <div className="flex justify-center ">
                         <img src={AppAssets.logo} alt="Logo"
                             className="h-44 flex justify-center mb-0 " />
                     </div>
                     <div className="bg-white sm:p-10 p-7 rounded-xl">
 
-                        <div className="flex items-start w-screen">
+                        <div className="flex items-start w-full">
                             <div className="w-2 bg-black mr-2 self-stretch" />
                             <div className="flex flex-col justify-center space-y-2 text-black">
                                 <p className="sm:text-2xl text-base sm:h-7 h-6 font-bold">
@@ -161,10 +167,57 @@ function RegisterPage() {
                                 </div> : undefined
                             }
 
+                            {/* Terms and Conditions Checkbox */}
+                            <div className="mt-6">
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={agreedToTerms}
+                                            onChange={(e) => {
+                                                setAgreedToTerms(e.target.checked);
+                                                if (e.target.checked) {
+                                                    setErrors({ ...errors, terms: "" });
+                                                }
+                                            }}
+                                            sx={{
+                                                color: 'black',
+                                                '&.Mui-checked': {
+                                                    color: 'black',
+                                                },
+                                                padding: '4px 9px',
+                                                alignSelf: 'flex-start',
+                                            }}
+                                        />
+                                    }
+                                    label={
+                                        <span className="text-sm text-gray-700 leading-relaxed flex items-center">
+                                            點擊「註冊」即表示你同意我們的
+                                            <Link 
+                                                to="/terms" 
+                                                target="_blank"
+                                                className="text-blue-600 hover:text-blue-800 underline font-semibold ml-1"
+                                            >
+                                                《服務條款》
+                                            </Link>
+                                        </span>
+                                    }
+                                    sx={{
+                                        alignItems: 'center',
+                                        margin: 0,
+                                        '& .MuiFormControlLabel-label': {
+                                            marginLeft: '8px',
+                                        }
+                                    }}
+                                />
+                                {errors.terms && (
+                                    <p className="text-red-500 text-xs mt-1 ml-8">{errors.terms}</p>
+                                )}
+                            </div>
+
                             <button
                                 type="submit"
-                                className="w-full py-3 mt-12 text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 border-none"
-                                disabled={loading}
+                                className="w-full py-3 mt-6 text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 border-none disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                                disabled={loading || !agreedToTerms}
                             >
                                 {loading ? t("loading") : t("register")}
                             </button>

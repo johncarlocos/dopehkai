@@ -37,15 +37,15 @@ function LoginPage() {
 
   return (
     <div className="overflow-hidden h-screen w-screen flex items-center justify-center bg-black" >
-      <div className="w-full max-w-lg p-8 items-center">
-        <div className="w-full max-w-lg sm:p-8 p-4 space-y-4 rounded-lg shadow-xl">
+      <div className="w-full max-w-xl p-8 items-center">
+        <div className="w-full max-w-xl sm:p-8 p-4 space-y-4 rounded-lg shadow-xl">
           <div className="flex justify-center ">
             <img src={AppAssets.logo} alt="Logo"
               className="h-44 flex justify-center mb-0 " />
           </div>
           <div className="bg-white sm:p-10 p-7 rounded-xl">
 
-            <div className="flex items-start w-screen">
+            <div className="flex items-start w-full">
               <div className="w-2 bg-black mr-2 self-stretch" />
               <div className="flex flex-col justify-center space-y-2 text-black">
                 <p className="sm:text-2xl text-base sm:h-7 h-6 font-bold">

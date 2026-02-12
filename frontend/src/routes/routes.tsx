@@ -12,6 +12,7 @@ import RecordsAdminPage from "../pages/admin/records/records";
 import Records2AdminPage from "../pages/admin/records2/records2";
 import RecordsPage from "../pages/records/records";
 import Records2Page from "../pages/records2/records2";
+import TermsPage from "../pages/terms/terms";
 
 const AppRoutes = () => {
     const { userRole } = useAuthStore();
@@ -24,6 +25,7 @@ const AppRoutes = () => {
                 <Route path="/forget-password" element={<ForgetPasswordPage />} />
                 <Route path="/records" element={<RecordsPage />} />
                 <Route path="/records2" element={<Records2Page />} />
+                <Route path="/terms" element={<TermsPage />} />
 
                 {userRole ?
                     <Route path="/matches" element={<MatchsPage />} />
