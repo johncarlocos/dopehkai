@@ -52,7 +52,7 @@ function AppBarComponent() {
 
     return (
         <nav className="bg-gradient-to-b from-black to-transparent fixed w-full z-20 top-0 h-24">
-            <div className="max-w-screen-xl mx-auto flex items-center justify-between h-full px-6">
+            <div className="max-w-screen-2xl mx-auto flex items-center justify-between h-full px-6">
 
 
                 <div className="flex items-center space-x-6">
