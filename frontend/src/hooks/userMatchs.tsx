@@ -13,16 +13,23 @@ export const useMatchs = (
       try {
         const url = AppGlobal.baseURL + "match/match-data";
         const res = await API.GET(url);
-        console.log('[useMatchs] API response status:', res.status);
-        console.log('[useMatchs] API response data type:', typeof res.data);
-        console.log('[useMatchs] API response is array:', Array.isArray(res.data));
+        
+        if (import.meta.env.DEV) {
+          console.log('[useMatchs] API response status:', res.status);
+          console.log('[useMatchs] API response data type:', typeof res.data);
+          console.log('[useMatchs] API response is array:', Array.isArray(res.data));
+        }
         
         if (res.status === 200 && res.data) {
           if (Array.isArray(res.data)) {
-            console.log('[useMatchs] Returning', res.data.length, 'matches');
+            if (import.meta.env.DEV) {
+              console.log('[useMatchs] Returning', res.data.length, 'matches');
+            }
             return res.data;
           } else {
-            console.warn('[useMatchs] Response data is not an array:', res.data);
+            if (import.meta.env.DEV) {
+              console.warn('[useMatchs] Response data is not an array:', res.data);
+            }
             return [];
           }
         }
@@ -34,7 +41,9 @@ export const useMatchs = (
         }
         
         // If no data, return empty array instead of throwing
-        console.warn('[useMatchs] No data in response, returning empty array');
+        if (import.meta.env.DEV) {
+          console.warn('[useMatchs] No data in response, returning empty array');
+        }
         return [];
       } catch (error) {
         console.error('[useMatchs] Error fetching matches:', error);
@@ -43,10 +52,10 @@ export const useMatchs = (
         throw error;
       }
     },
-    staleTime: 10000, // 10 seconds - match data changes frequently (like 111 project)
-    refetchInterval: 30000, // Refetch every 30 seconds for live updates (like 111 project)
-    refetchOnMount: true, // Refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when window regains focus
+    staleTime: 2 * 60 * 1000, // 2 minutes - balance between freshness and performance
+    refetchInterval: 60 * 1000, // Refetch every 60 seconds for live updates (reduced from 30s)
+    refetchOnMount: false, // Use cached data if available
+    refetchOnWindowFocus: false, // Disable to reduce unnecessary requests
     retry: 2, // Retry failed requests
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });

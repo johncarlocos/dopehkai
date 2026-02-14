@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import { matchRouter } from './routes/match.routes';
 import cron from 'node-cron';
 import path from 'path';
@@ -30,16 +31,22 @@ const corsOptions = {
             ? [process.env.CORS_ORIGIN || 'https://dopehkai.com', 'https://www.dopehkai.com']
             : ['http://localhost:5173', 'http://localhost:4000', 'http://localhost:3000', process.env.CORS_ORIGIN || 'https://dopehkai.com'].filter(Boolean);
         
-        console.log('[CORS] Checking origin:', origin);
-        console.log('[CORS] Allowed origins:', allowedOrigins);
-        console.log('[CORS] NODE_ENV:', process.env.NODE_ENV || 'development');
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('[CORS] Checking origin:', origin);
+            console.log('[CORS] Allowed origins:', allowedOrigins);
+            console.log('[CORS] NODE_ENV:', process.env.NODE_ENV || 'development');
+        }
         
         if (allowedOrigins.includes(origin)) {
-            console.log('[CORS] Origin allowed:', origin);
+            if (process.env.NODE_ENV !== 'production') {
+                console.log('[CORS] Origin allowed:', origin);
+            }
             callback(null, true);
         } else {
             console.error('[CORS] Origin NOT allowed:', origin);
-            console.error('[CORS] Allowed origins are:', allowedOrigins);
+            if (process.env.NODE_ENV !== 'production') {
+                console.error('[CORS] Allowed origins are:', allowedOrigins);
+            }
             callback(new Error(`Not allowed by CORS. Origin: ${origin}, Allowed: ${allowedOrigins.join(', ')}`));
         }
     },
@@ -48,22 +55,43 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'Pragma'],
 };
 
-// Request logging middleware (before CORS)
-app.use((req, res, next) => {
-    const timestamp = new Date().toISOString();
-    console.log(`[SERVER] ${timestamp} ${req.method} ${req.path}`);
-    console.log(`[SERVER] Origin: ${req.headers.origin || 'no-origin'}`);
-    console.log(`[SERVER] User-Agent: ${req.headers['user-agent']?.substring(0, 50) || 'no-user-agent'}`);
-    next();
-});
+// Enable compression for all responses (gzip/brotli)
+app.use(compression({
+    level: 6, // Compression level (1-9, 6 is a good balance)
+    filter: (req, res) => {
+        // Don't compress if client doesn't support it or if it's already compressed
+        if (req.headers['x-no-compression']) {
+            return false;
+        }
+        // Use compression for all text-based responses
+        return compression.filter(req, res);
+    }
+}));
+
+// Request logging middleware (before CORS) - only in development
+if (process.env.NODE_ENV !== 'production') {
+    app.use((req, res, next) => {
+        const timestamp = new Date().toISOString();
+        console.log(`[SERVER] ${timestamp} ${req.method} ${req.path}`);
+        console.log(`[SERVER] Origin: ${req.headers.origin || 'no-origin'}`);
+        console.log(`[SERVER] User-Agent: ${req.headers['user-agent']?.substring(0, 50) || 'no-user-agent'}`);
+        next();
+    });
+}
 
 app.use(cors(corsOptions));
 
-// Add cache-control headers for API routes to prevent caching
+// Add cache-control headers for API routes - optimize caching for GET requests
 app.use('/api', (req, res, next) => {
-    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
+    // For GET requests, allow short-term caching (30 seconds)
+    if (req.method === 'GET') {
+        res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=60');
+    } else {
+        // For POST/PUT/DELETE, prevent caching
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+    }
     next();
 });
 

@@ -41,15 +41,16 @@ window.addEventListener('unhandledrejection', (event) => {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Refetch on mount and window focus for production
-      refetchOnMount: true,
+      // Optimize refetch behavior for performance
+      refetchOnMount: false, // Don't refetch if data exists in cache
       refetchOnWindowFocus: false, // Disable to reduce unnecessary requests
-      // Longer stale time to reduce API calls (2 minutes)
-      staleTime: 2 * 60 * 1000,
-      // Longer garbage collection time (5 minutes)
-      gcTime: 5 * 60 * 1000,
+      refetchOnReconnect: true, // Only refetch when reconnecting
+      // Longer stale time to reduce API calls (5 minutes for better caching)
+      staleTime: 5 * 60 * 1000,
+      // Longer garbage collection time (10 minutes)
+      gcTime: 10 * 60 * 1000,
       // Retry failed requests
-      retry: 3, // Retry up to 3 times (increased from 2)
+      retry: 2, // Reduce retries for faster failure feedback
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
       // Don't throw errors, return them instead
       throwOnError: false,

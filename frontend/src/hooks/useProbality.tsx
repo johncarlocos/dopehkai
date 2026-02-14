@@ -20,10 +20,10 @@ export const useProbability = (
                 throw error;
             }
         },
-        refetchOnMount: true, // Refetch when component mounts
-        refetchOnWindowFocus: true, // Refetch when window regains focus
-        staleTime: 0, // Always consider data stale to ensure fresh data
-        gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+        refetchOnMount: false, // Use cached data if available
+        refetchOnWindowFocus: false, // Disable to reduce unnecessary requests
+        staleTime: 2 * 60 * 1000, // 2 minutes - balance freshness and performance
+        gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
         retry: 2, // Retry failed requests
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     });
