@@ -79,12 +79,12 @@ class UsersController {
                     if (!passwordMatch) {
                         return res.status(401).json({ error: "Invalid password." });
                     }
-                    const sessionId = await SessionService.createSession(userId, 7); // 7 days for admin
+                    const sessionId = await SessionService.createSession(userId, 365); // 365 days for admin (but won't expire due to validation logic)
                     res.cookie('sessionId', sessionId, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         sameSite: 'lax',
-                        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days for admin
+                        maxAge: 365 * 24 * 60 * 60 * 1000 // 365 days for admin
                     });
                     return res.json({
                         user: {
@@ -141,10 +141,13 @@ class UsersController {
                 return res.status(401).json({ error: "Invalid password." });
             }
 
-            const sessionId = await SessionService.createSession(userId);
+            // Check if user is an admin to set appropriate session expiration
+            const isAdmin = !querySnapshotAdmin.empty;
+            const expirationDays = isAdmin ? 365 : 30; // 365 days for admin, 30 for members
+            const sessionId = await SessionService.createSession(userId, expirationDays);
             res.cookie("sessionId", sessionId, {
                 sameSite: "strict",
-                maxAge: 30 * 24 * 60 * 60 * 1000,
+                maxAge: expirationDays * 24 * 60 * 60 * 1000,
             });
 
             return res.json(userData);

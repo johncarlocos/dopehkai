@@ -29,17 +29,27 @@ export class SessionService {
         if (!sessionDoc.exists()) return null;
 
         const sessionData = sessionDoc.data();
-        const now = Date.now();
+        const userId = sessionData.userId;
 
-        // Handle both Timestamp objects and millisecond numbers
-        const expiresAt = sessionData.expiresAt?.toMillis ? sessionData.expiresAt.toMillis() : sessionData.expiresAt;
+        // Check if user is an admin - admins never expire
+        const adminRef = doc(db, Tables.admins, userId);
+        const adminDoc = await getDoc(adminRef);
+        const isAdmin = adminDoc.exists();
 
-        if (expiresAt < now) {
-            await deleteDoc(doc(db, Tables.sessions, sessionId));
-            return null;
+        // If not admin, check expiration
+        if (!isAdmin) {
+            const now = Date.now();
+            // Handle both Timestamp objects and millisecond numbers
+            const expiresAt = sessionData.expiresAt?.toMillis ? sessionData.expiresAt.toMillis() : sessionData.expiresAt;
+
+            if (expiresAt < now) {
+                await deleteDoc(doc(db, Tables.sessions, sessionId));
+                return null;
+            }
         }
+        // Admin sessions never expire - skip expiration check
 
-        return { userId: sessionData.userId };
+        return { userId };
     }
 
     static async revokeSession(sessionId: string): Promise<void> {
