@@ -4,12 +4,14 @@ import AppGlobal from "../ultis/global";
 
 export const useMembers = (
     page: number,
-    limit: number
+    limit: number,
+    search?: string
 ): UseQueryResult<any, Error> => {
     return useQuery<any, Error>({
-        queryKey: ["members", page, limit],
+        queryKey: ["members", page, limit, search],
         queryFn: async () => {
-            const res = await API.GET(`${AppGlobal.baseURL}admin/members?page=${page}&limit=${limit}`);
+            const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
+            const res = await API.GET(`${AppGlobal.baseURL}admin/members?page=${page}&limit=${limit}${searchParam}`);
             if (res.status === 200 && res.data) return res.data;
             throw new Error("Failed to fetch members");
         },

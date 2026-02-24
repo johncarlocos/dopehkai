@@ -11,13 +11,25 @@ class AdminController {
         try {
             const page = parseInt(req.query.page as string) || 1;
             const pageSize = parseInt(req.query.limit as string) || 10;
+            const search = (req.query.search as string) || "";
 
             const membersRef = collection(db, Tables.members);
-            const totalSnapshot = await getCountFromServer(membersRef);
-            const total = totalSnapshot.data().count;
             const membersQuery = query(membersRef, orderBy("created_at", "desc"));
             const snapshot = await getDocs(membersQuery);
-            const docs = snapshot.docs;
+            let docs = snapshot.docs;
+
+            // Filter by search term if provided
+            if (search.trim()) {
+                const searchLower = search.toLowerCase().trim();
+                docs = docs.filter(doc => {
+                    const data = doc.data();
+                    const email = (data.email || "").toLowerCase();
+                    const ageRange = (data.ageRange || "").toLowerCase();
+                    return email.includes(searchLower) || ageRange.includes(searchLower);
+                });
+            }
+
+            const total = docs.length;
             const start = (page - 1) * pageSize;
             const paginatedDocs = docs.slice(start, start + pageSize).map(doc => {
                 const data = doc.data();

@@ -8,7 +8,7 @@ import {
     ColumnDef,
     SortingState,
 } from "@tanstack/react-table";
-import { Add } from "@mui/icons-material";
+import { Add, Search } from "@mui/icons-material";
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Box, IconButton, Tooltip, FormControl, InputLabel, Select, MenuItem, FormHelperText } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast, ToastContainer } from "react-toastify";
@@ -32,7 +32,8 @@ function MembersPage() {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [sorting, setSorting] = useState<SortingState>([]);
-    const { data } = useMembers(page, pageSize);
+    const [searchTerm, setSearchTerm] = useState("");
+    const { data } = useMembers(page, pageSize, searchTerm);
     const [openDialog, setOpenDialog] = useState(false);
     const [deleteId, setDeleteId] = useState<string>();
     const [editId, setEditId] = useState<string>();
@@ -94,7 +95,7 @@ function MembersPage() {
                     const res = await API.PUT(`${AppGlobal.baseURL}admin/member/${editId}`, formData);
                     if (res.status == 200) {
                         queryClient.invalidateQueries({
-                            queryKey: ["members", page, pageSize],
+                            queryKey: ["members", page, pageSize, searchTerm],
                         });
                         toast.success("🎉 " + t("memberEditedSuccessfully"));
                     } else if (res.status == 409) {
@@ -106,7 +107,7 @@ function MembersPage() {
                     const res = await API.POST(`${AppGlobal.baseURL}admin/member`, formData);
                     if (res.status == 200) {
                         queryClient.invalidateQueries({
-                            queryKey: ["members", page, pageSize],
+                            queryKey: ["members", page, pageSize, searchTerm],
                         });
                         toast.success("🎉 " + t("memberAddedSuccessfully"));
                     } else if (res.status == 409) {
@@ -305,7 +306,7 @@ function MembersPage() {
 
             <div className="mt-24 flex justify-center">
                 <div className="bg-gray-900 p-6 rounded-lg shadow-lg w-5/6">
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", marginBottom: "16px" }}>
                         <ThemedText type="defaultSemiBold" className="text-xl" colorText="white">
                             {t("member")}
                         </ThemedText>
@@ -316,6 +317,46 @@ function MembersPage() {
                         >
                             <Add className="text-white text-2xl" />
                         </button>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                backgroundColor: "rgba(255, 255, 255, 0.1)",
+                                borderRadius: "8px",
+                                padding: "8px 12px",
+                                flex: 1,
+                                maxWidth: "400px",
+                            }}
+                        >
+                            <Search sx={{ color: "white", marginRight: "8px" }} />
+                            <TextField
+                                placeholder="搜尋會員 (電子郵件或年齡範圍)..."
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    setPage(1); // Reset to first page when searching
+                                }}
+                                variant="standard"
+                                InputProps={{
+                                    disableUnderline: true,
+                                    sx: {
+                                        color: "white",
+                                        "&::placeholder": {
+                                            color: "rgba(255, 255, 255, 0.5)",
+                                        },
+                                    },
+                                }}
+                                sx={{
+                                    flex: 1,
+                                    "& .MuiInputBase-input": {
+                                        color: "white",
+                                    },
+                                }}
+                            />
+                        </Box>
                     </div>
 
                     <table className="w-full border-collapse text-white">
