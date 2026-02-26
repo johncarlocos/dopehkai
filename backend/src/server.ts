@@ -1,11 +1,16 @@
-import 'dotenv/config';
+import path from 'path';
+import dotenv from 'dotenv';
+// Load .env from backend directory so MongoDB/Redis env vars are set even when cwd is repo root
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
+import { connectMongo, isMongoEnabled, checkMongoConnection } from './database/mongodb';
+import { checkRedisConnection, isRedisConfigured } from './cache/redis';
 import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
 import { matchRouter } from './routes/match.routes';
-import cron from 'node-cron';
-import path from 'path';
-import MatchController from './controllers/match.controller';
+import { syncHkjcToMatches } from './service/syncHkjc';
+import { runAnalysisBatch } from './service/analysisWorker';
+import { cacheDelPattern } from './cache/redis';
 import { usersRouter } from './routes/users.routes';
 import { adminRouter } from './routes/admin.routes';
 import { homeRouter } from './routes/home.routes copy';
@@ -99,6 +104,19 @@ app.use('/api', (req, res, next) => {
 app.use(express.json({ limit: '200mb' }));
 app.use(express.urlencoded({ limit: '200mb', extended: true }));
 
+// Health check: verify MongoDB and Redis connections
+app.get("/api/health", async (_req, res) => {
+  const mongoEnabled = isMongoEnabled();
+  const redisConfigured = isRedisConfigured();
+  const mongoOk = mongoEnabled ? checkMongoConnection() : null;
+  const redisOk = redisConfigured ? await checkRedisConnection() : null;
+  res.json({
+    ok: (mongoOk !== false) && (redisOk !== false),
+    mongo: mongoEnabled ? { connected: mongoOk } : { configured: false },
+    redis: redisConfigured ? { connected: redisOk } : { configured: false },
+  });
+});
+
 // API routes must come BEFORE static files
 app.use("/api/home", homeRouter);
 app.use("/api/match", matchRouter);
@@ -132,13 +150,65 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
 });
 
-cron.schedule('0 0 * * *', () => {
-    console.log("UPDATE MATCHES....");
-    MatchController.getMatchResults();
-});
+async function start() {
+    if (isMongoEnabled()) {
+        try {
+            await connectMongo();
+            console.log("[STARTUP] MongoDB connected:", checkMongoConnection());
+        } catch (err) {
+            console.error("[STARTUP] MongoDB connection failed (ECONNREFUSED = MongoDB not running).");
+            console.error("[STARTUP] Start MongoDB (e.g. docker run -d -p 27017:27017 mongo) or remove MONGODB_URI from .env to use JSON file database.");
+            console.error("[STARTUP] Server will start anyway; DB requests will fail until MongoDB is up.");
+            // Don't throw - allow server to start so you can fix MongoDB or switch to JSON db
+        }
+    } else {
+        console.log("[STARTUP] MongoDB not configured (MONGODB_URI not set)");
+    }
+    if (isRedisConfigured()) {
+        try {
+            const redisOk = await checkRedisConnection();
+            console.log("[STARTUP] Redis connected:", redisOk);
+            if (!redisOk) console.warn("[STARTUP] Redis configured but ping failed - cache will be skipped");
+        } catch (err) {
+            console.warn("[STARTUP] Redis connection failed (cache disabled):", (err as Error).message);
+        }
+    } else {
+        console.log("[STARTUP] Redis not configured");
+    }
+    // Clear matches list cache so first request gets fresh list from HKJC (avoids showing stale extra dates)
+    cacheDelPattern('matches:list:*').then(() => console.log("[STARTUP] Cleared matches list cache"));
 
+    // On website load: sync HKJC to DB *before* accepting requests (so matches are in DB when user opens site)
+    const SYNC_TIMEOUT_MS = 45000;
+    console.log("[STARTUP] Syncing HKJC to DB (max wait " + SYNC_TIMEOUT_MS / 1000 + "s)...");
+    await Promise.race([
+        syncHkjcToMatches(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("sync timeout")), SYNC_TIMEOUT_MS)),
+    ]).then(() => console.log("[STARTUP] HKJC sync completed.")).catch((e) => {
+        console.error("[STARTUP] syncHkjc failed or timed out:", e?.message || e);
+    });
 
-app.listen(PORT, () => {
-    //  MatchController.getMatchResults();
-    console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    // After sync: trigger analysis worker once (batch Gemini for pending matches; Redis lock prevents duplicates)
+    setImmediate(() => {
+        runAnalysisBatch()
+            .then((r) => { if (r.ran) console.log("[STARTUP] Analysis batch ran, processed:", r.processed); })
+            .catch((e) => console.warn("[STARTUP] Analysis batch error:", e));
+    });
+
+    // Every 5 minutes: refresh matches from HKJC, then run analysis worker for pending/stale
+    const FIVE_MINS_MS = 5 * 60 * 1000;
+    setInterval(() => {
+        syncHkjcToMatches()
+            .then(() => runAnalysisBatch())
+            .then((r) => { if (r.ran && r.processed) console.log("[cron] Analysis batch processed", r.processed); })
+            .catch((e) => console.error("[syncHkjc] interval failed:", e));
+    }, FIVE_MINS_MS);
+
+    app.listen(PORT, () => {
+        console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    });
+}
+start().catch((err) => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
 });

@@ -10,9 +10,9 @@ export const useProbability = (
         queryKey: ["probability", id],
         queryFn: async () => {
             try {
-                // Always fetch fresh data by adding refresh parameter
-                const res = await API.GET(
-                    AppGlobal.baseURL + "match/match-data/" + id + "?refresh=true");
+                // Cache-bust so browser doesn't use stale 304 / disk cache (avoids "Something went wrong")
+                const url = AppGlobal.baseURL + "match/match-data/" + id + "?refresh=true&_t=" + Date.now();
+                const res = await API.GET(url);
                 if (res.status === 200 && res.data) return res.data;
                 throw new Error(`Failed to fetch match details: ${res.status}`);
             } catch (error) {

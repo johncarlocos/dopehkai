@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import bcrypt from 'bcrypt';
 import { db } from '../src/database/db';
 import { collection, doc, setDoc, query, getDocs, where } from '../src/database/db';
@@ -14,7 +15,8 @@ async function addUser() {
         process.exit(1);
     }
 
-    const [email, password, role, ageRange] = args;
+    const [emailRaw, password, role, ageRange] = args;
+    const email = emailRaw.toLowerCase().trim();
 
     if (!['member', 'admin'].includes(role)) {
         console.error('Error: role must be "member" or "admin"');

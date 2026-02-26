@@ -1,6 +1,39 @@
 import API from "../api/api";
 import { HKJC } from "../model/hkjc.model";
 
+async function queryHKJC(oddsTypes: string[]): Promise<HKJC[]> {
+    const queryWithDates = {
+        ...base,
+        variables: {
+            ...base.variables,
+            startDate: null,
+            endDate: null,
+            startIndex: 1,
+            endIndex: 500,
+            showAllMatch: false,
+            fbOddsTypesM: oddsTypes,
+            featuredMatchesOnly: false,
+            inplayOnly: false,
+        },
+    };
+    const res = await API.POST("https://info.cld.hkjc.com/graphql/base/", queryWithDates);
+    if (res.status !== 200 || !res.data?.data) return [];
+    return res.data.data.matches || [];
+}
+
+/** Match list for website/sync: HDC only = same as HKJC handicap page (e.g. 32 matches, 26th/27th). */
+export const ApiHKJCMatchList = async (): Promise<HKJC[]> => {
+    try {
+        console.log("[ApiHKJCMatchList] Fetching match list (HDC)");
+        const matches = await queryHKJC(["HDC"]);
+        console.log("[ApiHKJCMatchList] Received", matches.length, "matches");
+        return matches;
+    } catch (error) {
+        console.error("[ApiHKJCMatchList] Error:", error);
+        return [];
+    }
+};
+
 export const ApiHKJC = async (): Promise<HKJC[]> => {
     try {
         console.log("[ApiHKJC] Fetching all matches from HKJC API");
@@ -19,35 +52,14 @@ export const ApiHKJC = async (): Promise<HKJC[]> => {
             ["TG"]   // Total Goals
         ];
         
-        // Make all queries in parallel for better performance
         const queryPromises = oddsTypeGroups.map(async (oddsTypes) => {
             try {
-                const queryWithDates = {
-                    ...base,
-                    variables: {
-                        ...base.variables,
-                        startDate: null,
-                        endDate: null,
-                        startIndex: 1,
-                        endIndex: 500, // Increased from 120 to get more matches
-                        showAllMatch: false, // Match working implementation
-                        fbOddsTypesM: oddsTypes,
-                        featuredMatchesOnly: false,
-                        inplayOnly: false
-                    }
-                };
-                
-                console.log(`[ApiHKJC] Querying with odds types: ${oddsTypes.join(', ')}`);
-                const res = await API.POST("https://info.cld.hkjc.com/graphql/base/", queryWithDates);
-                
-                if (res.status == 200 && res.data && res.data.data) {
-                    const matches = res.data.data.matches || [];
-                    console.log(`[ApiHKJC] Received ${matches.length} matches for odds types: ${oddsTypes.join(', ')}`);
-                    return matches;
-                }
-                return [];
+                console.log(`[ApiHKJC] Querying with odds types: ${oddsTypes.join(", ")}`);
+                const matches = await queryHKJC(oddsTypes);
+                console.log(`[ApiHKJC] Received ${matches.length} for ${oddsTypes.join(", ")}`);
+                return matches;
             } catch (error) {
-                console.warn(`[ApiHKJC] Error querying with odds types ${oddsTypes.join(', ')}:`, error);
+                console.warn(`[ApiHKJC] Error ${oddsTypes.join(", ")}:`, error);
                 return [];
             }
         });

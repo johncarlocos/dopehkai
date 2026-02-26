@@ -1,5 +1,6 @@
 const Tables = {
     matches: "matches",
+    analysis: "analysis",
     members: "members",
     admins: "admins",
     sessions: "sessions",

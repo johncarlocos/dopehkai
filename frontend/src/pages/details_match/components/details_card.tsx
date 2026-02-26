@@ -122,7 +122,7 @@ function DetailsCardComponent({
                                             {`     ${conditionHome.replace(".0", "")}`}
                                         </ThemedText> : undefined
                                 }
-                                <Crown winRate={homeWin} size="w-4" className="ml-2" />
+                                {homeWin > 70 && <Crown winRate={homeWin} size="w-4" className="ml-2" />}
                             </div>
                             <span>{homeWin.toFixed(0)}%</span>
                         </div>
@@ -177,7 +177,7 @@ function DetailsCardComponent({
                                             {`     ${conditionAway.replace(".0", "")}`}
                                         </ThemedText> : undefined
                                 }
-                                <Crown winRate={awayWin} size="w-4" className="ml-2" />
+                                {awayWin > 70 && <Crown winRate={awayWin} size="w-4" className="ml-2" />}
                             </div>
                             <span>{awayWin.toFixed(0)}%</span>
                         </div>
@@ -355,7 +355,7 @@ function Card({
             </div>
 
             <div style={{ width: 10 }} />
-            <Crown winRate={probility} />
+            {probility > 70 && <Crown winRate={probility} />}
 
 
         </div>

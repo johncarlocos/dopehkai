@@ -3,6 +3,9 @@ import API from "../api/api";
 import { Match } from "../models/match";
 import AppGlobal from "../ultis/global";
 
+/**
+ * Fetches match list from backend only. Backend reads from DB (matches are saved to DB first, never from HKJC/external API directly to the client).
+ */
 export const useMatchs = (
   startDate?: string,
   endDate?: string
@@ -11,6 +14,7 @@ export const useMatchs = (
     queryKey: ["matchs", startDate, endDate],
     queryFn: async () => {
       try {
+        // Backend API: returns matches from database (backend saves from HKJC to DB, then responds from DB)
         const url = AppGlobal.baseURL + "match/match-data";
         const res = await API.GET(url);
         

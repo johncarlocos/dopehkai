@@ -38,7 +38,19 @@ matchRouter.get('/match-data', async (req, res) => {
     }
 });
 
+matchRouter.get('/analysis', async (req, res) => {
+    await MatchController.getAllMatchAnalysis(req, res);
+});
+
 matchRouter.get('/match-data/:id', async (req, res) => {
+    // Prevent 304 so client always gets full JSON body (no ETag / If-None-Match)
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    const app = req.app;
+    const prevEtag = app.get('etag');
+    app.set('etag', false);
+    res.once('finish', () => app.set('etag', prevEtag));
     await MatchController.getMatchDetails(req, res);
 });
 

@@ -88,7 +88,7 @@ export function CardMatchComponent({
                                 >
                                     {teams[0]}
                                 </ThemedText>
-                                {homeWin && <Crown winRate={homeWin} size="w-3 sm:w-4" />}
+                                {homeWin != null && homeWin > 70 && <Crown winRate={homeWin} size="w-3 sm:w-4" />}
                             </div>
 
                             <div style={{ height: 5 }} />
@@ -112,15 +112,16 @@ export function CardMatchComponent({
                         </div>
 
 
-                        {
-                            match.homeTeamLogo
-                                ? <img src={match.homeTeamLogo}
-                                    onError={(e: any) => {
-                                        e.target.onerror = null;
-                                        e.target.src = AppAssets.logo;
-                                    }} className="h-9 w-9 sm:h-14 sm:w-14 object-contain" />
-                                : <></>
-                        }
+                        <img
+                            src={match.homeTeamLogo || AppAssets.logo}
+                            alt=""
+                            className="h-9 w-9 sm:h-14 sm:w-14 object-contain"
+                            loading="lazy"
+                            onError={(e: any) => {
+                                e.target.onerror = null;
+                                e.target.src = AppAssets.logo;
+                            }}
+                        />
                     </div>
 
                     <div  >
@@ -142,16 +143,16 @@ export function CardMatchComponent({
                     </div>
 
                     <div className="flex gap-2 items-center justify-start ml-4" style={{ width: "70%" }}>
-                        {
-                            match.awayTeamLogo
-                                ? <img src={match.awayTeamLogo}
-                                    onError={(e: any) => {
-                                        e.target.onerror = null;
-                                        e.target.src = AppAssets.logo;
-                                    }}
-                                    className="h-9 w-9 sm:h-14 sm:w-14 object-contain" />
-                                : <></>
-                        }
+                        <img
+                            src={match.awayTeamLogo || AppAssets.logo}
+                            alt=""
+                            className="h-9 w-9 sm:h-14 sm:w-14 object-contain"
+                            loading="lazy"
+                            onError={(e: any) => {
+                                e.target.onerror = null;
+                                e.target.src = AppAssets.logo;
+                            }}
+                        />
                         <div>
                             <div className="flex items-center gap-1">
                                 <ThemedText
@@ -170,7 +171,7 @@ export function CardMatchComponent({
                                 >
                                     {teams[1]}
                                 </ThemedText>
-                                {awayWin && <Crown winRate={awayWin} size="w-3 sm:w-4" />}
+                                {awayWin != null && awayWin > 70 && <Crown winRate={awayWin} size="w-3 sm:w-4" />}
                             </div>
                             <div style={{ height: 5 }} />
 

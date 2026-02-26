@@ -1,6 +1,7 @@
 import AppBarComponent from "../../components/appBar";
 import { Loading } from "../../components/loading";
 import { useProbability } from "../../hooks/useProbality";
+import { useMatchAnalysis } from "../../hooks/useMatchAnalysis";
 import { useNavigate, useParams } from "react-router-dom";
 import LastGameDetailsComponent from "./components/last_games_details";
 import DetailsCardComponent from "./components/details_card";
@@ -25,6 +26,7 @@ function DetailsMatchPage() {
     const queryClient = useQueryClient();
     const { id } = useParams();
     const { data, isLoading, error } = useProbability(id ?? "");
+    const { data: analysisMap } = useMatchAnalysis();
     const [loadingGenerate, setLoadingGenerate] = useState(false);
     const [hasGenerated, setHasGenerated] = useState(false);
     const [isVip, setIsVip] = useState<boolean | null>(null);
@@ -132,6 +134,12 @@ function DetailsMatchPage() {
         setLoadingGenerate(false);
     }
 
+    // Use list analysis (batch) when available so crowns and % match the match list
+    const displayData: Probability | undefined =
+        data && id
+            ? { ...data, ia: (analysisMap && analysisMap[id]) ? analysisMap[id] : data.ia }
+            : data;
+
     return (
         error ?
             <Loading />
@@ -174,9 +182,7 @@ function DetailsMatchPage() {
 
                     <AppBarComponent />
                     <div className="mt-24" >
-
-
-                        <HeaderDetailsComponent data={data} />
+                        {displayData && <HeaderDetailsComponent data={displayData} />}
 
                         {/* Show locked cards for non-VIP users */}
                         {isVip === false && (
@@ -187,7 +193,7 @@ function DetailsMatchPage() {
                             </>
                         )}
 
-                        {!data.ia && loadingGenerate ?
+                        {!displayData?.ia && loadingGenerate ?
                             <div style={{ marginTop: 30 }}>
 
                                 <div style={{
@@ -212,7 +218,7 @@ function DetailsMatchPage() {
                                     <div style={{ width: "20%", height: 2, backgroundColor: AppColors.primary }} />
                                 </div>
                             </div>
-                        : !data.ia ?
+                        : !displayData?.ia ?
                             <div style={{ marginTop: 30, cursor: "pointer" }}
                                 onClick={generateIA}      >
 
@@ -255,8 +261,8 @@ function DetailsMatchPage() {
 
                                     <div style={{ width: "20%", height: 2, backgroundColor: AppColors.primary }} />
                                 </div>
-                            </div> : (data.predictions || data.ia) && isVip === true ?
-                                <DetailsCardComponent probability={data} />
+                            </div> : (data.predictions || displayData?.ia) && isVip === true ?
+                                <DetailsCardComponent probability={displayData!} />
                                 : <div />
                         }
 
@@ -264,11 +270,19 @@ function DetailsMatchPage() {
                             //  <DetailsInfoComponent probability={data} />
                         }
 
-
-
-                        <LastGameDetailsComponent name={getTeamNameInCurrentLanguage(data.homeLanguages, data.homeTeamName)} img={data.homeTeamLogo} lastGames={data.lastGames.homeTeam.recentMatch} />
-
-                        <LastGameDetailsComponent name={getTeamNameInCurrentLanguage(data.awayLanguages, data.awayTeamName)} img={data.awayTeamLogo} lastGames={data.lastGames.awayTeam.recentMatch} />
+                        {/* HKJC-only matches have no lastGames – show limited message instead of crashing */}
+                        {data.lastGames?.homeTeam && data.lastGames?.awayTeam ? (
+                            <>
+                                <LastGameDetailsComponent name={getTeamNameInCurrentLanguage(data.homeLanguages, data.homeTeamName)} img={data.homeTeamLogo} lastGames={data.lastGames.homeTeam.recentMatch} />
+                                <LastGameDetailsComponent name={getTeamNameInCurrentLanguage(data.awayLanguages, data.awayTeamName)} img={data.awayTeamLogo} lastGames={data.lastGames.awayTeam.recentMatch} />
+                            </>
+                        ) : (
+                            <div className="mx-auto mt-8 p-4 max-w-md rounded-lg bg-white/10 text-center">
+                                <ThemedText type="subtitle" className="text-white">
+                                    {t('limitedMatchData') !== 'limitedMatchData' ? t('limitedMatchData') : 'Limited data for this match. Statistics and recent games are not available.'}
+                                </ThemedText>
+                            </div>
+                        )}
 
 
 

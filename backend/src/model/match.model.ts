@@ -7,6 +7,7 @@ export interface TeamLanguages {
 }
 
 export interface Match {
+    id?: string;
     homeLanguages?: TeamLanguages;
     awayLanguages?: TeamLanguages;
     condition?: string
@@ -34,6 +35,10 @@ export interface Match {
     predictions?: Predictions
     ia?: ResultIA
     ia2?: ResultIA
+    /** "pending" | "completed" – used for batch Gemini workflow */
+    analysis_status?: "pending" | "completed"
+    /** When AI analysis was last updated; used for stale check (e.g. re-analyze after 1h) */
+    analysis_updated_at?: Date | string | null
 }
 
 export interface ResultIA {

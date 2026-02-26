@@ -7,6 +7,7 @@ import moment from 'moment-timezone';
 import { Probability } from "../models/probability";
 import useIsMobile from "../hooks/useIsMobile";
 import Crown from "./crown";
+import AppAssets from "../ultis/assets";
 
 export type Props = {
     teams: string[]
@@ -80,12 +81,17 @@ export function CardMatch({
                     <span className="text-xs font-semibold mt-1">{month.toUpperCase()}</span>
                 </div>
 
-                <div className="flex flex-1 border border-gray-500 items-center justify-between py-4 px-6 text-[#191919] font-sans">
+                    <div className="flex flex-1 border border-gray-500 items-center justify-between py-4 px-6 text-[#191919] font-sans">
                     <div className="flex items-center space-y-1 flex-row">
                         <img
-                            src={match.homeTeamLogo}
+                            src={match.homeTeamLogo || AppAssets.logo}
                             alt={teams[0]}
                             className="sm:w-16 sm:h-16 h-10 w-10 object-contain"
+                            loading="lazy"
+                            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = AppAssets.logo;
+                            }}
                         />
                         <div className="text-center ml-2 sm:w-48 w-36"
                             style={{ width: widht }}>
@@ -94,12 +100,12 @@ export function CardMatch({
                     </div>
 
                     <div className="flex flex-col items-center justify-center">
-                        {/* Show crowns for the team with higher win rate above the label */}
+                        {/* Show crowns only when win rate > 70% (1 crown), > 80% (2), > 90% (3) */}
                         {(() => {
-                            const higherWinRate = homeWin && awayWin 
+                            const higherWinRate = homeWin != null && awayWin != null
                                 ? (homeWin > awayWin ? homeWin : awayWin)
-                                : (homeWin || awayWin);
-                            return higherWinRate && higherWinRate > 70 ? (
+                                : (homeWin ?? awayWin ?? 0);
+                            return higherWinRate > 70 ? (
                                 <div className="mb-1.5 flex justify-center">
                                     <Crown winRate={higherWinRate} size="w-4 sm:w-5" />
                                 </div>
@@ -120,9 +126,14 @@ export function CardMatch({
                             <p className="sm:text-base text-xs font-bold mt-1"> {teams[1]}</p>
                         </div>
                         <img
-                            src={match.awayTeamLogo}
+                            src={match.awayTeamLogo || AppAssets.logo}
                             alt={teams[1]}
                             className="sm:w-16 sm:h-16 h-10 w-10 object-contain"
+                            loading="lazy"
+                            onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = AppAssets.logo;
+                            }}
                         />
                     </div>
                 </div>

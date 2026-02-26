@@ -3,6 +3,7 @@ import AppBarCompoonent from "../../components/appBar";
 import ThemedText from "../../components/themedText";
 import AppColors from "../../ultis/colors";
 import { useMatchs } from "../../hooks/userMatchs";
+import { useMatchAnalysis } from "../../hooks/useMatchAnalysis";
 import { Match } from "../../models/match";
 import { Loading } from "../../components/loading";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +24,7 @@ function MatchsPage() {
     const { userRole } = useAuthStore();
 
     const { data, isLoading, error } = useMatchs();
+    const { data: analysisMap } = useMatchAnalysis();
 
     useEffect(() => {
         // Ensure data is an array before processing
@@ -46,8 +48,14 @@ function MatchsPage() {
             setMatchs([]);
             return;
         }
-        getMatch(data);
-    }, [data, selectedDay]);
+        // Merge analysis from DB into matches (so crowns/ia show on cards)
+        const merged = data.map((m: Match) => {
+            const id = m.id || (m as any).eventId;
+            const ia = id && analysisMap?.[id] ? analysisMap[id] : m.ia;
+            return { ...m, ia };
+        });
+        getMatch(merged);
+    }, [data, selectedDay, analysisMap]);
 
     function getMatch(matches: Match[]) {
         // Like 111 project: backend already filters past matches, so we just format dates
