@@ -690,88 +690,96 @@ class MatchController {
                 matchData.predictions = existingMatchData.predictions;
             }
 
-            // Auto-generate IA if refresh is requested and we have the necessary data
+            // Fill IA whenever we have data so we never show 50/50 when we have odds/form.
+            // Run regardless of refresh so detail page shows real win rates (not 50/50).
+            // Gemini runs only in background when refresh=true to avoid blocking.
             const needsIA = !matchData.ia || !matchData.ia.home || !matchData.ia.away;
-            if (refresh && needsIA && matchData.homeForm && matchData.awayForm) {
-                try {
-                    console.log("[getMatchDetails] Auto-generating IA analysis for match:", id);
-                    let playersInjured = { home: [], away: [] };
-                    if (matchData.fixture_id && matchData.league_id && matchData.homeTeamId && matchData.awayTeamId) {
-                        try {
-                            playersInjured = await ApiTopScoreInjured(
-                                matchData.fixture_id, 
-                                matchData.league_id, 
-                                matchData.kickOff.split("-")[0], 
-                                matchData.homeTeamId, 
-                                matchData.awayTeamId
-                            );
-                        } catch (error) {
-                            console.warn("[getMatchDetails] Error fetching injured players, continuing without:", error);
-                        }
-                    }
-                    
-                    // Try to use predictions if available, otherwise use HKJC odds as fallback
+            if (needsIA) {
+                if (existingMatchData?.ia) {
+                    matchData.ia = existingMatchData.ia;
+                } else {
                     let homeWinRate: number | null = null;
                     let awayWinRate: number | null = null;
-                    
-                    if (matchData.predictions?.homeWinRate && matchData.predictions?.awayWinRate) {
+                    if (matchData.predictions?.homeWinRate != null && matchData.predictions?.awayWinRate != null) {
                         homeWinRate = matchData.predictions.homeWinRate;
                         awayWinRate = matchData.predictions.awayWinRate;
-                    } else if ((matchData as any).hadHomePct && (matchData as any).hadAwayPct) {
-                        // Use HKJC odds as fallback (from FootyLogic Event data)
+                    } else if ((matchData as any).hadHomePct != null && (matchData as any).hadAwayPct != null) {
                         homeWinRate = parseFloat((matchData as any).hadHomePct);
                         awayWinRate = parseFloat((matchData as any).hadAwayPct);
-                        console.log("[getMatchDetails] Using HKJC odds as fallback for IA generation:", homeWinRate, awayWinRate);
                     }
-                    
                     if (homeWinRate !== null && awayWinRate !== null) {
-                        // Try AI-based IA first if we have lastGames data
-                        if (matchData.lastGames && matchData.homeTeamNameEn && matchData.awayTeamNameEn) {
+                        // Use predictions/HKJC odds as IA when we don't have CalculationProbality inputs
+                        if (matchData.homeForm && matchData.awayForm) {
+                            let playersInjured = { home: [], away: [] };
+                            if (matchData.fixture_id && matchData.league_id && matchData.homeTeamId && matchData.awayTeamId) {
+                                try {
+                                    playersInjured = await ApiTopScoreInjured(
+                                        matchData.fixture_id,
+                                        matchData.league_id,
+                                        matchData.kickOff.split("-")[0],
+                                        matchData.homeTeamId,
+                                        matchData.awayTeamId
+                                    );
+                                } catch {
+                                    // ignore
+                                }
+                            }
                             try {
-                                const resultIa = await IaProbality(matchData, playersInjured);
-                                if (resultIa) {
+                                const result = CalculationProbality(
+                                    playersInjured,
+                                    homeWinRate,
+                                    awayWinRate,
+                                    matchData.homeForm.split(","),
+                                    matchData.awayForm.split(",")
+                                );
+                                matchData.ia = result;
+                            } catch {
+                                matchData.ia = { home: homeWinRate, away: awayWinRate, draw: 0 };
+                            }
+                        } else {
+                            matchData.ia = { home: homeWinRate, away: awayWinRate, draw: 0 };
+                        }
+                        // When refresh requested, run Gemini in background and update DB later
+                        if (refresh && matchData.lastGames && matchData.homeTeamNameEn && matchData.awayTeamNameEn) {
+                            let playersInjured = { home: [], away: [] };
+                            if (matchData.fixture_id && matchData.league_id && matchData.homeTeamId && matchData.awayTeamId) {
+                                try {
+                                    playersInjured = await ApiTopScoreInjured(
+                                        matchData.fixture_id,
+                                        matchData.league_id,
+                                        matchData.kickOff.split("-")[0],
+                                        matchData.homeTeamId,
+                                        matchData.awayTeamId
+                                    );
+                                } catch {
+                                    // ignore
+                                }
+                            }
+                            IaProbality(matchData, playersInjured)
+                                .then((resultIa) => {
+                                    if (!resultIa) return;
                                     const total = resultIa.home + resultIa.away;
-                                    const homeShare = resultIa.home / total;
-                                    const awayShare = resultIa.away / total;
+                                    const homeShare = total > 0 ? resultIa.home / total : 0.5;
+                                    const awayShare = total > 0 ? resultIa.away / total : 0.5;
                                     const redistributedHome = resultIa.home + resultIa.draw * homeShare;
                                     const redistributedAway = resultIa.away + resultIa.draw * awayShare;
-                                    matchData.ia = {
+                                    const ia = {
                                         home: Number(redistributedHome.toFixed(2)),
                                         away: Number(redistributedAway.toFixed(2)),
                                         draw: resultIa.draw
                                     };
-                                    console.log("[getMatchDetails] IA generated successfully using AI:", matchData.ia);
-                                }
-                            } catch (error) {
-                                console.warn("[getMatchDetails] AI IA generation failed, using calculation fallback:", error);
-                            }
+                                    const matchRef = doc(db, Tables.matches, id);
+                                    setDoc(matchRef, { ia }, { merge: true }).then(() => {
+                                        cacheDel(CacheKeys.matchDetail(id));
+                                        cacheDel(CacheKeys.matchesList(false));
+                                        cacheDel(CacheKeys.matchesList(true));
+                                        console.log("[getMatchDetails] Background Gemini IA saved for match:", id, ia);
+                                    }).catch((err) => console.warn("[getMatchDetails] Background save IA failed:", err));
+                                })
+                                .catch((err) => console.warn("[getMatchDetails] Background Gemini IA failed:", err));
                         }
-                        
-                        // Fallback to CalculationProbality if AI failed or not available
-                        if (!matchData.ia) {
-                            try {
-                                const result = CalculationProbality(
-                                    playersInjured, 
-                                    homeWinRate, 
-                                    awayWinRate, 
-                                    matchData.homeForm.split(","), 
-                                    matchData.awayForm.split(",")
-                                );
-                                matchData.ia = result;
-                                console.log("[getMatchDetails] IA generated using CalculationProbality:", matchData.ia);
-                            } catch (error) {
-                                console.error("[getMatchDetails] Error generating IA with CalculationProbality:", error);
-                            }
-                        }
-                    } else {
-                        console.warn("[getMatchDetails] Cannot generate IA: missing predictions and HKJC odds for match:", id);
                     }
-                } catch (error) {
-                    console.error("[getMatchDetails] Error auto-generating IA:", error);
                 }
-            } else if (existingMatchData?.ia) {
-                // Preserve ia from existing data if it exists and we're not refreshing
-                matchData.ia = existingMatchData.ia;
             }
 
             let homeWin = matchData.ia?.home ?? matchData.predictions?.homeWinRate ?? null;
