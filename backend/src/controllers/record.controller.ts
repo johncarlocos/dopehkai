@@ -13,6 +13,11 @@ class RecordController {
             const pageSize = parseInt(req.query.limit as string) || 10;
             const table = (req.query.table as string) || Tables.records;
 
+            // Prevent browser cache so new records show after add (record1/record2 list + home)
+            res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, private");
+            res.setHeader("Pragma", "no-cache");
+            res.setHeader("Expires", "0");
+
             const recordsRef = collection(db, table);
             const totalSnapshot = await getCountFromServer(recordsRef);
             const total = totalSnapshot.data().count;

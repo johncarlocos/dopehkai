@@ -49,10 +49,12 @@ const recordsRouter = Router();
 recordsRouter.post('/',
     authenticateAdmin,
     upload.array('media'), async (req: Request, res: Response) => {
+        req.body.table = "records";
         await RecordController.createRecord(req, res);
     });
 
 recordsRouter.get('/', async (req: Request, res: Response) => {
+    req.query.table = "records";
     await RecordController.record(req, res);
 });
 
@@ -60,6 +62,7 @@ recordsRouter.post(
     "/:id",
     authenticateAdmin,
     upload.array('media'), async (req: Request, res: Response) => {
+        req.body.table = "records";
         await RecordController.updateRecord(req, res);
     });
 
@@ -67,6 +70,7 @@ recordsRouter.delete(
     "/:id",
     authenticateAdmin,
     upload.array('media'), async (req: Request, res: Response) => {
+        req.query.table = "records";
         await RecordController.deleteRecord(req, res);
     });
 

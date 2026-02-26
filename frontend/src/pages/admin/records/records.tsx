@@ -94,9 +94,7 @@ function RecordsAdminPage() {
                     }
                     const res = await API.POSTFORMDATA(`${AppGlobal.baseURL}records/${editId}`, formData);
                     if (res.status == 200) {
-                        queryClient.invalidateQueries({
-                            queryKey: ["records", page, pageSize],
-                        });
+                        queryClient.invalidateQueries({ queryKey: ["records"] });
                         toast.success("🎉 " + t("recordAddedSuccessfully"));
                     } else if (res.status == 409) {
                         alert(res.data.error)
@@ -114,11 +112,7 @@ function RecordsAdminPage() {
                     }
                     const res = await API.POSTFORMDATA(`${AppGlobal.baseURL}records`, formData);
                     if (res.status == 200) {
-                        queryClient.invalidateQueries({
-                            queryKey: ["records", page, pageSize],
-                            refetchType: "active"
-                        });
-
+                        queryClient.invalidateQueries({ queryKey: ["records"] });
                         toast.success("🎉 " + t("recordAddedSuccessfully"));
                     } else if (res.status == 409) {
                         alert(res.data.error)
@@ -211,9 +205,7 @@ function RecordsAdminPage() {
     const handleOnDelete = async () => {
         const res = await API.DELETE(`${AppGlobal.baseURL}records/${deleteId}`);
         if (res.status == 200) {
-            queryClient.invalidateQueries({
-                queryKey: ["records", page, pageSize],
-            });
+            queryClient.invalidateQueries({ queryKey: ["records"] });
         } else if (res.status == 409) {
             alert(res.data.error)
             return;

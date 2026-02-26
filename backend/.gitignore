@@ -75,3 +75,6 @@ data/
 
 # Compiled output (dist folder)
 dist/
+
+src/uploads/
+
