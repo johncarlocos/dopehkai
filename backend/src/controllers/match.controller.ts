@@ -374,10 +374,26 @@ class MatchController {
         const refresh = req.query.refresh === 'true';
         console.log("[getMatchDetails] Fetching match details for eventId:", id, "refresh:", refresh);
         try {
+            // Helper: fill IA from predictions so we never return 50/50 when we have real odds
+            const fillIAFromPredictions = (match: Match): void => {
+                const pred = match.predictions;
+                if (pred?.homeWinRate == null || pred?.awayWinRate == null) return;
+                const hasNoIA = !match.ia || match.ia.home == null || match.ia.away == null;
+                const isFiftyFifty = match.ia && match.ia.home === 50 && match.ia.away === 50;
+                if (!hasNoIA && !isFiftyFifty) return;
+                const h = Number(pred.homeWinRate);
+                const a = Number(pred.awayWinRate);
+                if (Number.isNaN(h) || Number.isNaN(a)) return;
+                const total = h + a;
+                if (total <= 0) return;
+                match.ia = { home: (h / total) * 100, away: (a / total) * 100, draw: 0 };
+            };
+
             // Try Redis cache first when not forcing refresh
             if (!refresh) {
                 const cached = await cacheGet<Match>(CacheKeys.matchDetail(id));
                 if (cached && cached.lastGames?.homeTeam && cached.lastGames?.awayTeam) {
+                    fillIAFromPredictions(cached);
                     console.log("[getMatchDetails] Returning match from Redis cache");
                     return res.json(cached);
                 }
@@ -392,6 +408,7 @@ class MatchController {
                     existingMatchData = matchSnap.data() as Match;
                     // If match exists in DB with complete data, return it and cache it
                     if (existingMatchData.lastGames && existingMatchData.lastGames.homeTeam && existingMatchData.lastGames.awayTeam) {
+                        fillIAFromPredictions(existingMatchData);
                         console.log("[getMatchDetails] Returning complete match from database");
                         await cacheSet(CacheKeys.matchDetail(id), existingMatchData, 300);
                         return res.json(existingMatchData);
