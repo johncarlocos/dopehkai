@@ -49,20 +49,19 @@ ${listText}
 
 For EACH match:
 1) Estimate home/away/draw win probabilities (must sum to 100).
-2) Choose ONE best betting idea where odds are 1.7 or higher and label it as "bestPick":
-   - "HOME", "AWAY", "DRAW"
-   - or "HANDICAP_HOME", "HANDICAP_AWAY"
-   - or "OVER_2.5", "UNDER_2.5"
+2) Choose ONE best betting idea across ALL markets (1X2, Handicap, HiLo 2.5, HiLo 3.5) where odds are 1.7 or higher. Label it as "bestPick".
+   You MUST vary your choices: use "DRAW", "HANDICAP_HOME", "HANDICAP_AWAY", "OVER_2.5", "UNDER_2.5", "OVER_3.5", "UNDER_3.5" when they offer better value—do NOT always pick "HOME" or "AWAY".
+   Allowed bestPick values: "HOME", "AWAY", "DRAW", "HANDICAP_HOME", "HANDICAP_AWAY", "OVER_2.5", "UNDER_2.5", "OVER_3.5", "UNDER_3.5"
 
 Respond ONLY with a JSON array. One object per match in the same order. No other text.
 Format:
 [
-  { "matchId": "<id>", "home": number, "away": number, "draw": number, "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5" },
+  { "matchId": "<id>", "home": number, "away": number, "draw": number, "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5" | "OVER_3.5" | "UNDER_3.5" },
   ...
 ]
 - home + away + draw for each match must sum to 100.
 - Consider home advantage (around 5%).
-- Always choose exactly one bestPick for each match.
+- Always choose exactly one bestPick per match. Vary across the 9 options based on best value.
 - Do not add explanations. Only the JSON array.
 `;
 

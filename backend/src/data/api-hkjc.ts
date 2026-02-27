@@ -11,6 +11,7 @@ async function queryHKJC(oddsTypes: string[]): Promise<HKJC[]> {
             startIndex: 1,
             endIndex: 500,
             showAllMatch: false,
+            fbOddsTypes: oddsTypes,
             fbOddsTypesM: oddsTypes,
             featuredMatchesOnly: false,
             inplayOnly: false,
@@ -67,12 +68,23 @@ export const ApiHKJC = async (): Promise<HKJC[]> => {
         // Wait for all queries to complete
         const results = await Promise.all(queryPromises);
         
-        // Merge and deduplicate matches by id
+        // Merge matches by id and merge foPools so each match has HAD, HDC, HIL/TG etc.
         const allMatchesMap = new Map<string, HKJC>();
         results.forEach((matches) => {
             matches.forEach((match: HKJC) => {
-                if (match.id && !allMatchesMap.has(match.id)) {
-                    allMatchesMap.set(match.id, match);
+                if (!match.id) return;
+                const existing = allMatchesMap.get(match.id);
+                if (existing) {
+                    const existingTypes = new Set((existing.foPools || []).map((p: any) => p.oddsType));
+                    (match.foPools || []).forEach((p: any) => {
+                        if (!existingTypes.has(p.oddsType)) {
+                            existing.foPools = existing.foPools || [];
+                            existing.foPools.push(p);
+                            existingTypes.add(p.oddsType);
+                        }
+                    });
+                } else {
+                    allMatchesMap.set(match.id, { ...match, foPools: match.foPools ? [...match.foPools] : [] });
                 }
             });
         });

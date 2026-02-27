@@ -35,9 +35,12 @@ function HeaderDetailsComponent({
         if (pick === "HANDICAP_HOME") return "分析 : 主讓球";
         if (pick === "HANDICAP_AWAY") return "分析 : 客受讓";
 
-        // HiLo: distinguish Over vs Under 2.5
+        // HiLo 2.5 line
         if (pick === "OVER_2.5") return "分析 : 大2.5";
         if (pick === "UNDER_2.5") return "分析 : 細2.5";
+        // HiLo 3.5 line
+        if (pick === "OVER_3.5") return "分析 : 大3.5";
+        if (pick === "UNDER_3.5") return "分析 : 細3.5";
 
         return null;
     };

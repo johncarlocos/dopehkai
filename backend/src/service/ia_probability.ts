@@ -40,7 +40,9 @@ You are a football betting analyst.
 - away = Away team wins
 - draw = Draw
 
-2) Then, considering all markets (1X2, Handicap, HiLo), choose ONE best betting idea where the odds are 1.7 or higher.
+2) Then choose ONE best betting idea across ALL markets where odds would be 1.7 or higher.
+   You MUST consider: 1X2 (HOME, AWAY, DRAW), Handicap (HANDICAP_HOME, HANDICAP_AWAY), HiLo 2.5 (OVER_2.5, UNDER_2.5), HiLo 3.5 (OVER_3.5, UNDER_3.5).
+   Pick the option with the best value—do NOT always choose HOME or AWAY. Use DRAW, handicap, or HiLo when they offer better value.
 Return which market/type you prefer in a tag called "bestPick".
 
 Respond ONLY in this exact JSON format (no explanations, no extra fields):
@@ -48,7 +50,7 @@ Respond ONLY in this exact JSON format (no explanations, no extra fields):
   "home": number,
   "away": number,
   "draw": number,
-  "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5"
+  "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5" | "OVER_3.5" | "UNDER_3.5"
 }
 
 ### Match Information:
@@ -65,11 +67,8 @@ Respond ONLY in this exact JSON format (no explanations, no extra fields):
 Guidelines:
 - Injuries reduce the strength of that team; if injuries are similar both sides, reduce the impact.
 - Home team has small base advantage (~5%).
-- For "bestPick", think in this order:
-  1. If one side has clear 1X2 edge (home or away) with value at odds ≥ 1.7, you may choose "HOME" or "AWAY".
-  2. If handicap betting looks better value, choose "HANDICAP_HOME" or "HANDICAP_AWAY".
-  3. If total goals (HiLo) is best (for example Over/Under 2.5) and odds ≥ 1.7, choose "OVER_2.5" or "UNDER_2.5".
-- Always choose exactly ONE bestPick.
+- For "bestPick": choose the SINGLE best value across 1X2, Handicap, HiLo 2.5, and HiLo 3.5. Use DRAW when a draw is likely and has value. Use HANDICAP_HOME or HANDICAP_AWAY when handicap is the best value. Use OVER_2.5, UNDER_2.5, OVER_3.5, or UNDER_3.5 when total goals market is the best value. Do not default to HOME or AWAY only.
+- Always choose exactly ONE bestPick from the 9 options.
 - Do not provide any explanations. Only return the JSON result.
 `;
 
