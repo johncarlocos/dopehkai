@@ -259,7 +259,7 @@ class UsersController {
             return res.status(200).json({ message: "Valid VIP access" });
         }
 
-
+        // Session exists but user no longer in admins (e.g. admin record was deleted) → ask to re-login
         const Ref = doc(db, Tables.members, session.userId);
         const Snapshot = await getDoc(Ref);
         if (Snapshot.exists()) {
@@ -279,7 +279,8 @@ class UsersController {
                 res.status(403).json({ message: "VIP expired" });
             }
         } else {
-            return res.status(404).json({ message: "Invalid session" });
+            // Session valid but userId not in admins or members (e.g. admin was deleted) → re-login needed
+            return res.status(403).json({ message: "Session invalid or user removed. Please log in again." });
         }
     }
 
