@@ -80,10 +80,9 @@ class UsersController {
                         return res.status(401).json({ error: "Invalid password." });
                     }
                     const sessionId = await SessionService.createSession(userId, 365); // 365 days for admin (but won't expire due to validation logic)
+                    // Align cookie options with main admin path so frontend can read sessionId via js-cookie
                     res.cookie('sessionId', sessionId, {
-                        httpOnly: true,
-                        secure: process.env.NODE_ENV === 'production',
-                        sameSite: 'lax',
+                        sameSite: 'strict',
                         maxAge: 365 * 24 * 60 * 60 * 1000 // 365 days for admin
                     });
                     return res.json({
