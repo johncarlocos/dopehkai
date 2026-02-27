@@ -281,12 +281,6 @@ class MatchController {
             }
 
             const hkjc: HKJC[] = await ApiHKJCMatchList();
-            if (!hkjc || hkjc.length === 0) {
-                await cacheSet(CacheKeys.matchesList(refresh), [], 60);
-                if (!res.headersSent) return res.json([]);
-                return;
-            }
-
             const matchesCol = collection(db, Tables.matches);
             const snapshot = await getDocs(matchesCol);
             const dbById: Record<string, any> = {};
@@ -296,7 +290,88 @@ class MatchController {
             });
 
             const list: any[] = [];
-            for (const m of hkjc) {
+
+            // Preferred path: HKJC is source of truth when it returns matches
+            if (hkjc && hkjc.length > 0) {
+                for (const m of hkjc) {
+                    let matchDate = m.matchDate?.split("+")[0].split("T")[0] ?? "";
+                    const kickOffTime = m.kickOffTime ?? "";
+                    let kickOff: string;
+                    if (kickOffTime && (kickOffTime.includes("T") || kickOffTime.includes(" "))) {
+                        kickOff = kickOffTime;
+                    } else {
+                        kickOff = `${matchDate} ${kickOffTime}`;
+                    }
+                    try {
+                        const t = kickOff.includes("T") ? new Date(kickOff) : new Date(kickOff.replace(" ", "T"));
+                        if (isNaN(t.getTime())) continue;
+                    } catch {
+                        continue;
+                    }
+                    const [y, mo, d] = matchDate.split("-");
+                    const kickOffDate = mo && d && y ? `${mo}/${d}/${y}` : "";
+                    const kickOffDateLocal = mo && d && y ? `${d}/${mo}/${y}` : "";
+
+                    const base: any = {
+                        id: m.id,
+                        eventId: m.id,
+                        kickOff,
+                        kickOffDate,
+                        kickOffDateLocal,
+                        kickOffTime: m.kickOffTime ?? "",
+                        homeTeamName: m.homeTeam?.name_ch || m.homeTeam?.name_en || "",
+                        awayTeamName: m.awayTeam?.name_ch || m.awayTeam?.name_en || "",
+                        homeTeamNameEn: m.homeTeam?.name_en,
+                        awayTeamNameEn: m.awayTeam?.name_en,
+                        competitionName: m.tournament?.name_ch || m.tournament?.name_en || "",
+                        competitionId: parseInt(m.tournament?.id || "0", 10),
+                        matchOutcome: "",
+                        homeForm: "",
+                        awayForm: "",
+                        homeLanguages: {
+                            en: m.homeTeam?.name_en || "",
+                            zh: m.homeTeam?.name_ch || "",
+                            zhCN: m.homeTeam?.name_ch || "",
+                        },
+                        awayLanguages: {
+                            en: m.awayTeam?.name_en || "",
+                            zh: m.awayTeam?.name_ch || "",
+                            zhCN: m.awayTeam?.name_ch || "",
+                        },
+                    };
+
+                    const dbData = dbById[m.id];
+                    if (dbData) {
+                        list.push({ ...base, ...dbData, id: m.id, eventId: m.id, kickOff: base.kickOff, kickOffDate: base.kickOffDate, kickOffDateLocal: base.kickOffDateLocal });
+                    } else {
+                        list.push(base);
+                    }
+                }
+            } else {
+                // Fallback: HKJC returned 0 matches (API down or no data).
+                // Always return something so the website can load: use future matches
+                // already stored in DB as last known state.
+                console.warn("[getMatchs] HKJC returned 0 matches - falling back to DB matches");
+                const now = new Date();
+                for (const docId of Object.keys(dbById)) {
+                    const m = dbById[docId];
+                    if (!m.kickOff) continue;
+                    try {
+                        const t = m.kickOff.includes("T") ? new Date(m.kickOff) : new Date(m.kickOff.replace(" ", "T"));
+                        if (isNaN(t.getTime())) continue;
+                        if (t.getTime() < now.getTime()) continue; // only future matches
+                    } catch {
+                        continue;
+                    }
+                    list.push({
+                        ...m,
+                        id: docId,
+                        eventId: docId,
+                    });
+                }
+            }
+
+            for (const m of hkjc || []) {
                 let matchDate = m.matchDate?.split("+")[0].split("T")[0] ?? "";
                 const kickOffTime = m.kickOffTime ?? "";
                 let kickOff: string;
@@ -310,44 +385,6 @@ class MatchController {
                     if (isNaN(t.getTime())) continue;
                 } catch {
                     continue;
-                }
-                const [y, mo, d] = matchDate.split("-");
-                const kickOffDate = mo && d && y ? `${mo}/${d}/${y}` : "";
-                const kickOffDateLocal = mo && d && y ? `${d}/${mo}/${y}` : "";
-
-                const base: any = {
-                    id: m.id,
-                    eventId: m.id,
-                    kickOff,
-                    kickOffDate,
-                    kickOffDateLocal,
-                    kickOffTime: m.kickOffTime ?? "",
-                    homeTeamName: m.homeTeam?.name_ch || m.homeTeam?.name_en || "",
-                    awayTeamName: m.awayTeam?.name_ch || m.awayTeam?.name_en || "",
-                    homeTeamNameEn: m.homeTeam?.name_en,
-                    awayTeamNameEn: m.awayTeam?.name_en,
-                    competitionName: m.tournament?.name_ch || m.tournament?.name_en || "",
-                    competitionId: parseInt(m.tournament?.id || "0", 10),
-                    matchOutcome: "",
-                    homeForm: "",
-                    awayForm: "",
-                    homeLanguages: {
-                        en: m.homeTeam?.name_en || "",
-                        zh: m.homeTeam?.name_ch || "",
-                        zhCN: m.homeTeam?.name_ch || "",
-                    },
-                    awayLanguages: {
-                        en: m.awayTeam?.name_en || "",
-                        zh: m.awayTeam?.name_ch || "",
-                        zhCN: m.awayTeam?.name_ch || "",
-                    },
-                };
-
-                const dbData = dbById[m.id];
-                if (dbData) {
-                    list.push({ ...base, ...dbData, id: m.id, eventId: m.id, kickOff: base.kickOff, kickOffDate: base.kickOffDate, kickOffDateLocal: base.kickOffDateLocal });
-                } else {
-                    list.push(base);
                 }
             }
 
