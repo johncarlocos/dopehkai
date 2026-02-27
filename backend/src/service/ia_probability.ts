@@ -33,28 +33,45 @@ export async function IaProbality(match: Match, playersInjured: any): Promise<Re
     const injuredAway = playersInjured.away.length;
 
     const prompt = `
-    You are a football analyst. Based on the data below, estimate the win probability percentage for the home team, draw, and away team.
-    Respond only in this exact JSON format:
-    {
-      "home": number,
-      "away": number,
-      "draw": number
-    }
-    ### Match Information:
-    - Date: ${matchDataInput.data}
-    - Home Team: ${matchDataInput.home.name}
-      - Last 5 matches: ${matchDataInput.home.last5Matches.join(", ")}
-      - Average goals per game: ${matchDataInput.home.averageGoals}
-      - Injured players: ${injuredHome}
-    - Away Team: ${matchDataInput.away.name}
-      - Last 5 matches: ${matchDataInput.away.last5Matches.join(", ")}
-      - Average goals per game: ${matchDataInput.away.averageGoals}
-      - Injured players: ${injuredAway}
-    
-    Take into account that injuries impact team performance. If both teams have a similar number of injuries, reduce the impact.
-    Also consider that the home team has a small advantage just for playing at home, usually around 5%.
-    Do not provide any explanations. Only return the JSON result.
-    `;
+You are a football betting analyst.
+
+1) First, estimate win probability percentages for FULL TIME RESULT (1X2):
+- home = Home team wins
+- away = Away team wins
+- draw = Draw
+
+2) Then, considering all markets (1X2, Handicap, HiLo), choose ONE best betting idea where the odds are 1.7 or higher.
+Return which market/type you prefer in a tag called "bestPick".
+
+Respond ONLY in this exact JSON format (no explanations, no extra fields):
+{
+  "home": number,
+  "away": number,
+  "draw": number,
+  "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5"
+}
+
+### Match Information:
+- Date: ${matchDataInput.data}
+- Home Team: ${matchDataInput.home.name}
+  - Last 5 matches: ${matchDataInput.home.last5Matches.join(", ")}
+  - Average goals per game: ${matchDataInput.home.averageGoals}
+  - Injured players: ${injuredHome}
+- Away Team: ${matchDataInput.away.name}
+  - Last 5 matches: ${matchDataInput.away.last5Matches.join(", ")}
+  - Average goals per game: ${matchDataInput.away.averageGoals}
+  - Injured players: ${injuredAway}
+
+Guidelines:
+- Injuries reduce the strength of that team; if injuries are similar both sides, reduce the impact.
+- Home team has small base advantage (~5%).
+- For "bestPick", think in this order:
+  1. If one side has clear 1X2 edge (home or away) with value at odds ≥ 1.7, you may choose "HOME" or "AWAY".
+  2. If handicap betting looks better value, choose "HANDICAP_HOME" or "HANDICAP_AWAY".
+  3. If total goals (HiLo) is best (for example Over/Under 2.5) and odds ≥ 1.7, choose "OVER_2.5" or "UNDER_2.5".
+- Always choose exactly ONE bestPick.
+- Do not provide any explanations. Only return the JSON result.
+`;
 
     console.log("[Gemini] Calling single-match API", { model: GEMINI_MODEL, matchId: match.id || match.eventId, home: match.homeTeamNameEn || match.homeTeamName, away: match.awayTeamNameEn || match.awayTeamName });
     const response = await ai.models.generateContent({
@@ -82,7 +99,14 @@ export async function IaProbality(match: Match, playersInjured: any): Promise<Re
       return null;
     }
 
-    return parsed as ResultIA;
+    const result: ResultIA = {
+      home: parsed.home,
+      away: parsed.away,
+      draw: parsed.draw,
+      bestPick: typeof parsed.bestPick === "string" ? parsed.bestPick : undefined,
+    };
+
+    return result;
   } catch (error: any) {
     console.error("IaProbality error:", error.message || error);
     return null;

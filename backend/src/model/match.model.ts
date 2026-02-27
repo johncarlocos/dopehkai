@@ -45,6 +45,8 @@ export interface ResultIA {
     draw: number;
     home: number;
     away: number;
+    /** Optional AI recommendation tag for frontend, e.g. 'HOME', 'AWAY', 'HANDICAP_HOME', 'OVER_2.5'. */
+    bestPick?: string;
 }
 
 export interface Predictions {

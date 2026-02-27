@@ -20,6 +20,8 @@ export interface BatchAnalysisItem {
   home: number;
   away: number;
   draw: number;
+  /** Optional AI recommendation tag for frontend. */
+  bestPick?: string;
 }
 
 /**
@@ -40,19 +42,27 @@ export async function IaProbabilityBatch(
       .join("\n");
 
     const prompt = `
-You are a football analyst. Analyze the following matches and estimate win probability (percentage) for home, draw, and away for each.
+You are a football betting analyst. Analyze the following matches and estimate win probability (percentage) for home, draw, and away for each.
 
 Matches:
 ${listText}
 
+For EACH match:
+1) Estimate home/away/draw win probabilities (must sum to 100).
+2) Choose ONE best betting idea where odds are 1.7 or higher and label it as "bestPick":
+   - "HOME", "AWAY", "DRAW"
+   - or "HANDICAP_HOME", "HANDICAP_AWAY"
+   - or "OVER_2.5", "UNDER_2.5"
+
 Respond ONLY with a JSON array. One object per match in the same order. No other text.
 Format:
 [
-  { "matchId": "<id>", "home": number, "away": number, "draw": number },
+  { "matchId": "<id>", "home": number, "away": number, "draw": number, "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5" },
   ...
 ]
-- home + away + draw for each match should sum to 100.
+- home + away + draw for each match must sum to 100.
 - Consider home advantage (around 5%).
+- Always choose exactly one bestPick for each match.
 - Do not add explanations. Only the JSON array.
 `;
 
@@ -92,11 +102,14 @@ Format:
       const draw = typeof raw?.draw === "number" ? raw.draw : 0;
       if (home != null && away != null && home >= 0 && away >= 0) {
         const id = raw?.matchId ?? matchId;
+        const bestPick =
+          typeof raw?.bestPick === "string" ? raw.bestPick : undefined;
         results.push({
           matchId: String(id),
           home,
           away,
           draw,
+          bestPick,
         });
       }
     }
@@ -116,5 +129,6 @@ export function toResultIA(item: BatchAnalysisItem): ResultIA {
     home: Number((item.home + item.draw * homeShare).toFixed(2)),
     away: Number((item.away + item.draw * awayShare).toFixed(2)),
     draw: item.draw,
+    bestPick: item.bestPick,
   };
 }
