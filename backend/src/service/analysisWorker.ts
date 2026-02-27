@@ -4,8 +4,10 @@
  * - Acquire Redis lock to prevent duplicate Gemini calls
  * - Call Gemini once (batch) for all such matches
  * - Save results to MongoDB, invalidate Redis cache
+ * - When Gemini fails or returns no result for a match, use predictions/HKJC odds from DB
+ *   so we never persist 50/50 when we have real odds.
  */
-import { collection, doc, getDocs, updateDoc } from "../database/db";
+import { collection, doc, getDoc, getDocs, updateDoc } from "../database/db";
 import { db } from "../firebase/firebase";
 import Tables from "../ultis/tables.ultis";
 import { acquireLock, releaseLock, cacheDel, CacheKeys } from "../cache/redis";
@@ -14,6 +16,8 @@ import {
   toResultIA,
   MatchForBatch,
 } from "./ia_probability_batch";
+import { CalculationProbality } from "./calculationProbality";
+import { ResultIA } from "../model/match.model";
 
 const STALE_MS = 60 * 60 * 1000; // 1 hour – re-analyze after this
 const LOCK_TTL_SECONDS = 120; // Lock held for up to 2 min during batch
@@ -103,13 +107,70 @@ export async function runAnalysisBatch(): Promise<{
     const now = new Date();
     const resultById = new Map(results.map((r) => [String(r.matchId), r]));
 
-    const defaultIA = { home: 50, away: 50, draw: 0 };
+    /**
+     * When Gemini returns no result for a match, compute IA from DB (predictions or HKJC odds)
+     * so we never persist 50/50 when we have real data.
+     */
+    function fallbackIAFromMatchData(data: any): ResultIA | null {
+      if (!data) return null;
+      let homePct: number | null = null;
+      let awayPct: number | null = null;
+      if (data.predictions?.homeWinRate != null && data.predictions?.awayWinRate != null) {
+        homePct = Number(data.predictions.homeWinRate);
+        awayPct = Number(data.predictions.awayWinRate);
+      } else if (data.hadHomePct != null && data.hadAwayPct != null) {
+        homePct = parseFloat(data.hadHomePct);
+        awayPct = parseFloat(data.hadAwayPct);
+      }
+      if (homePct == null || awayPct == null || Number.isNaN(homePct) || Number.isNaN(awayPct)) return null;
+      const total = homePct + awayPct;
+      if (total <= 0) return null;
+      const homeForm = (data.homeForm || "").toString().split(",").filter(Boolean);
+      const awayForm = (data.awayForm || "").toString().split(",").filter(Boolean);
+      try {
+        return CalculationProbality(
+          data.playersInjured ?? { home: [], away: [] },
+          homePct,
+          awayPct,
+          homeForm,
+          awayForm
+        );
+      } catch {
+        return { home: (homePct / total) * 100, away: (awayPct / total) * 100, draw: 0 };
+      }
+    }
+
+    // Load full match docs only for matches missing Gemini result (for fallback)
+    const missingIds = toAnalyze.filter((m) => !resultById.has(String(m.matchId))).map((m) => m.matchId);
+    const fallbackByMatchId = new Map<string, ResultIA | null>();
+    if (missingIds.length > 0) {
+      const BATCH = 30;
+      for (let i = 0; i < missingIds.length; i += BATCH) {
+        const chunk = missingIds.slice(i, i + BATCH);
+        const snaps = await Promise.all(chunk.map((id) => getDoc(doc(db, Tables.matches, id))));
+        snaps.forEach((snap, idx) => {
+          const matchId = chunk[idx];
+          if (snap.exists()) {
+            const ia = fallbackIAFromMatchData(snap.data());
+            if (ia) fallbackByMatchId.set(matchId, ia);
+          }
+        });
+      }
+    }
 
     for (const m of toAnalyze) {
       const item = resultById.get(String(m.matchId));
-      const ia = item ? toResultIA(item) : defaultIA;
-      if (!item) {
-        console.warn("[analysisWorker] No Gemini result for", m.matchId, m.home, "vs", m.away, "- using default 50/50");
+      let ia: ResultIA;
+      if (item) {
+        ia = toResultIA(item);
+      } else {
+        const fallback = fallbackByMatchId.get(m.matchId) ?? null;
+        if (fallback) {
+          ia = fallback;
+        } else {
+          console.warn("[analysisWorker] No Gemini result and no predictions/had for", m.matchId, m.home, "vs", m.away, "- skipping update (no 50/50)");
+          continue;
+        }
       }
       const matchRef = doc(db, Tables.matches, m.matchId);
       try {

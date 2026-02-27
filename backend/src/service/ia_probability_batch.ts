@@ -115,7 +115,12 @@ Format:
     }
     return results;
   } catch (error: any) {
-    console.error("[IaProbabilityBatch] Error:", error?.message || error);
+    const msg = error?.message || String(error);
+    const cause = error?.cause ? ` (cause: ${error.cause?.message ?? error.cause})` : "";
+    console.error("[IaProbabilityBatch] Error:", msg + cause);
+    if (msg.includes("fetch") || msg.includes("ECONNREFUSED") || msg.includes("ETIMEDOUT")) {
+      console.error("[IaProbabilityBatch] Check GEMINI_API_KEY in .env and network/proxy. See https://ai.google.dev/gemini-api/docs");
+    }
     return [];
   }
 }

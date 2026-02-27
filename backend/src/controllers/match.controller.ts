@@ -272,9 +272,29 @@ class MatchController {
     static async getMatchs(req: Request, res: Response) {
         try {
             const refresh = req.query.refresh === 'true';
+            // Fill ia from predictions/HKJC when ia is missing or 50/50 (so list never shows all 50%)
+            const fillListIAFromPredictions = (match: any): void => {
+                const hasNoIA = !match.ia || match.ia.home == null || match.ia.away == null;
+                const isFiftyFifty = match.ia && match.ia.home === 50 && match.ia.away === 50;
+                if (!hasNoIA && !isFiftyFifty) return;
+                let h: number | null = null;
+                let a: number | null = null;
+                if (match.predictions?.homeWinRate != null && match.predictions?.awayWinRate != null) {
+                    h = Number(match.predictions.homeWinRate);
+                    a = Number(match.predictions.awayWinRate);
+                } else if (match.hadHomePct != null && match.hadAwayPct != null) {
+                    h = parseFloat(match.hadHomePct);
+                    a = parseFloat(match.hadAwayPct);
+                }
+                if (h == null || a == null || Number.isNaN(h) || Number.isNaN(a)) return;
+                const total = h + a;
+                if (total <= 0) return;
+                match.ia = { home: (h / total) * 100, away: (a / total) * 100, draw: 0 };
+            };
             if (!refresh) {
                 const cached = await cacheGet<any[]>(CacheKeys.matchesList(false));
                 if (cached && Array.isArray(cached) && cached.length > 0) {
+                    cached.forEach(fillListIAFromPredictions);
                     if (!res.headersSent) return res.json(cached);
                     return;
                 }
@@ -389,6 +409,7 @@ class MatchController {
             }
 
             const futureMatches = list.sort((a: any, b: any) => new Date(a.kickOff).getTime() - new Date(b.kickOff).getTime());
+            futureMatches.forEach(fillListIAFromPredictions);
 
             // Fetch logos for matches that don't have them (api-sports.io via GetFixture), like topx-betting-mern
             const listWithLogos = await fetchLogosForList(futureMatches);

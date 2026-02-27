@@ -55,25 +55,36 @@ function DetailsCardComponent({
     homeWin = Math.max(0, Math.min(100, homeWin));
     awayWin = Math.max(0, Math.min(100, awayWin));
 
-    //HOME
-    const homeStats = probability.lastGames.homeTeam;
-    const homeGoals = homeStats.teamGoalsFor ? parseInt(homeStats.teamGoalsFor) : 0;
-    const homeGoalsAway = homeStats.teamGoalsAway ? parseInt(homeStats.teamGoalsAway) : 0;
-    const homeResults = homeStats.teamForm.split(",");
-    const homeWinCount = homeResults.filter(r => r === "W").length;
-    let homeWinRateCalculated = homeResults.length > 0 ? ((homeWinCount / homeResults.length) * 100) : 0;
-    // If calculated win rate is 0%, use prediction win rate as fallback
-    const homeWinRate = homeWinRateCalculated === 0 ? Math.round(homeWin) : homeWinRateCalculated.toFixed(0);
+    const hasLastGames = !!probability.lastGames?.homeTeam && !!probability.lastGames?.awayTeam;
 
-    //AWAY
-    const awayStats = probability.lastGames.awayTeam;
-    const awayGoals = awayStats.teamGoalsFor ? parseInt(awayStats.teamGoalsFor) : 0;
-    const awayGoalsAway = awayStats.teamGoalsAway ? parseInt(awayStats.teamGoalsAway) : 0;
-    const awayResults = awayStats.teamForm.split(",");
-    const awayWinCount = awayResults.filter(r => r === "W").length;
-    let awayWinRateCalculated = awayResults.length > 0 ? ((awayWinCount / awayResults.length) * 100) : 0;
-    // If calculated win rate is 0%, use prediction win rate as fallback
-    const awayWinRate = awayWinRateCalculated === 0 ? Math.round(awayWin) : awayWinRateCalculated.toFixed(0);
+    //HOME / AWAY stats only when lastGames is available
+    let homeGoals = 0;
+    let homeGoalsAway = 0;
+    let homeWinRate: string | number = Math.round(homeWin);
+
+    let awayGoals = 0;
+    let awayGoalsAway = 0;
+    let awayWinRate: string | number = Math.round(awayWin);
+
+    if (hasLastGames) {
+        const homeStats = probability.lastGames!.homeTeam;
+        homeGoals = homeStats.teamGoalsFor ? parseInt(homeStats.teamGoalsFor) : 0;
+        homeGoalsAway = homeStats.teamGoalsAway ? parseInt(homeStats.teamGoalsAway) : 0;
+        const homeResults = homeStats.teamForm.split(",");
+        const homeWinCount = homeResults.filter(r => r === "W").length;
+        let homeWinRateCalculated = homeResults.length > 0 ? ((homeWinCount / homeResults.length) * 100) : 0;
+        // If calculated win rate is 0%, use prediction win rate as fallback
+        homeWinRate = homeWinRateCalculated === 0 ? Math.round(homeWin) : homeWinRateCalculated.toFixed(0);
+
+        const awayStats = probability.lastGames!.awayTeam;
+        awayGoals = awayStats.teamGoalsFor ? parseInt(awayStats.teamGoalsFor) : 0;
+        awayGoalsAway = awayStats.teamGoalsAway ? parseInt(awayStats.teamGoalsAway) : 0;
+        const awayResults = awayStats.teamForm.split(",");
+        const awayWinCount = awayResults.filter(r => r === "W").length;
+        let awayWinRateCalculated = awayResults.length > 0 ? ((awayWinCount / awayResults.length) * 100) : 0;
+        // If calculated win rate is 0%, use prediction win rate as fallback
+        awayWinRate = awayWinRateCalculated === 0 ? Math.round(awayWin) : awayWinRateCalculated.toFixed(0);
+    }
 
     const conditionHome = probability.condition ? probability.condition.split(',')[0] : undefined
     const conditionAway = probability.condition ? probability.condition.split(',')[1] : undefined
