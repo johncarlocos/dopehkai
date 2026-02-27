@@ -57,6 +57,40 @@ function MatchsPage() {
         getMatch(merged);
     }, [data, selectedDay, analysisMap]);
 
+    // When returning from details page, scroll back to the last clicked match
+    useEffect(() => {
+        try {
+            const lastFrom = sessionStorage.getItem("lastMatchFrom");
+            const lastId = sessionStorage.getItem("lastMatchId");
+            if (!lastId || lastFrom !== "/matches") return;
+
+            const target = matchs.find((m) => {
+                const matchId = m.id || (m as any).eventId;
+                return String(matchId) === String(lastId);
+            });
+            if (!target) return;
+
+            // Ensure the correct day filter is selected so the match is rendered
+            if (target.matchDateFormated) {
+                setSelectedDay(target.matchDateFormated);
+            }
+
+            // Scroll after the DOM updates – keep one match above (clicked match appears second)
+            setTimeout(() => {
+                const el = document.getElementById(`match-${lastId}`);
+                if (el) {
+                    const scrollTarget = (el.previousElementSibling as HTMLElement) || el;
+                    scrollTarget.scrollIntoView({ block: "start", behavior: "auto" });
+                }
+            }, 0);
+
+            sessionStorage.removeItem("lastMatchFrom");
+            sessionStorage.removeItem("lastMatchId");
+        } catch {
+            // ignore storage/DOM errors
+        }
+    }, [matchs]);
+
     function getMatch(matches: Match[]) {
         // Like 111 project: backend already filters past matches, so we just format dates
         // No additional filtering needed on frontend
@@ -294,7 +328,7 @@ function MatchsPage() {
                                                 return null;
                                             }
                                             return (
-                                                <div key={matchId} className="mb-2 sm:w-2/3 w-5/6 mx-auto">
+                                                <div key={matchId} id={`match-${matchId}`} className="mb-2 sm:w-2/3 w-5/6 mx-auto">
                                                     <CardMatch
                                                         widht={"100%"}
                                                         id={matchId}
@@ -349,7 +383,7 @@ function MatchsPage() {
                                                     return null;
                                                 }
                                                 return (
-                                                    <div key={matchId} className="mb-2 sm:w-2/3 w-5/6 mx-auto">
+                                                    <div key={matchId} id={`match-${matchId}`} className="mb-2 sm:w-2/3 w-5/6 mx-auto">
                                                         <CardMatch
                                                             widht={"100%"}
                                                             id={matchId}

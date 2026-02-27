@@ -61,6 +61,13 @@ export function CardMatch({
 
     const handleClick = async () => {
         if (id) {
+            // Remember this match so the matches page can restore scroll position on back
+            try {
+                sessionStorage.setItem("lastMatchId", String(id));
+                sessionStorage.setItem("lastMatchFrom", window.location.pathname || "");
+            } catch {
+                // ignore storage errors
+            }
             // Allow navigation to details page for all users
             // VIP check will be done on the details page
             navigate("/details-match/" + id);
