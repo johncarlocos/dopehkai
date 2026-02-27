@@ -25,7 +25,9 @@ axios.interceptors.response.use(
     (response) => response,
     (error: AxiosError) => {
         // Handle 401 unauthorized - redirect to login
-        if (error.response?.status === 401) {
+        // Do NOT global logout for verify/vip 401: transient cookie/session issues would log out admins.
+        const isVerifyVip = error.config?.url?.includes?.("verify/vip") ?? false;
+        if (error.response?.status === 401 && !isVerifyVip) {
             try {
                 Cookies.remove("sessionId");
                 logout();

@@ -29,11 +29,19 @@ function LoginPage() {
     if (res.status === 200) {
       if (res.data?.sessionId) {
         const isAdmin = res.data?.role === "admin";
+        const host = window.location.hostname;
+        const cookieDomain =
+          host === "localhost" || host.startsWith("127.")
+            ? undefined
+            : host.startsWith("www.")
+              ? host.slice(4)
+              : host;
         Cookies.set("sessionId", res.data.sessionId, {
           sameSite: "strict",
           secure: window.location.protocol === "https:",
           path: "/",
           maxAge: isAdmin ? 365 * 24 * 60 * 60 : 30 * 24 * 60 * 60,
+          ...(cookieDomain ? { domain: `.${cookieDomain}` } : {}),
         });
       }
       login(res.data.role);
