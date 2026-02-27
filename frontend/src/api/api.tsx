@@ -187,6 +187,7 @@ export const API = {
         const _headers = headers ?? {};
         var response: any;
         await axios.get(url, {
+            withCredentials: true,
             timeout: 30000, // 30 seconds timeout
             headers: {
                 'Content-type': 'application/json; charset=UTF-8',

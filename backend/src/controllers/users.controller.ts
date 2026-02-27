@@ -246,11 +246,11 @@ class UsersController {
 
         const RefR = doc(db, Tables.sessions, sessionId);
         const sessionDoc = await getDoc(RefR);
-        if (!sessionDoc.exists()) return res.status(404).json({ message: "No session ID provided" });
+        if (!sessionDoc.exists()) return res.status(401).json({ message: "Session not found or expired" });
         const session = sessionDoc.data();
 
         if (!session) {
-            return res.status(404).json({ message: "Invalid session" });
+            return res.status(401).json({ message: "Invalid session" });
         }
 
         const RefA = doc(db, Tables.admins, session.userId);

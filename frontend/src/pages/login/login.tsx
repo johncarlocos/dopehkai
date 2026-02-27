@@ -6,6 +6,7 @@ import useAuthStore from "../../store/userAuthStore";
 import { useNavigate } from "react-router-dom";
 import ThemedText from "../../components/themedText";
 import { useTranslation } from "react-i18next";
+import Cookies from "js-cookie";
 
 function LoginPage() {
   const { t } = useTranslation();
@@ -26,6 +27,15 @@ function LoginPage() {
     };
     const res = await API.POST(AppGlobal.baseURL + "user/login", data);
     if (res.status === 200) {
+      if (res.data?.sessionId) {
+        const isAdmin = res.data?.role === "admin";
+        Cookies.set("sessionId", res.data.sessionId, {
+          sameSite: "strict",
+          secure: window.location.protocol === "https:",
+          path: "/",
+          maxAge: isAdmin ? 365 * 24 * 60 * 60 : 30 * 24 * 60 * 60,
+        });
+      }
       login(res.data.role);
       navigate("/");
     } else {
