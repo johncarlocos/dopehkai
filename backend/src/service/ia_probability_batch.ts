@@ -42,10 +42,26 @@ export async function IaProbabilityBatch(
       .join("\n");
 
     const prompt = `
-You are a football betting analyst. Analyze the following matches and estimate win probability (percentage) for home, draw, and away for each.
+You are a football betting analyst. Please analyze the following match:
 
 Matches:
 ${listText}
+
+Conduct this research by referencing professional data sources such as WhoScored, Sofascore, and Transfermarkt, and cross-reference the latest odds and match info from the HKJC Football website.
+
+Please strictly follow the structure below for your internal reasoning before you pick probabilities and a bet:
+1. Data & Statistical Analysis:
+- Compare both teams' xG (Expected Goals) and xGA (Expected Goals Against) over the last 5 matches.
+- Analyze the win rate disparity between home and away performances.
+- Consider the latest news in both English and the league's native language (e.g., Spanish, German, or Portuguese) so you don't miss key information.
+2. Squad & Lineup Deep-Dive:
+- Use the most updated injury and suspension information you can infer.
+- Specifically reason about how the absence of key players affects offensive or defensive efficiency (use data-backed logic where possible).
+3. Tactical Breakdown:
+- Analyze the preferred formations and tactical styles of both head coaches.
+- Assess tactical counters, for example whether a high press is vulnerable to direct counter-attacks.
+4. Market Sentiment & Odds:
+- Consider the trend of international mainstream odds (opening vs. current) and which side the market shows more confidence in.
 
 For EACH match:
 1) Estimate home/away/draw win probabilities (must sum to 100).

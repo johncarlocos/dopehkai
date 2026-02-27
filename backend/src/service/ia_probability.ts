@@ -33,27 +33,9 @@ export async function IaProbality(match: Match, playersInjured: any): Promise<Re
     const injuredAway = playersInjured.away.length;
 
     const prompt = `
-You are a football betting analyst.
+You are a football betting analyst. Please analyze the following match:
 
-1) First, estimate win probability percentages for FULL TIME RESULT (1X2):
-- home = Home team wins
-- away = Away team wins
-- draw = Draw
-
-2) Then choose ONE best betting idea across ALL markets where odds would be 1.7 or higher.
-   You MUST consider: 1X2 (HOME, AWAY, DRAW), Handicap (HANDICAP_HOME, HANDICAP_AWAY), HiLo 2.5 (OVER_2.5, UNDER_2.5), HiLo 3.5 (OVER_3.5, UNDER_3.5).
-   Pick the option with the best value—do NOT always choose HOME or AWAY. Use DRAW, handicap, or HiLo when they offer better value.
-Return which market/type you prefer in a tag called "bestPick".
-
-Respond ONLY in this exact JSON format (no explanations, no extra fields):
-{
-  "home": number,
-  "away": number,
-  "draw": number,
-  "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5" | "OVER_3.5" | "UNDER_3.5"
-}
-
-### Match Information:
+Match:
 - Date: ${matchDataInput.data}
 - Home Team: ${matchDataInput.home.name}
   - Last 5 matches: ${matchDataInput.home.last5Matches.join(", ")}
@@ -64,11 +46,36 @@ Respond ONLY in this exact JSON format (no explanations, no extra fields):
   - Average goals per game: ${matchDataInput.away.averageGoals}
   - Injured players: ${injuredAway}
 
-Guidelines:
-- Injuries reduce the strength of that team; if injuries are similar both sides, reduce the impact.
-- Home team has small base advantage (~5%).
-- For "bestPick": choose the SINGLE best value across 1X2, Handicap, HiLo 2.5, and HiLo 3.5. Use DRAW when a draw is likely and has value. Use HANDICAP_HOME or HANDICAP_AWAY when handicap is the best value. Use OVER_2.5, UNDER_2.5, OVER_3.5, or UNDER_3.5 when total goals market is the best value. Do not default to HOME or AWAY only.
-- Always choose exactly ONE bestPick from the 9 options.
+Conduct this research by referencing professional data sources such as WhoScored, Sofascore, and Transfermarkt, and cross-reference the latest odds and match info from the HKJC Football website.
+
+Please strictly follow the structure below for your internal reasoning before you pick probabilities and a bet:
+1. Data & Statistical Analysis:
+- Compare both teams' xG (Expected Goals) and xGA (Expected Goals Against) over the last 5 matches.
+- Analyze the win rate disparity between home and away performances.
+- Consider the latest news in both English and the league's native language (e.g., Spanish, German, or Portuguese) so you don't miss key information.
+2. Squad & Lineup Deep-Dive:
+- Use the most updated injury and suspension information you can infer.
+- Specifically reason about how the absence of key players affects offensive or defensive efficiency (use data-backed logic where possible).
+3. Tactical Breakdown:
+- Analyze the preferred formations and tactical styles of both head coaches.
+- Assess tactical counters, for example whether a high press is vulnerable to direct counter-attacks.
+4. Market Sentiment & Odds:
+- Consider the trend of international mainstream odds (opening vs. current) and which side the market shows more confidence in.
+
+Now, based on that reasoning, produce ONLY the final numeric betting view in this exact JSON format (no explanations, no extra fields):
+{
+  "home": number,
+  "away": number,
+  "draw": number,
+  "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5" | "OVER_3.5" | "UNDER_3.5"
+}
+
+Rules:
+- home + away + draw must sum to 100.
+- Consider home advantage (~5%).
+- Choose ONE best betting idea across ALL markets (1X2, Handicap, HiLo 2.5, HiLo 3.5) where odds would be 1.7 or higher and label it as "bestPick".
+- You MUST vary your choices: use "DRAW", "HANDICAP_HOME", "HANDICAP_AWAY", "OVER_2.5", "UNDER_2.5", "OVER_3.5", "UNDER_3.5" when they offer better value—do NOT always pick "HOME" or "AWAY".
+- Always choose exactly ONE bestPick from the 9 allowed values.
 - Do not provide any explanations. Only return the JSON result.
 `;
 

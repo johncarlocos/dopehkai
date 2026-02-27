@@ -1050,7 +1050,8 @@ class MatchController {
                     matchData.ia = {
                         home: Number(redistributedHome.toFixed(2)),
                         away: Number(redistributedAway.toFixed(2)),
-                        draw: resultIa.draw
+                        draw: resultIa.draw,
+                        bestPick: resultIa.bestPick,
                     };
                 } else {
                     const result = CalculationProbality(playersInjured, homeWinRate, awayWinRate, homeForm.split(","), awayForm.split(","));
@@ -1089,7 +1090,7 @@ class MatchController {
             const cutoffTime = new Date(Date.now() - 60 * 60 * 1000);
             const matchesCol = collection(db, Tables.matches);
             const snapshot = await getDocs(matchesCol);
-            const analysisMap: Record<string, { home: number; away: number; draw: number }> = {};
+            const analysisMap: Record<string, { home: number; away: number; draw: number; bestPick?: string }> = {};
 
             for (const docSnap of snapshot.docs) {
                 const data = docSnap.data() as Match;
@@ -1105,6 +1106,7 @@ class MatchController {
                         home: data.ia.home,
                         away: data.ia.away,
                         draw: data.ia.draw ?? 0,
+                        bestPick: data.ia.bestPick,
                     };
                 }
             }

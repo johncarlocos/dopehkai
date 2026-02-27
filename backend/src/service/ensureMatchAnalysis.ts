@@ -195,7 +195,7 @@ async function computeAndSaveAnalysis(matchId: string, matchData: Match): Promis
 
 export type AnalysisMap = Record<string, ResultIA>;
 
-/** Get or create analysis for all future matches. Returns map matchId -> { home, away, draw }. */
+/** Get or create analysis for all future matches. Returns map matchId -> { home, away, draw, bestPick? }. */
 export async function ensureAllMatchAnalysis(): Promise<AnalysisMap> {
   const cutoffTime = new Date(Date.now() - 60 * 60 * 1000);
   const matchesCol = collection(db, Tables.matches);
@@ -219,7 +219,14 @@ export async function ensureAllMatchAnalysis(): Promise<AnalysisMap> {
   const result: AnalysisMap = {};
   for (const docSnap of analysisSnap.docs) {
     const d = docSnap.data();
-    if (d.home != null && d.away != null) result[docSnap.id] = { home: d.home, away: d.away, draw: d.draw ?? 0 };
+    if (d.home != null && d.away != null) {
+      result[docSnap.id] = {
+        home: d.home,
+        away: d.away,
+        draw: d.draw ?? 0,
+        bestPick: d.bestPick,
+      };
+    }
   }
 
   const missing = matchIds.filter((id) => !result[id]);

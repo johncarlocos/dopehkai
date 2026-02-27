@@ -6,6 +6,7 @@ export interface ResultIA {
   home: number;
   away: number;
   draw: number;
+  bestPick?: string;
 }
 
 /**
