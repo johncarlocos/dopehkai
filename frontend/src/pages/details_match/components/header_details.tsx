@@ -5,10 +5,13 @@ import { getTeamNameInCurrentLanguage } from "../../../ultis/languageUtils";
 
 interface Props {
     data: Probability;
+    /** When false (e.g. non-VIP), the "分析:主勝" block is hidden; lock is shown by parent. */
+    showAnalysisLabel?: boolean;
 }
 
 function HeaderDetailsComponent({
-    data
+    data,
+    showAnalysisLabel = true,
 }: Props) {
     const navigate = useNavigate();
 
@@ -57,7 +60,7 @@ function HeaderDetailsComponent({
                     teams={[getTeamNameInCurrentLanguage(data.homeLanguages, data.homeTeamName), getTeamNameInCurrentLanguage(data.awayLanguages, data.awayTeamName)]}
                 />
             </div>
-            {analysisLabel && (
+            {showAnalysisLabel && analysisLabel && (
                 <div className="sm:w-2/3 w-5/6 mt-3">
                     <div className="bg-white/90 rounded-lg px-4 py-4 sm:py-5 shadow flex items-center justify-center">
                         <span className="text-base sm:text-2xl font-bold text-gray-800 text-center">

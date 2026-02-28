@@ -182,7 +182,7 @@ function DetailsMatchPage() {
 
                     <AppBarComponent />
                     <div className="mt-24" >
-                        {displayData && <HeaderDetailsComponent data={displayData} />}
+                        {displayData && <HeaderDetailsComponent data={displayData} showAnalysisLabel={isVip === true} />}
 
                         {/* Show locked cards for non-VIP users */}
                         {isVip === false && (
