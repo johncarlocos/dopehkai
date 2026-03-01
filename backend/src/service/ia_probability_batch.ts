@@ -13,6 +13,14 @@ export interface MatchForBatch {
   home: string;
   away: string;
   kickoff: string;
+  /** HKJC real-time 1X2 implied % */
+  hadHomePct?: string;
+  hadDrawPct?: string;
+  hadAwayPct?: string;
+  /** HKJC handicap condition */
+  condition?: string;
+  /** HKJC HiLo lines */
+  hiloLines?: { line: string; overPct: string; underPct: string }[];
 }
 
 export interface BatchAnalysisItem {
@@ -35,50 +43,40 @@ export async function IaProbabilityBatch(
 
   try {
     const listText = matches
-      .map(
-        (m, i) =>
-          `${i + 1}. [${m.matchId}] ${m.home} vs ${m.away} (${m.kickoff})`
-      )
+      .map((m, i) => {
+        const base = `${i + 1}. [${m.matchId}] ${m.home} vs ${m.away} (${m.kickoff})`;
+        const odds: string[] = [];
+        if (m.hadHomePct != null && m.hadAwayPct != null) {
+          odds.push(`1X2: H ${m.hadHomePct}% D ${m.hadDrawPct ?? "—"}% A ${m.hadAwayPct}%`);
+        }
+        if (m.condition) odds.push(`Handicap: ${m.condition}`);
+        if (m.hiloLines?.length) {
+          odds.push(
+            "HiLo: " +
+              m.hiloLines.map((l) => `${l.line} O${l.overPct}% U${l.underPct}%`).join("; ")
+          );
+        }
+        return odds.length ? `${base} | HKJC: ${odds.join(" | ")}` : base;
+      })
       .join("\n");
 
     const prompt = `
-You are a football betting analyst. Please analyze the following match:
+You are a football betting analyst. Use ONLY the data below. Do not use external sources.
 
-Matches:
+Matches (HKJC = real-time market implied %):
 ${listText}
 
-Conduct this research by referencing professional data sources such as WhoScored, Sofascore, and Transfermarkt, and cross-reference the latest odds and match info from the HKJC Football website.
-
-Please strictly follow the structure below for your internal reasoning before you pick probabilities and a bet:
-1. Data & Statistical Analysis:
-- Compare both teams' xG (Expected Goals) and xGA (Expected Goals Against) over the last 5 matches.
-- Analyze the win rate disparity between home and away performances.
-- Consider the latest news in both English and the league's native language (e.g., Spanish, German, or Portuguese) so you don't miss key information.
-2. Squad & Lineup Deep-Dive:
-- Use the most updated injury and suspension information you can infer.
-- Specifically reason about how the absence of key players affects offensive or defensive efficiency (use data-backed logic where possible).
-3. Tactical Breakdown:
-- Analyze the preferred formations and tactical styles of both head coaches.
-- Assess tactical counters, for example whether a high press is vulnerable to direct counter-attacks.
-4. Market Sentiment & Odds:
-- Consider the trend of international mainstream odds (opening vs. current) and which side the market shows more confidence in.
-
 For EACH match:
-1) Estimate home/away/draw win probabilities (must sum to 100).
-2) Choose ONE best betting idea across ALL markets (1X2, Handicap, HiLo 2.5, HiLo 3.5) where odds are 1.7 or higher. Label it as "bestPick".
-   You MUST vary your choices: use "DRAW", "HANDICAP_HOME", "HANDICAP_AWAY", "OVER_2.5", "UNDER_2.5", "OVER_3.5", "UNDER_3.5" when they offer better value—do NOT always pick "HOME" or "AWAY".
-   Allowed bestPick values: "HOME", "AWAY", "DRAW", "HANDICAP_HOME", "HANDICAP_AWAY", "OVER_2.5", "UNDER_2.5", "OVER_3.5", "UNDER_3.5"
+1) Estimate home/draw/away win probabilities (sum = 100). Use the HKJC odds as the market baseline; adjust slightly if the team names or context suggest value.
+2) Choose ONE bestPick: the option where your estimated probability is higher than the market implied probability (value bet). If no clear value, pick the most likely outcome. Allowed: HOME, AWAY, DRAW, HANDICAP_HOME, HANDICAP_AWAY, OVER_2.5, UNDER_2.5, OVER_3.5, UNDER_3.5.
 
 Respond ONLY with a JSON array. One object per match in the same order. No other text.
-Format:
 [
   { "matchId": "<id>", "home": number, "away": number, "draw": number, "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5" | "OVER_3.5" | "UNDER_3.5" },
   ...
 ]
-- home + away + draw for each match must sum to 100.
-- Consider home advantage (around 5%).
-- Always choose exactly one bestPick per match. Vary across the 9 options based on best value.
-- Do not add explanations. Only the JSON array.
+- home + away + draw = 100 per match. Home advantage ~5%.
+- Exactly one bestPick per match. Vary choices; do not always pick HOME or AWAY.
 `;
 
     console.log("[Gemini] Calling batch API", { model: GEMINI_MODEL, matchCount: matches.length });
@@ -87,8 +85,8 @@ Format:
       contents: prompt,
       config: {
         systemInstruction:
-          "You are a football analyst. Respond only with a valid JSON array of objects with matchId, home, away, draw (numbers summing to 100 per match).",
-        temperature: 0.3,
+          "You are a football analyst. Use only the data provided. Respond only with a valid JSON array of objects with matchId, home, away, draw (sum 100), bestPick.",
+        temperature: 0.2,
       },
     });
 

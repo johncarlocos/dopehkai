@@ -18,6 +18,8 @@ import {
 } from "./ia_probability_batch";
 import { CalculationProbality } from "./calculationProbality";
 import { ResultIA } from "../model/match.model";
+import { ApiHKJC } from "../data/api-hkjc";
+import { extractHKJCMarkets } from "./hkjcMarkets";
 
 const STALE_MS = 60 * 60 * 1000; // 1 hour – re-analyze after this
 const LOCK_TTL_SECONDS = 120; // Lock held for up to 2 min during batch
@@ -96,12 +98,30 @@ export async function runAnalysisBatch(): Promise<{
   }
 
   try {
-    const matchesForBatch: MatchForBatch[] = toAnalyze.map((m) => ({
-      matchId: m.matchId,
-      home: m.home,
-      away: m.away,
-      kickoff: m.kickoff,
-    }));
+    let hkjcMap = new Map<string, ReturnType<typeof extractHKJCMarkets>>();
+    try {
+      const hkjc = await ApiHKJC();
+      hkjc.forEach((h) => {
+        if (h.id) hkjcMap.set(h.id, extractHKJCMarkets(h));
+      });
+    } catch (e) {
+      console.warn("[analysisWorker] HKJC fetch failed, batch will run without odds:", (e as Error)?.message);
+    }
+
+    const matchesForBatch: MatchForBatch[] = toAnalyze.map((m) => {
+      const markets = hkjcMap.get(m.matchId);
+      return {
+        matchId: m.matchId,
+        home: m.home,
+        away: m.away,
+        kickoff: m.kickoff,
+        ...(markets?.hadHomePct && { hadHomePct: markets.hadHomePct }),
+        ...(markets?.hadDrawPct && { hadDrawPct: markets.hadDrawPct }),
+        ...(markets?.hadAwayPct && { hadAwayPct: markets.hadAwayPct }),
+        ...(markets?.condition && { condition: markets.condition }),
+        ...(markets?.hiloLines?.length && { hiloLines: markets.hiloLines }),
+      };
+    });
 
     const results = await IaProbabilityBatch(matchesForBatch);
     const now = new Date();

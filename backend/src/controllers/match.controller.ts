@@ -16,94 +16,15 @@ import { ApiTopScoreInjured } from "../data/api-topscore-injured";
 import { IaProbality } from "../service/ia_probability";
 import { GetFixture } from "../service/getFixture";
 import ExcelJS from 'exceljs';
-import { ApiHKJC, ApiHKJCMatchList } from "../data/api-hkjc";
+import { ApiHKJC, ApiHKJCMatchList, ApiHKJCMatchById } from "../data/api-hkjc";
 import { FootyLogicRecentForm } from "model/footylogic_recentform.model";
-import { HKJC, FoPool, Line, Combination } from "model/hkjc.model";
+import { HKJC } from "model/hkjc.model";
+import { extractHKJCMarkets } from "../service/hkjcMarkets";
 import { format } from 'date-fns';
 import { convertToSimplifiedChinese } from "../service/chinese-simplify";
 import { cacheGet, cacheSet, cacheDel, CacheKeys } from "../cache/redis";
 import { runAnalysisBatch } from "../service/analysisWorker";
 import { fetchLogosForList } from "../service/fetchLogosForList";
-
-/** Extract HAD (主客和), HDC (讓球), and TG (大細 HiLo) from HKJC foPools for match detail. */
-function extractHKJCMarkets(hkjcMatch: HKJC): {
-    hadHomePct?: string;
-    hadDrawPct?: string;
-    hadAwayPct?: string;
-    condition?: string;
-    hiloLines?: { line: string; overPct: string; underPct: string }[];
-} {
-    const out: ReturnType<typeof extractHKJCMarkets> = {};
-    const pools = hkjcMatch.foPools || [];
-    // HAD 主客和
-    const hadPool = pools.find((p: FoPool) => p.oddsType === "HAD");
-    if (hadPool && hadPool.lines?.length) {
-        const line = hadPool.lines[0];
-        const combs = (line.combinations || []) as Combination[];
-        const home: { odds: number } = { odds: 0 };
-        const draw: { odds: number } = { odds: 0 };
-        const away: { odds: number } = { odds: 0 };
-        combs.forEach((c: Combination) => {
-            const sel = c.selections?.[0];
-            const name = (sel?.name_ch || sel?.name_en || "").trim();
-            const odds = parseFloat(c.currentOdds || "0");
-            if (odds <= 0) return;
-            if (name === "主") home.odds = odds;
-            else if (name === "和") draw.odds = odds;
-            else if (name === "客") away.odds = odds;
-        });
-        const inv = (o: number) => o > 0 ? 100 / o : 0;
-        const h = inv(home.odds);
-        const d = inv(draw.odds);
-        const a = inv(away.odds);
-        const total = h + d + a;
-        if (total > 0) {
-            out.hadHomePct = (h / total * 100).toFixed(2);
-            out.hadDrawPct = (d / total * 100).toFixed(2);
-            out.hadAwayPct = (a / total * 100).toFixed(2);
-        }
-    }
-    // HDC 讓球
-    const hdcPool = pools.find((p: FoPool) => p.oddsType === "HDC");
-    if (hdcPool && hdcPool.lines?.length) {
-        const line = hdcPool.lines.find((l: Line) => l.condition);
-        if (line?.condition) {
-            const more = line.condition.includes("+");
-            const regex = new RegExp(more ? "\\+" : "-", "g");
-            out.condition = line.condition + "," + line.condition.replace(regex, more ? "-" : "+");
-        }
-    }
-    // TG 大細 (Total Goals / HiLo)
-    const tgPool = pools.find((p: FoPool) => p.oddsType === "TG");
-    if (tgPool && tgPool.lines?.length) {
-        const hilo: { line: string; overPct: string; underPct: string }[] = [];
-        (tgPool.lines as Line[]).forEach((l: Line) => {
-            const cond = (l.condition || "").trim();
-            if (!cond) return;
-            const combs = (l.combinations || []) as Combination[];
-            let overOdds = 0, underOdds = 0;
-            combs.forEach((c: Combination) => {
-                const sel = c.selections?.[0];
-                const name = (sel?.name_ch || sel?.name_en || "").trim();
-                const odds = parseFloat(c.currentOdds || "0");
-                if (name === "大" || (name && name.toLowerCase().includes("over"))) overOdds = odds;
-                else if (name === "細" || (name && name.toLowerCase().includes("under"))) underOdds = odds;
-            });
-            if (overOdds > 0 && underOdds > 0) {
-                const o = 100 / overOdds;
-                const u = 100 / underOdds;
-                const total = o + u;
-                hilo.push({
-                    line: cond,
-                    overPct: (o / total * 100).toFixed(2),
-                    underPct: (u / total * 100).toFixed(2),
-                });
-            }
-        });
-        if (hilo.length) out.hiloLines = hilo;
-    }
-    return out;
-}
 
 class MatchController {
     static async getMatchResults() {
@@ -690,11 +611,11 @@ class MatchController {
                     matchData.awayTeamName = hkjcMatch.awayTeam.name_ch;
                 }
                 const markets = extractHKJCMarkets(hkjcMatch);
-                if (markets.hadHomePct != null) (matchData as any).hadHomePct = markets.hadHomePct;
-                if (markets.hadDrawPct != null) (matchData as any).hadDrawPct = markets.hadDrawPct;
-                if (markets.hadAwayPct != null) (matchData as any).hadAwayPct = markets.hadAwayPct;
+                if (markets.hadHomePct != null) matchData.hadHomePct = markets.hadHomePct;
+                if (markets.hadDrawPct != null) matchData.hadDrawPct = markets.hadDrawPct;
+                if (markets.hadAwayPct != null) matchData.hadAwayPct = markets.hadAwayPct;
                 if (markets.condition) matchData.condition = markets.condition;
-                if (markets.hiloLines?.length) (matchData as any).hiloLines = markets.hiloLines;
+                if (markets.hiloLines?.length) matchData.hiloLines = markets.hiloLines;
             }
 
             // Add language support (use existing if available, otherwise convert)
@@ -864,9 +785,9 @@ class MatchController {
                     if (matchData.predictions?.homeWinRate != null && matchData.predictions?.awayWinRate != null) {
                         homeWinRate = matchData.predictions.homeWinRate;
                         awayWinRate = matchData.predictions.awayWinRate;
-                    } else if ((matchData as any).hadHomePct != null && (matchData as any).hadAwayPct != null) {
-                        homeWinRate = parseFloat((matchData as any).hadHomePct);
-                        awayWinRate = parseFloat((matchData as any).hadAwayPct);
+                    } else if (matchData.hadHomePct != null && matchData.hadAwayPct != null) {
+                        homeWinRate = parseFloat(matchData.hadHomePct);
+                        awayWinRate = parseFloat(matchData.hadAwayPct);
                     }
                     if (homeWinRate !== null && awayWinRate !== null) {
                         // Use predictions/HKJC odds as IA when we don't have CalculationProbality inputs
@@ -1032,6 +953,15 @@ class MatchController {
             }
             let matchData = matchSnap.data() as Match;
             if (matchData.predictions) {
+                const hkjcMatch = await ApiHKJCMatchById(id);
+                if (hkjcMatch) {
+                    const markets = extractHKJCMarkets(hkjcMatch);
+                    if (markets.hadHomePct != null) matchData.hadHomePct = markets.hadHomePct;
+                    if (markets.hadDrawPct != null) matchData.hadDrawPct = markets.hadDrawPct;
+                    if (markets.hadAwayPct != null) matchData.hadAwayPct = markets.hadAwayPct;
+                    if (markets.condition) matchData.condition = markets.condition;
+                    if (markets.hiloLines?.length) matchData.hiloLines = markets.hiloLines;
+                }
                 let homeWinRate = matchData.predictions.homeWinRate;
                 let awayWinRate = matchData.predictions.awayWinRate;
                 let homeForm = matchData.homeForm;

@@ -35,6 +35,12 @@ export interface Match {
     predictions?: Predictions
     ia?: ResultIA
     ia2?: ResultIA
+    /** HKJC real-time: 1X2 implied % (主客和). */
+    hadHomePct?: string
+    hadDrawPct?: string
+    hadAwayPct?: string
+    /** HKJC HiLo lines e.g. [{ line: "2.5", overPct, underPct }]. */
+    hiloLines?: { line: string; overPct: string; underPct: string }[]
     /** "pending" | "completed" – used for batch Gemini workflow */
     analysis_status?: "pending" | "completed"
     /** When AI analysis was last updated; used for stale check (e.g. re-analyze after 1h) */

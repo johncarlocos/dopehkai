@@ -22,6 +22,33 @@ async function queryHKJC(oddsTypes: string[]): Promise<HKJC[]> {
     return res.data.data.matches || [];
 }
 
+/** Fetch one match by id with HAD, HDC, TG (1X2, handicap, HiLo) for real-time odds. */
+export async function ApiHKJCMatchById(matchId: string): Promise<HKJC | null> {
+    try {
+        const oddsTypes = ["HAD", "HDC", "TG"];
+        const queryOne = {
+            ...base,
+            variables: {
+                ...base.variables,
+                matchIds: [matchId],
+                startIndex: 0,
+                endIndex: 1,
+                showAllMatch: true,
+                fbOddsTypes: oddsTypes,
+                fbOddsTypesM: oddsTypes,
+                featuredMatchesOnly: false,
+                inplayOnly: false,
+            },
+        };
+        const res = await API.POST("https://info.cld.hkjc.com/graphql/base/", queryOne);
+        if (res.status !== 200 || !res.data?.data?.matches?.length) return null;
+        return res.data.data.matches[0] as HKJC;
+    } catch (error) {
+        console.warn("[ApiHKJCMatchById] Error for", matchId, error);
+        return null;
+    }
+}
+
 /** Match list for website/sync: HDC only = same as HKJC handicap page (e.g. 32 matches, 26th/27th). */
 export const ApiHKJCMatchList = async (): Promise<HKJC[]> => {
     try {

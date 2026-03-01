@@ -32,51 +32,50 @@ export async function IaProbality(match: Match, playersInjured: any): Promise<Re
     const injuredHome = playersInjured.home.length;
     const injuredAway = playersInjured.away.length;
 
+    const hadHome = match.hadHomePct ?? match.predictions?.homeWinRate;
+    const hadAway = match.hadAwayPct ?? match.predictions?.awayWinRate;
+    const hadDraw = match.hadDrawPct;
+    const hkjc1x2 =
+      hadHome != null && hadAway != null
+        ? `HKJC 1X2 (real-time implied %): Home ${hadHome}%, Draw ${hadDraw ?? "—"}%, Away ${hadAway}%.`
+        : "";
+    const hkjcHandicap = match.condition ? `HKJC Handicap: ${match.condition}.` : "";
+    const hkjcHilo =
+      match.hiloLines?.length
+        ? "HKJC HiLo: " +
+          match.hiloLines.map((l) => `${l.line} — Over ${l.overPct}%, Under ${l.underPct}%`).join("; ") +
+          "."
+        : "";
+    const hkjcBlock = [hkjc1x2, hkjcHandicap, hkjcHilo].filter(Boolean).join(" ");
+
     const prompt = `
-You are a football betting analyst. Please analyze the following match:
+You are a football betting analyst. Use ONLY the data below. Do not use external sources.
 
 Match:
 - Date: ${matchDataInput.data}
 - Home Team: ${matchDataInput.home.name}
-  - Last 5 matches: ${matchDataInput.home.last5Matches.join(", ")}
-  - Average goals per game: ${matchDataInput.home.averageGoals}
-  - Injured players: ${injuredHome}
+  - Last 5: ${matchDataInput.home.last5Matches.join(", ")}
+  - Avg goals: ${matchDataInput.home.averageGoals}
+  - Injured: ${injuredHome}
 - Away Team: ${matchDataInput.away.name}
-  - Last 5 matches: ${matchDataInput.away.last5Matches.join(", ")}
-  - Average goals per game: ${matchDataInput.away.averageGoals}
-  - Injured players: ${injuredAway}
+  - Last 5: ${matchDataInput.away.last5Matches.join(", ")}
+  - Avg goals: ${matchDataInput.away.averageGoals}
+  - Injured: ${injuredAway}
+${hkjcBlock ? `\n${hkjcBlock}\n` : ""}
 
-Conduct this research by referencing professional data sources such as WhoScored, Sofascore, and Transfermarkt, and cross-reference the latest odds and match info from the HKJC Football website.
+Tasks:
+1) Estimate home/draw/away win probabilities (sum = 100). Use the HKJC odds above as the market baseline; adjust slightly based on form and injuries if justified.
+2) Choose ONE bestPick: the option where your estimated probability is higher than the market implied probability (value bet). If no clear value, pick the most likely outcome among: HOME, AWAY, DRAW, HANDICAP_HOME, HANDICAP_AWAY, OVER_2.5, UNDER_2.5, OVER_3.5, UNDER_3.5.
 
-Please strictly follow the structure below for your internal reasoning before you pick probabilities and a bet:
-1. Data & Statistical Analysis:
-- Compare both teams' xG (Expected Goals) and xGA (Expected Goals Against) over the last 5 matches.
-- Analyze the win rate disparity between home and away performances.
-- Consider the latest news in both English and the league's native language (e.g., Spanish, German, or Portuguese) so you don't miss key information.
-2. Squad & Lineup Deep-Dive:
-- Use the most updated injury and suspension information you can infer.
-- Specifically reason about how the absence of key players affects offensive or defensive efficiency (use data-backed logic where possible).
-3. Tactical Breakdown:
-- Analyze the preferred formations and tactical styles of both head coaches.
-- Assess tactical counters, for example whether a high press is vulnerable to direct counter-attacks.
-4. Market Sentiment & Odds:
-- Consider the trend of international mainstream odds (opening vs. current) and which side the market shows more confidence in.
-
-Now, based on that reasoning, produce ONLY the final numeric betting view in this exact JSON format (no explanations, no extra fields):
+Respond ONLY with this JSON (no other text):
 {
   "home": number,
   "away": number,
   "draw": number,
   "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5" | "OVER_3.5" | "UNDER_3.5"
 }
-
-Rules:
-- home + away + draw must sum to 100.
-- Consider home advantage (~5%).
-- Choose ONE best betting idea across ALL markets (1X2, Handicap, HiLo 2.5, HiLo 3.5) where odds would be 1.7 or higher and label it as "bestPick".
-- You MUST vary your choices: use "DRAW", "HANDICAP_HOME", "HANDICAP_AWAY", "OVER_2.5", "UNDER_2.5", "OVER_3.5", "UNDER_3.5" when they offer better value—do NOT always pick "HOME" or "AWAY".
-- Always choose exactly ONE bestPick from the 9 allowed values.
-- Do not provide any explanations. Only return the JSON result.
+- home + away + draw = 100. Home advantage ~5%.
+- Exactly one bestPick from the 9 values. Vary choices; do not always pick HOME or AWAY.
 `;
 
     console.log("[Gemini] Calling single-match API", { model: GEMINI_MODEL, matchId: match.id || match.eventId, home: match.homeTeamNameEn || match.homeTeamName, away: match.awayTeamNameEn || match.awayTeamName });
@@ -84,8 +83,8 @@ Rules:
       model: GEMINI_MODEL,
       contents: prompt,
       config: {
-        systemInstruction: "You are a football analyst with access to real-time data. Respond only with valid JSON.",
-        temperature: 0.3,
+        systemInstruction: "You are a football analyst. Use only the data provided. Respond only with valid JSON.",
+        temperature: 0.2,
       },
     });
 
