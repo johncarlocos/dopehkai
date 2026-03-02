@@ -23,8 +23,7 @@ import { extractHKJCMarkets } from "./hkjcMarkets";
 
 const STALE_MS = 60 * 60 * 1000; // 1 hour – re-analyze after this
 const LOCK_TTL_SECONDS = 120; // Lock held for up to 2 min during batch
-/** Min win rate to show a crown; do not overwrite existing ia when it would remove the crown */
-const CROWN_THRESHOLD = 70;
+/** Once a match has analysis (ia), never overwrite it so the user always sees the same result */
 
 /**
  * Find match IDs that need analysis: no analysis yet, or analysis older than STALE_MS.
@@ -196,23 +195,19 @@ export async function runAnalysisBatch(): Promise<{
       }
       const matchRef = doc(db, Tables.matches, m.matchId);
       try {
-        // Preserve crown: if match already has ia with winning side >= 70%, don't overwrite with lower value
         const snap = await getDoc(matchRef);
         if (snap.exists()) {
           const existing = snap.data();
           const eh = existing?.ia?.home;
           const ea = existing?.ia?.away;
           if (typeof eh === "number" && typeof ea === "number") {
-            const maxExisting = Math.max(eh, ea);
-            const maxNew = Math.max(ia.home, ia.away);
-            if (maxExisting >= CROWN_THRESHOLD && maxNew < maxExisting) {
-              await updateDoc(matchRef, {
-                analysis_status: "completed",
-                analysis_updated_at: now,
-              });
-              await cacheDel(CacheKeys.matchDetail(m.matchId));
-              continue;
-            }
+            // Already has analysis: never overwrite so user always sees the same result
+            await updateDoc(matchRef, {
+              analysis_status: "completed",
+              analysis_updated_at: now,
+            });
+            await cacheDel(CacheKeys.matchDetail(m.matchId));
+            continue;
           }
         }
         await updateDoc(matchRef, {

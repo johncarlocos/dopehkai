@@ -953,6 +953,10 @@ class MatchController {
             }
             let matchData = matchSnap.data() as Match;
             if (matchData.predictions) {
+                // If match already has analysis, always return it so user sees the same result
+                if (matchData.ia && typeof matchData.ia.home === "number" && typeof matchData.ia.away === "number") {
+                    return res.json(matchData.ia);
+                }
                 const hkjcMatch = await ApiHKJCMatchById(id);
                 if (hkjcMatch) {
                     const markets = extractHKJCMarkets(hkjcMatch);
@@ -970,11 +974,6 @@ class MatchController {
                 if (matchData.fixture_id && matchData.league_id && matchData.homeTeamId && matchData.awayTeamId) {
                     playersInjured = await ApiTopScoreInjured(matchData.fixture_id, matchData.league_id, matchData.kickOff.split("-")[0], matchData.homeTeamId, matchData.awayTeamId);
                 }
-                const existingIa = matchData.ia;
-                const existingMax = existingIa && typeof existingIa.home === "number" && typeof existingIa.away === "number"
-                    ? Math.max(existingIa.home, existingIa.away) : 0;
-                const CROWN_THRESHOLD = 70;
-
                 const resultIa = await IaProbality(matchData, playersInjured);
                 if (resultIa) {
                     const total = resultIa.home + resultIa.away;
@@ -982,41 +981,19 @@ class MatchController {
                     const awayShare = total > 0 ? resultIa.away / total : 0.5;
                     const redistributedHome = resultIa.home + resultIa.draw * homeShare;
                     const redistributedAway = resultIa.away + resultIa.draw * awayShare;
-                    const newMax = Math.max(redistributedHome, redistributedAway);
-                    if (existingMax >= CROWN_THRESHOLD && newMax < existingMax) {
-                        matchData.ia = {
-                            home: existingIa!.home,
-                            away: existingIa!.away,
-                            draw: existingIa!.draw ?? 0,
-                            bestPick: existingIa!.bestPick,
-                        };
-                    } else {
-                        matchData.ia = {
-                            home: Number(redistributedHome.toFixed(2)),
-                            away: Number(redistributedAway.toFixed(2)),
-                            draw: resultIa.draw,
-                            bestPick: resultIa.bestPick,
-                        };
-                    }
+                    matchData.ia = {
+                        home: Number(redistributedHome.toFixed(2)),
+                        away: Number(redistributedAway.toFixed(2)),
+                        draw: resultIa.draw,
+                        bestPick: resultIa.bestPick,
+                    };
                 } else {
-                    const result = CalculationProbality(playersInjured, homeWinRate, awayWinRate, homeForm.split(","), awayForm.split(","));
-                    const newMax = Math.max(result.home, result.away);
-                    if (existingMax >= CROWN_THRESHOLD && newMax < existingMax && existingIa) {
-                        matchData.ia = {
-                            home: existingIa.home,
-                            away: existingIa.away,
-                            draw: existingIa.draw ?? 0,
-                            bestPick: existingIa.bestPick,
-                        };
-                    } else {
-                        matchData.ia = result;
-                    }
+                    matchData.ia = CalculationProbality(playersInjured, homeWinRate, awayWinRate, homeForm.split(","), awayForm.split(","));
                 }
                 await setDoc(matchRef, matchData, { merge: true });
                 await cacheDel(CacheKeys.matchDetail(id));
                 await cacheDel(CacheKeys.matchesList(false));
                 await cacheDel(CacheKeys.matchesList(true));
-                // Also save to analysis collection
                 const analysisRef = doc(db, Tables.analysis, id);
                 await setDoc(analysisRef, { matchId: id, ...matchData.ia }, { merge: true });
                 return res.json(matchData.ia);
