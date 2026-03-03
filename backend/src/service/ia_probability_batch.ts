@@ -1,12 +1,9 @@
 /**
- * Single Gemini call for multiple matches. Saves cost and avoids rate limits.
+ * Single AI call (Gemini or Grok) for multiple matches. Saves cost and avoids rate limits.
  * Returns one analysis per match (home, away, draw percentages).
  */
-import { GoogleGenAI } from "@google/genai";
 import { ResultIA } from "../model/match.model";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY ?? "" });
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+import { generateText, getModelName, getProviderName } from "./aiProvider";
 
 export interface MatchForBatch {
   matchId: string;
@@ -79,19 +76,15 @@ Respond ONLY with a JSON array. One object per match in the same order. No other
 - Exactly one bestPick per match. Vary choices; do not always pick HOME or AWAY.
 `;
 
-    console.log("[Gemini] Calling batch API", { model: GEMINI_MODEL, matchCount: matches.length });
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
-      contents: prompt,
-      config: {
-        systemInstruction:
-          "You are a football analyst. Use only the data provided. Respond only with a valid JSON array of objects with matchId, home, away, draw (sum 100), bestPick.",
-        temperature: 0.2,
-      },
+    const provider = getProviderName();
+    const model = getModelName();
+    console.log(`[${provider}] Calling batch API`, { model, matchCount: matches.length });
+    const content = await generateText(prompt, {
+      systemInstruction:
+        "You are a football analyst. Use only the data provided. Respond only with a valid JSON array of objects with matchId, home, away, draw (sum 100), bestPick.",
+      temperature: 0.2,
     });
-
-    const content = response.text ?? "";
-    console.log("[Gemini] Batch API response received", { model: GEMINI_MODEL, responseLength: content?.length ?? 0 });
+    console.log(`[${provider}] Batch API response received`, { model, responseLength: content?.length ?? 0 });
     const jsonStart = content.indexOf("[");
     const jsonEnd = content.lastIndexOf("]");
     if (jsonStart === -1 || jsonEnd === -1) {
@@ -132,7 +125,12 @@ Respond ONLY with a JSON array. One object per match in the same order. No other
     const cause = error?.cause ? ` (cause: ${error.cause?.message ?? error.cause})` : "";
     console.error("[IaProbabilityBatch] Error:", msg + cause);
     if (msg.includes("fetch") || msg.includes("ECONNREFUSED") || msg.includes("ETIMEDOUT")) {
-      console.error("[IaProbabilityBatch] Check GEMINI_API_KEY in .env and network/proxy. See https://ai.google.dev/gemini-api/docs");
+      const provider = getProviderName();
+      if (provider === "Grok") {
+        console.error("[IaProbabilityBatch] Check GROK_API_KEY or XAI_API_KEY in .env. See https://docs.x.ai");
+      } else {
+        console.error("[IaProbabilityBatch] Check GEMINI_API_KEY in .env and network. See https://ai.google.dev/gemini-api/docs");
+      }
     }
     return [];
   }

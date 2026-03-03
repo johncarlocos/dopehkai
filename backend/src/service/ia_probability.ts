@@ -1,8 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
 import { Match, ResultIA } from "../model/match.model";
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY ?? "" });
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+import { generateText, getModelName, getProviderName } from "./aiProvider";
 
 export async function IaProbality(match: Match, playersInjured: any): Promise<ResultIA | null> {
   try {
@@ -78,18 +75,14 @@ Respond ONLY with this JSON (no other text):
 - Exactly one bestPick from the 9 values. Vary choices; do not always pick HOME or AWAY.
 `;
 
-    console.log("[Gemini] Calling single-match API", { model: GEMINI_MODEL, matchId: match.id || match.eventId, home: match.homeTeamNameEn || match.homeTeamName, away: match.awayTeamNameEn || match.awayTeamName });
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
-      contents: prompt,
-      config: {
-        systemInstruction: "You are a football analyst. Use only the data provided. Respond only with valid JSON.",
-        temperature: 0.2,
-      },
+    const provider = getProviderName();
+    const model = getModelName();
+    console.log(`[${provider}] Calling single-match API`, { model, matchId: match.id || match.eventId, home: match.homeTeamNameEn || match.homeTeamName, away: match.awayTeamNameEn || match.awayTeamName });
+    const content = await generateText(prompt, {
+      systemInstruction: "You are a football analyst. Use only the data provided. Respond only with valid JSON.",
+      temperature: 0.2,
     });
-
-    const content = response.text ?? "";
-    console.log("[Gemini] Single-match API response received", { model: GEMINI_MODEL, responseLength: content?.length ?? 0 });
+    console.log(`[${provider}] Single-match API response received`, { model, responseLength: content?.length ?? 0 });
 
     const jsonStart = content.indexOf("{");
     const jsonEnd = content.lastIndexOf("}");
