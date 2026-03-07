@@ -40,7 +40,7 @@ function RegisterPage() {
         }
         if (!ageRange) {
             isValid = false;
-            alert(t("selectAgeRange") || "選擇年齡範圍");
+            alert(t("selectAgeRange") || "請選擇在哪裡看到廣告");
         }
         if (!agreedToTerms) {
             tempErrors.terms = "請同意服務條款";
@@ -135,7 +135,7 @@ function RegisterPage() {
                             <div>
                                 <FormControl fullWidth required={false}>
                                     <InputLabel
-                                        id="age-label">{t("ageRange") || "Faixa Etária"}</InputLabel>
+                                        id="age-label">哪一個地方看到廣告?</InputLabel>
                                     <Select
                                         labelId="age-label"
                                         id="age"
@@ -143,11 +143,9 @@ function RegisterPage() {
                                         onChange={(e) => setAgeRange(e.target.value)}
                                         className="bg-[#f7f7e3] text-black rounded-md mt-2 border-none"
                                     >
-                                        <MenuItem value="18-24">18-24</MenuItem>
-                                        <MenuItem value="25-34">25-34</MenuItem>
-                                        <MenuItem value="35-44">35-44</MenuItem>
-                                        <MenuItem value="45-54">45-54</MenuItem>
-                                        <MenuItem value="55+">55+</MenuItem>
+                                        <MenuItem value="FACEBOOK">FACEBOOK</MenuItem>
+                                        <MenuItem value="INSTAGRAM">INSTAGRAM</MenuItem>
+                                        <MenuItem value="THREADS">THREADS</MenuItem>
                                     </Select>
                                 </FormControl>
                             </div>
