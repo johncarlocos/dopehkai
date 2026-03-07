@@ -8,7 +8,7 @@ import {
     ColumnDef,
     SortingState,
 } from "@tanstack/react-table";
-import { Add, Search } from "@mui/icons-material";
+import { Add, Search, WorkspacePremium } from "@mui/icons-material";
 import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Box, IconButton, Tooltip, FormControl, InputLabel, Select, MenuItem, FormHelperText } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast, ToastContainer } from "react-toastify";
@@ -33,6 +33,7 @@ function MembersPage() {
     const [pageSize, setPageSize] = useState(10);
     const [sorting, setSorting] = useState<SortingState>([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const [filterVipOnly, setFilterVipOnly] = useState(false);
     const { data } = useMembers(page, pageSize, searchTerm);
     const [openDialog, setOpenDialog] = useState(false);
     const [deleteId, setDeleteId] = useState<string>();
@@ -209,7 +210,7 @@ function MembersPage() {
 
 
     const table = useReactTable({
-        data: data?.data || [],
+        data: displayData,
         columns,
         pageCount: Math.ceil((data?.total || 0) / pageSize),
         state: {
@@ -297,6 +298,11 @@ function MembersPage() {
         return diffDias > 0 ? diffDias : null;
     }
 
+    const isVip = (m: Member) => getDays(m.date) !== null && getDays(m.date)! > 0;
+    const displayData = filterVipOnly
+        ? (data?.data || []).filter(isVip)
+        : (data?.data || []);
+
 
     return (
         <div className="h-screen w-screen overflow-x-hidden bg-black">
@@ -357,6 +363,24 @@ function MembersPage() {
                                 }}
                             />
                         </Box>
+                        <Tooltip title={filterVipOnly ? t("showAllMembers") ?? "顯示全部會員" : t("filterVipOnly") ?? "只顯示 VIP"}>
+                            <Button
+                                variant="contained"
+                                onClick={() => setFilterVipOnly((prev) => !prev)}
+                                sx={{
+                                    minWidth: "48px",
+                                    height: "48px",
+                                    borderRadius: "8px",
+                                    backgroundColor: filterVipOnly ? "green" : "rgba(255, 255, 255, 0.1)",
+                                    color: "white",
+                                    "&:hover": {
+                                        backgroundColor: filterVipOnly ? "darkgreen" : "rgba(255, 255, 255, 0.2)",
+                                    },
+                                }}
+                            >
+                                <WorkspacePremium />
+                            </Button>
+                        </Tooltip>
                     </div>
 
                     <table className="w-full border-collapse text-white">
