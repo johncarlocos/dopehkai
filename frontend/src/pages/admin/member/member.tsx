@@ -208,6 +208,18 @@ function MembersPage() {
         },
     ];
 
+    function getDays(date: any) {
+        const hoje = new Date();
+        const alvo = new Date(date);
+        if (isNaN(alvo.getTime())) return null;
+        const diffTime = alvo.getTime() - hoje.getTime();
+        const diffDias = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDias > 0 ? diffDias : null;
+    }
+    const isVip = (m: Member) => getDays(m.date) !== null && getDays(m.date)! > 0;
+    const displayData = filterVipOnly
+        ? (data?.data || []).filter(isVip)
+        : (data?.data || []);
 
     const table = useReactTable({
         data: displayData,
@@ -286,23 +298,6 @@ function MembersPage() {
     const handleDelete = (id: string) => {
         setDeleteId(id);
     };
-
-    function getDays(date: any) {
-        const hoje = new Date();
-        const alvo = new Date(date);
-
-        if (isNaN(alvo.getTime())) return null;
-
-        const diffTime = alvo.getTime() - hoje.getTime();
-        const diffDias = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDias > 0 ? diffDias : null;
-    }
-
-    const isVip = (m: Member) => getDays(m.date) !== null && getDays(m.date)! > 0;
-    const displayData = filterVipOnly
-        ? (data?.data || []).filter(isVip)
-        : (data?.data || []);
-
 
     return (
         <div className="h-screen w-screen overflow-x-hidden bg-black">
