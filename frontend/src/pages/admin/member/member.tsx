@@ -34,7 +34,7 @@ function MembersPage() {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterVipOnly, setFilterVipOnly] = useState(false);
-    const { data } = useMembers(page, pageSize, searchTerm);
+    const { data } = useMembers(page, pageSize, searchTerm, filterVipOnly);
     const [openDialog, setOpenDialog] = useState(false);
     const [deleteId, setDeleteId] = useState<string>();
     const [editId, setEditId] = useState<string>();
@@ -96,7 +96,7 @@ function MembersPage() {
                     const res = await API.PUT(`${AppGlobal.baseURL}admin/member/${editId}`, formData);
                     if (res.status == 200) {
                         queryClient.invalidateQueries({
-                            queryKey: ["members", page, pageSize, searchTerm],
+                            queryKey: ["members", page, pageSize, searchTerm, filterVipOnly],
                         });
                         toast.success("🎉 " + t("memberEditedSuccessfully"));
                     } else if (res.status == 409) {
@@ -108,7 +108,7 @@ function MembersPage() {
                     const res = await API.POST(`${AppGlobal.baseURL}admin/member`, formData);
                     if (res.status == 200) {
                         queryClient.invalidateQueries({
-                            queryKey: ["members", page, pageSize, searchTerm],
+                            queryKey: ["members", page, pageSize, searchTerm, filterVipOnly],
                         });
                         toast.success("🎉 " + t("memberAddedSuccessfully"));
                     } else if (res.status == 409) {
@@ -216,10 +216,7 @@ function MembersPage() {
         const diffDias = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         return diffDias > 0 ? diffDias : null;
     }
-    const isVip = (m: Member) => getDays(m.date) !== null && getDays(m.date)! > 0;
-    const displayData = filterVipOnly
-        ? (data?.data || []).filter(isVip)
-        : (data?.data || []);
+    const displayData = data?.data || [];
 
     const table = useReactTable({
         data: displayData,
@@ -249,7 +246,7 @@ function MembersPage() {
         const res = await API.DELETE(`${AppGlobal.baseURL}admin/member/${deleteId}`);
         if (res.status == 200) {
             queryClient.invalidateQueries({
-                queryKey: ["members", page, pageSize],
+                queryKey: ["members", page, pageSize, searchTerm, filterVipOnly],
             });
             toast.success(t("memberDeletedSuccessfully"));
         } else if (res.status == 409) {
@@ -358,10 +355,13 @@ function MembersPage() {
                                 }}
                             />
                         </Box>
-                        <Tooltip title={filterVipOnly ? t("showAllMembers") ?? "顯示全部會員" : t("filterVipOnly") ?? "只顯示 VIP"}>
+                        <Tooltip title={filterVipOnly ? "顯示全部會員" : "只顯示 VIP"}>
                             <Button
                                 variant="contained"
-                                onClick={() => setFilterVipOnly((prev) => !prev)}
+                                onClick={() => {
+                                setFilterVipOnly((prev) => !prev);
+                                setPage(1);
+                            }}
                                 sx={{
                                     minWidth: "48px",
                                     height: "48px",

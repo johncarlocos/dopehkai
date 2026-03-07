@@ -12,6 +12,7 @@ class AdminController {
             const page = parseInt(req.query.page as string) || 1;
             const pageSize = parseInt(req.query.limit as string) || 10;
             const search = (req.query.search as string) || "";
+            const vipOnly = req.query.vipOnly === "true" || req.query.vipOnly === "1";
 
             const membersRef = collection(db, Tables.members);
             const membersQuery = query(membersRef, orderBy("created_at", "desc"));
@@ -26,6 +27,18 @@ class AdminController {
                     const email = (data.email || "").toLowerCase();
                     const ageRange = (data.ageRange || "").toLowerCase();
                     return email.includes(searchLower) || ageRange.includes(searchLower);
+                });
+            }
+
+            // Filter to VIP only (date exists and is in the future)
+            if (vipOnly) {
+                const now = new Date();
+                docs = docs.filter(doc => {
+                    const data = doc.data();
+                    const date = data.date;
+                    if (!date) return false;
+                    const d = new Date(date);
+                    return !isNaN(d.getTime()) && d.getTime() > now.getTime();
                 });
             }
 
