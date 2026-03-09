@@ -58,22 +58,31 @@ export async function IaProbabilityBatch(
       .join("\n");
 
     const prompt = `
-You are a football betting analyst. Use ONLY the data below. Do not use external sources.
+你是一個專業足球分析師,專門分析入球大小和比賽結果。你的分析不會看賠率去進行分析,會用最理智的方式去分析。
 
-Matches (HKJC = real-time market implied %):
+你必須根據以下因素對每場比賽進行深入分析:
+1. 具體天氣狀況 — 比賽當天的天氣如何影響比賽節奏和入球數
+2. 具體消耗曲線 — 兩隊近期賽程密度,體能疲勞程度
+3. 傷停名單深入分析 — 受傷球員的位置和重要性,對球隊戰術的影響
+4. 近期表現趨勢 — 上升還是下滑
+5. 主客場表現差異
+6. 兩隊歷史交鋒
+
+賽事列表 (HKJC數據僅供參考,不要用賠率作為分析依據):
 ${listText}
 
-For EACH match:
-1) Estimate home/draw/away win probabilities (sum = 100). Use the HKJC odds as the market baseline; adjust slightly if the team names or context suggest value.
-2) Choose ONE bestPick: the option where your estimated probability is higher than the market implied probability (value bet). If no clear value, pick the most likely outcome. Allowed: HOME, AWAY, DRAW, HANDICAP_HOME, HANDICAP_AWAY, OVER_2.5, UNDER_2.5, OVER_3.5, UNDER_3.5.
+重要規則:
+- 分析必須基於球隊實力、狀態、傷停影響、天氣等客觀因素,不是基於賠率
+- bestPick 必須是你最有信心的選擇
+- 給我勝率最高的推薦
 
 Respond ONLY with a JSON array. One object per match in the same order. No other text.
 [
   { "matchId": "<id>", "home": number, "away": number, "draw": number, "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5" | "OVER_3.5" | "UNDER_3.5" },
   ...
 ]
-- home + away + draw = 100 per match. Home advantage ~5%.
-- Exactly one bestPick per match. Vary choices; do not always pick HOME or AWAY.
+- home + away + draw = 100 per match.
+- Exactly one bestPick per match. Choose based on deep analysis, not odds.
 `;
 
     const provider = getProviderName();
@@ -81,7 +90,7 @@ Respond ONLY with a JSON array. One object per match in the same order. No other
     console.log(`[${provider}] Calling batch API`, { model, matchCount: matches.length });
     const content = await generateText(prompt, {
       systemInstruction:
-        "You are a football analyst. Use only the data provided. Respond only with a valid JSON array of objects with matchId, home, away, draw (sum 100), bestPick.",
+        "你是一個專業足球分析師,專門分析入球大小和比賽結果。你不會看賠率去分析,會用最理智的方式,根據天氣、消耗曲線、傷停名單進行深入分析。你可以運用你的足球知識來分析球隊實力和狀態。Respond only with a valid JSON array of objects with matchId, home, away, draw (sum 100), bestPick.",
       temperature: 0.2,
     });
     console.log(`[${provider}] Batch API response received`, { model, responseLength: content?.length ?? 0 });
