@@ -27,8 +27,10 @@ function LoginPage() {
     };
     const res = await API.POST(AppGlobal.baseURL + "user/login", data);
     if (res.status === 200) {
-      if (res.data?.sessionId) {
-        const isAdmin = res.data?.role === "admin";
+      const sessionId = res.data?.sessionId;
+      const role = res.data?.role ?? res.data?.user?.role;
+      if (typeof sessionId === "string") {
+        const isAdmin = role === "admin";
         const host = window.location.hostname;
         const cookieDomain =
           host === "localhost" || host.startsWith("127.")
@@ -36,7 +38,7 @@ function LoginPage() {
             : host.startsWith("www.")
               ? host.slice(4)
               : host;
-        Cookies.set("sessionId", res.data.sessionId, {
+        Cookies.set("sessionId", sessionId, {
           sameSite: "strict",
           secure: window.location.protocol === "https:",
           path: "/",
@@ -44,7 +46,7 @@ function LoginPage() {
           ...(cookieDomain ? { domain: `.${cookieDomain}` } : {}),
         });
       }
-      login(res.data.role);
+      if (role) login(role);
       navigate("/");
     } else {
       setShowErro(true);
