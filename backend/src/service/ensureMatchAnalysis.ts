@@ -173,6 +173,7 @@ async function computeAndSaveAnalysis(matchId: string, matchData: Match): Promis
         home: Number((resultIa.home + resultIa.draw * homeShare).toFixed(2)),
         away: Number((resultIa.away + resultIa.draw * awayShare).toFixed(2)),
         draw: resultIa.draw,
+        bestPick: resultIa.bestPick,
       };
     } else {
       ia = CalculationProbality(
