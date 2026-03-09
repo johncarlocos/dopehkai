@@ -45,11 +45,11 @@ function LoginPage() {
             : host.startsWith("www.")
               ? host.slice(4)
               : host;
-        const options: Record<string, string | number | boolean> = {
+        const options: Cookies.CookieAttributes = {
           sameSite: "strict",
           secure: window.location.protocol === "https:",
           path: "/",
-          maxAge: isAdmin ? 365 * 24 * 60 * 60 : 30 * 24 * 60 * 60,
+          expires: isAdmin ? 365 : 30,
         };
         if (typeof cookieDomain === "string" && cookieDomain.length > 0) {
           options.domain = `.${cookieDomain}`;
