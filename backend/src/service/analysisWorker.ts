@@ -195,21 +195,6 @@ export async function runAnalysisBatch(): Promise<{
       }
       const matchRef = doc(db, Tables.matches, m.matchId);
       try {
-        const snap = await getDoc(matchRef);
-        if (snap.exists()) {
-          const existing = snap.data();
-          const eh = existing?.ia?.home;
-          const ea = existing?.ia?.away;
-          if (typeof eh === "number" && typeof ea === "number") {
-            // Already has analysis: never overwrite so user always sees the same result
-            await updateDoc(matchRef, {
-              analysis_status: "completed",
-              analysis_updated_at: now,
-            });
-            await cacheDel(CacheKeys.matchDetail(m.matchId));
-            continue;
-          }
-        }
         await updateDoc(matchRef, {
           ia,
           analysis_status: "completed",
