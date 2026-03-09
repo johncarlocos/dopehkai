@@ -103,9 +103,8 @@ class UsersController {
                     }
                     const sessionId = await SessionService.createSession(userId);
                     res.cookie('sessionId', sessionId, {
-                        httpOnly: true,
-                        secure: process.env.NODE_ENV === 'production',
                         sameSite: 'lax',
+                        secure: process.env.NODE_ENV === 'production',
                         maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
                     });
                     return res.json({
@@ -149,7 +148,12 @@ class UsersController {
                 maxAge: expirationDays * 24 * 60 * 60 * 1000,
             });
 
-            return res.json(userData);
+            const role = userData.role || (querySnapshotAdmin.empty ? "member" : "admin");
+            return res.json({
+                user: { id: userId, email: userData.email, role },
+                role,
+                sessionId,
+            });
         } catch (err) {
             console.error("Login error:", err);
             return res.status(500).json({ error: "Internal server error." });
@@ -238,11 +242,13 @@ class UsersController {
     }
 
     static async verifyVIP(req: Request, res: Response) {
-        let sessionId = req.headers.authorization;
+        let sessionId: string | undefined =
+            (req.headers.authorization || "").replace(/^Bearer\s+/i, "").trim() ||
+            (req.cookies?.sessionId as string) ||
+            "";
         if (!sessionId) {
             return res.status(401).json({ message: "No session ID provided" });
         }
-        sessionId = sessionId.replace("Bearer ", "");
 
         const RefR = doc(db, Tables.sessions, sessionId);
         const sessionDoc = await getDoc(RefR);

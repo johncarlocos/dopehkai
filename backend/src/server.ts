@@ -5,6 +5,7 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 import { connectMongo, isMongoEnabled, checkMongoConnection } from './database/mongodb';
 import { checkRedisConnection, isRedisConfigured } from './cache/redis';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import compression from 'compression';
 import { matchRouter } from './routes/match.routes';
@@ -99,6 +100,9 @@ app.use('/api', (req, res, next) => {
     }
     next();
 });
+
+// Parse cookies (e.g. sessionId) so auth can work when browser sends cookie without Authorization header
+app.use(cookieParser());
 
 // Increase body parser limits for file uploads
 app.use(express.json({ limit: '200mb' }));
