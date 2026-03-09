@@ -27,24 +27,34 @@ function LoginPage() {
     };
     const res = await API.POST(AppGlobal.baseURL + "user/login", data);
     if (res.status === 200) {
-      const sessionId = res.data?.sessionId;
       const role = res.data?.role ?? res.data?.user?.role;
-      if (typeof sessionId === "string") {
+      // js-cookie requires value to be a string (calls .split internally) - extract safely from any shape
+      const raw = res.data?.sessionId;
+      const sessionIdStr =
+        typeof raw === "string"
+          ? raw
+          : raw && typeof raw === "object" && typeof (raw as { token?: string }).token === "string"
+            ? (raw as { token: string }).token
+            : null;
+      if (sessionIdStr) {
         const isAdmin = role === "admin";
-        const host = window.location.hostname;
+        const host = typeof window.location.hostname === "string" ? window.location.hostname : "";
         const cookieDomain =
-          host === "localhost" || host.startsWith("127.")
+          host === "" || host === "localhost" || host.startsWith("127.")
             ? undefined
             : host.startsWith("www.")
               ? host.slice(4)
               : host;
-        Cookies.set("sessionId", sessionId, {
+        const options: Record<string, string | number | boolean> = {
           sameSite: "strict",
           secure: window.location.protocol === "https:",
           path: "/",
           maxAge: isAdmin ? 365 * 24 * 60 * 60 : 30 * 24 * 60 * 60,
-          ...(cookieDomain ? { domain: `.${cookieDomain}` } : {}),
-        });
+        };
+        if (typeof cookieDomain === "string" && cookieDomain.length > 0) {
+          options.domain = `.${cookieDomain}`;
+        }
+        Cookies.set("sessionId", sessionIdStr, options);
       }
       if (role) login(role);
       navigate("/");
