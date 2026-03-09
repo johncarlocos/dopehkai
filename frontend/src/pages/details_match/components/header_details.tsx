@@ -17,33 +17,9 @@ function HeaderDetailsComponent({
 
     const getAnalysisLabel = () => {
         const pick = data.ia?.bestPick;
-        const home = data.ia?.home ?? 0;
-        const away = data.ia?.away ?? 0;
-        const draw = data.ia?.draw ?? 0;
+        if (!pick) return null;
 
-        // For 1X2 (HOME/AWAY/DRAW): show the outcome that matches the higher probability so the box matches the % bars
-        if (pick === "HOME" || pick === "AWAY" || pick === "DRAW") {
-            const maxIsHome = home >= away && home >= draw;
-            const maxIsAway = away >= home && away >= draw;
-            const maxIsDraw = draw >= home && draw >= away;
-            if (maxIsHome) return "分析 : 主勝";
-            if (maxIsAway) return "分析 : 客勝";
-            if (maxIsDraw) return "分析 : 和局";
-            return pick === "HOME" ? "分析 : 主勝" : pick === "AWAY" ? "分析 : 客勝" : "分析 : 和局";
-        }
-
-        if (!pick) {
-            if (data.ia && (home > 0 || away > 0 || draw > 0)) {
-                if (home >= away && home >= draw) return "分析 : 主勝";
-                if (away >= home && away >= draw) return "分析 : 客勝";
-                if (draw >= home && draw >= away) return "分析 : 和局";
-            }
-            return null;
-        }
-        
-        // Handicap / HiLo: use bestPick label as-is
-        if (pick === "HANDICAP_HOME") return "分析 : 主讓";
-        if (pick === "HANDICAP_AWAY") return "分析 : 客讓";
+        // Only show HiLo analysis
         if (pick === "OVER_2.5") return "分析 : 大2.5";
         if (pick === "UNDER_2.5") return "分析 : 細2.5";
         if (pick === "OVER_3.5") return "分析 : 大3.5";

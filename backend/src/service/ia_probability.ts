@@ -72,7 +72,8 @@ ${hkjcBlock ? `\nHKJC 參考數據（僅供參考,不要用賠率作為分析依
 
 重要規則:
 - 你的分析必須基於球隊實力、狀態、傷停影響、天氣等客觀因素,不是基於賠率
-- bestPick 必須是你最有信心的選擇,勝率要高
+- bestPick 只能從以下4個選項中選擇: OVER_2.5, UNDER_2.5, OVER_3.5, UNDER_3.5
+- 選擇你最有信心的入球大小分析,勝率要高
 - 如果你對任何選項都沒有足夠信心,仍然選擇最有把握的一個
 
 Respond ONLY with this JSON (no other text):
@@ -80,10 +81,10 @@ Respond ONLY with this JSON (no other text):
   "home": number,
   "away": number,
   "draw": number,
-  "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5" | "OVER_3.5" | "UNDER_3.5"
+  "bestPick": "OVER_2.5" | "UNDER_2.5" | "OVER_3.5" | "UNDER_3.5"
 }
 - home + away + draw = 100.
-- Exactly one bestPick from the 9 values. Choose based on your deep analysis, not odds.
+- Exactly one bestPick from the 4 values above. Choose based on your deep analysis of goal scoring trends.
 `;
 
     const provider = getProviderName();

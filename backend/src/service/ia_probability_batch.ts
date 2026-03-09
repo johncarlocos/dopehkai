@@ -73,16 +73,17 @@ ${listText}
 
 重要規則:
 - 分析必須基於球隊實力、狀態、傷停影響、天氣等客觀因素,不是基於賠率
-- bestPick 必須是你最有信心的選擇
+- bestPick 只能從以下4個選項中選擇: OVER_2.5, UNDER_2.5, OVER_3.5, UNDER_3.5
+- 選擇你最有信心的入球大小分析
 - 給我勝率最高的推薦
 
 Respond ONLY with a JSON array. One object per match in the same order. No other text.
 [
-  { "matchId": "<id>", "home": number, "away": number, "draw": number, "bestPick": "HOME" | "AWAY" | "DRAW" | "HANDICAP_HOME" | "HANDICAP_AWAY" | "OVER_2.5" | "UNDER_2.5" | "OVER_3.5" | "UNDER_3.5" },
+  { "matchId": "<id>", "home": number, "away": number, "draw": number, "bestPick": "OVER_2.5" | "UNDER_2.5" | "OVER_3.5" | "UNDER_3.5" },
   ...
 ]
 - home + away + draw = 100 per match.
-- Exactly one bestPick per match. Choose based on deep analysis, not odds.
+- Exactly one bestPick per match from the 4 values above. Choose based on deep analysis of goal scoring trends.
 `;
 
     const provider = getProviderName();
