@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Probability } from "../../../models/probability";
 import { CardMatch } from "../../../components/card_match";
 import { useNavigate } from "react-router-dom";
@@ -14,16 +15,17 @@ function HeaderDetailsComponent({
     showAnalysisLabel = true,
 }: Props) {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const getAnalysisLabel = () => {
         const pick = data.ia?.bestPick;
         if (!pick) return null;
 
-        // Only show HiLo analysis
-        if (pick === "OVER_2.5") return "分析 : 大2.5";
-        if (pick === "UNDER_2.5") return "分析 : 細2.5";
-        if (pick === "OVER_3.5") return "分析 : 大3.5";
-        if (pick === "UNDER_3.5") return "分析 : 細3.5";
+        // Only show HiLo analysis – labels from translation so you can change "大3.5" etc.
+        if (pick === "OVER_2.5") return t("analysis_over_2_5");
+        if (pick === "UNDER_2.5") return t("analysis_under_2_5");
+        if (pick === "OVER_3.5") return t("analysis_over_3_5");
+        if (pick === "UNDER_3.5") return t("analysis_under_3_5");
 
         return null;
     };

@@ -86,8 +86,18 @@ function DetailsCardComponent({
         awayWinRate = awayWinRateCalculated === 0 ? Math.round(awayWin) : awayWinRateCalculated.toFixed(0);
     }
 
-    const conditionHome = probability.condition ? probability.condition.split(',')[0] : undefined
-    const conditionAway = probability.condition ? probability.condition.split(',')[1] : undefined
+    // Show same text as hilo analysis result (e.g. 大3.5) in all four handicap spots
+    const getHiloLabel = () => {
+        const pick = probability.ia?.bestPick;
+        if (pick === "OVER_2.5") return t("hilo_short_over_2_5");
+        if (pick === "UNDER_2.5") return t("hilo_short_under_2_5");
+        if (pick === "OVER_3.5") return t("hilo_short_over_3_5");
+        if (pick === "UNDER_3.5") return t("hilo_short_under_3_5");
+        return null;
+    };
+    const hiloLabel = getHiloLabel();
+    const conditionHome = hiloLabel ?? undefined;
+    const conditionAway = hiloLabel ?? undefined;
     const hiloLines = probability.hiloLines || []
 
     return (
@@ -224,14 +234,11 @@ function DetailsCardComponent({
             <div className="sm:w-2/3 w-5/6 flex flex-col h-48 bg-white rounded-lg mt-5 items-center justify-center">
 
                 <div className="flex items-start sm:w-2/3 w-5/6 mb-2">
-                    <Card name={getTeamNameInCurrentLanguage(probability.homeLanguages, probability.homeTeamName)} condition={probability.condition ? probability.condition.split(',')[0] : undefined} img={probability.homeTeamLogo} probility={homeWin} />
+                    <Card name={getTeamNameInCurrentLanguage(probability.homeLanguages, probability.homeTeamName)} condition={conditionHome} img={probability.homeTeamLogo} probility={homeWin} />
                 </div>
 
-                <p className="sm:text-sm text-sm sm:h-4 h-4 font-bold text-black text-center">
-                    {t("PER_GAME")}
-                </p>
                 <p className="sm:text-sm text-sm font-heading sm:h-4 h-4 font-bold text-black text-center">
-                    {t("STATISTIC")}
+                    {t("PER_GAME_STATISTIC")}
                 </p>
 
                 <div className="flex flex-row justify-evenly items-center w-3/4 h-14 mt-1">
@@ -267,14 +274,11 @@ function DetailsCardComponent({
             <div className="sm:w-2/3 w-5/6 flex flex-col h-48 bg-white rounded-lg mt-5 items-center justify-center">
 
                 <div className="flex items-start sm:w-2/3 w-5/6 mb-2">
-                    <Card name={getTeamNameInCurrentLanguage(probability.awayLanguages, probability.awayTeamName)} condition={probability.condition ? probability.condition.split(',')[1] : undefined} img={probability.awayTeamLogo} probility={awayWin} />
+                    <Card name={getTeamNameInCurrentLanguage(probability.awayLanguages, probability.awayTeamName)} condition={conditionAway} img={probability.awayTeamLogo} probility={awayWin} />
                 </div>
 
-                <p className="sm:text-sm text-xs sm:h-4 h-4 font-bold text-black text-center">
-                    {t("PER_GAME")}
-                </p>
                 <p className="sm:text-sm text-xs font-heading sm:h-4 h-4 font-bold text-black text-center">
-                    {t("STATISTIC")}
+                    {t("PER_GAME_STATISTIC")}
                 </p>
 
                 <div className="flex flex-row justify-evenly items-center w-3/4 h-14 mt-1">
@@ -322,6 +326,7 @@ function Card({
     probility,
     condition
 }: PropsCard) {
+    const showCondition = condition != null && condition.replace(".0", "").trim() !== "" && condition.replace(".0", "").trim() !== "0";
     return <div style={{ flexDirection: "row" }}>
 
         <div style={{ flexDirection: "row", display: "flex", alignItems: "center", justifyItems: "flex-start", width: "100%" }} >
@@ -349,7 +354,7 @@ function Card({
 
 
             {
-                condition
+                showCondition
                     ? <ThemedText
                         className="font-bold text-[17px] sm:text-[17px] leading-tight pl-4"
                         type="defaultSemiBold"
@@ -357,7 +362,7 @@ function Card({
                             color: "black",
                         }}
                     >
-                        {`    ${condition.replace(".0", "")}`}
+                        {`    ${condition!.replace(".0", "")}`}
                     </ThemedText> : undefined
             }
 
