@@ -18,10 +18,9 @@ const useAuthStore = create<AuthState>()(
             userRole: null,
             login: (role: any) => set({ isAuthenticated: true, userRole: role }),
             logout: () => {
-                Cookies.remove("sessionId");
-                let redirectPath = "/login";
+                Cookies.remove("sessionId", { path: "/" });
                 set({ isAuthenticated: false, userRole: null });
-                window.location.href = redirectPath;
+                window.location.href = "/login";
             },
             setUserRole: (role: any) => set({ userRole: role }),
             checkSession: () => {

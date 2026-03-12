@@ -28,7 +28,9 @@ function LoginPage() {
     const res = await API.POST(AppGlobal.baseURL + "user/login", data);
     if (res.status === 200) {
       const role = res.data?.role ?? res.data?.user?.role;
-      // js-cookie requires value to be a string (calls .split internally) - extract safely from any shape
+      // Backend sets the cookie via Set-Cookie header (same origin in production).
+      // For cross-origin dev (frontend :5173, backend :4000), the browser may not
+      // save the Set-Cookie, so set it via js-cookie as a fallback.
       const raw = res.data?.sessionId;
       const sessionIdStr =
         typeof raw === "string"
@@ -36,25 +38,13 @@ function LoginPage() {
           : raw && typeof raw === "object" && typeof (raw as { token?: string }).token === "string"
             ? (raw as { token: string }).token
             : null;
-      if (sessionIdStr) {
-        const isAdmin = role === "admin";
-        const host = typeof window.location.hostname === "string" ? window.location.hostname : "";
-        const cookieDomain =
-          host === "" || host === "localhost" || host.startsWith("127.")
-            ? undefined
-            : host.startsWith("www.")
-              ? host.slice(4)
-              : host;
-        const options: Cookies.CookieAttributes = {
-          sameSite: "strict",
-          secure: window.location.protocol === "https:",
+      if (sessionIdStr && !Cookies.get("sessionId")) {
+        const isAdmin = role === "admin" || role === "subadmin";
+        Cookies.set("sessionId", sessionIdStr, {
+          sameSite: "lax",
           path: "/",
           expires: isAdmin ? 365 : 30,
-        };
-        if (typeof cookieDomain === "string" && cookieDomain.length > 0) {
-          options.domain = `.${cookieDomain}`;
-        }
-        Cookies.set("sessionId", sessionIdStr, options);
+        });
       }
       if (role) login(role);
       navigate("/");

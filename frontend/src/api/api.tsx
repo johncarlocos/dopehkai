@@ -29,7 +29,7 @@ axios.interceptors.response.use(
         const isVerifyVip = error.config?.url?.includes?.("verify/vip") ?? false;
         if (error.response?.status === 401 && !isVerifyVip) {
             try {
-                Cookies.remove("sessionId");
+                Cookies.remove("sessionId", { path: "/" });
                 logout();
                 // Only redirect if we're not already on the login page
                 if (window.location.pathname !== '/login') {
