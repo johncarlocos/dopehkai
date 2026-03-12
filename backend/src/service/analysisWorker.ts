@@ -21,9 +21,7 @@ import { ResultIA } from "../model/match.model";
 import { ApiHKJC } from "../data/api-hkjc";
 import { extractHKJCMarkets } from "./hkjcMarkets";
 
-const STALE_MS = 60 * 60 * 1000; // 1 hour – re-analyze after this
 const LOCK_TTL_SECONDS = 120; // Lock held for up to 2 min during batch
-/** Once a match has analysis (ia), never overwrite it so the user always sees the same result */
 
 /**
  * Find match IDs that need analysis: no analysis yet, or analysis older than STALE_MS.
@@ -32,8 +30,6 @@ const LOCK_TTL_SECONDS = 120; // Lock held for up to 2 min during batch
 async function getMatchIdsNeedingAnalysis(): Promise<
   { matchId: string; home: string; away: string; kickoff: string }[]
 > {
-  const staleThreshold = new Date(Date.now() - STALE_MS);
-
   const matchesCol = collection(db, Tables.matches);
   const snapshot = await getDocs(matchesCol);
   const out: { matchId: string; home: string; away: string; kickoff: string }[] = [];
@@ -52,14 +48,8 @@ async function getMatchIdsNeedingAnalysis(): Promise<
     }
     if (isNaN(kickTime.getTime())) continue;
 
-    const status = data?.analysis_status;
-    const updatedAt = data?.analysis_updated_at;
-    const hasValidAnalysis =
-      status === "completed" &&
-      updatedAt &&
-      new Date(updatedAt).getTime() >= staleThreshold.getTime();
-
-    if (hasValidAnalysis) continue;
+    // Once a match has completed analysis (ia), never overwrite it
+    if (data?.analysis_status === "completed" && data?.ia) continue;
 
     const home =
       data?.homeTeamNameEn || data?.homeTeamName || "Home";
