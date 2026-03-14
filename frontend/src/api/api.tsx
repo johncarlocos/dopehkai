@@ -66,13 +66,14 @@ export const API = {
         return token;
     },
 
-    async POSTFORMDATA(url: string, data: any, headers?: any): Promise<AxiosResponse<any, any>> {
+    async POSTFORMDATA(url: string, data: any, headers?: any, options?: { timeout?: number }): Promise<AxiosResponse<any, any>> {
         const token = await this.getToken();
         const _headers = headers ?? {};
+        const timeoutMs = options?.timeout ?? 300000; // 5 minutes default for video/file uploads
         var response: any;
         await axios.post(url, data, {
             withCredentials: true,
-            timeout: 60000, // 60 seconds for file uploads
+            timeout: timeoutMs,
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'Authorization': 'Bearer ' + token,
