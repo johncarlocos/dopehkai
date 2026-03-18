@@ -616,6 +616,7 @@ class MatchController {
                 if (markets.hadAwayPct != null) matchData.hadAwayPct = markets.hadAwayPct;
                 if (markets.condition) matchData.condition = markets.condition;
                 if (markets.hiloLines?.length) matchData.hiloLines = markets.hiloLines;
+                if (markets.hilMainLine) matchData.hilMainLine = markets.hilMainLine;
             }
 
             // Add language support (use existing if available, otherwise convert)
@@ -965,6 +966,7 @@ class MatchController {
                     if (markets.hadAwayPct != null) matchData.hadAwayPct = markets.hadAwayPct;
                     if (markets.condition) matchData.condition = markets.condition;
                     if (markets.hiloLines?.length) matchData.hiloLines = markets.hiloLines;
+                    if (markets.hilMainLine) matchData.hilMainLine = markets.hilMainLine;
                 }
                 let homeWinRate = matchData.predictions.homeWinRate;
                 let awayWinRate = matchData.predictions.awayWinRate;

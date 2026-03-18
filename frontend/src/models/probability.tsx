@@ -36,8 +36,10 @@ export interface Probability {
   kickOffDateLocal: string
   hadAwayPct: string
   ia?: ResultIA
-  /** HiLo 大細 lines from HKJC TG pool, e.g. [{ line: "2.5", overPct, underPct }] */
+  /** HiLo 大細 lines from HKJC TG/HIL pool, e.g. [{ line: "2.5", overPct, underPct }] */
   hiloLines?: { line: string; overPct: string; underPct: string }[]
+  /** HKJC HIL pool main available line condition, e.g. "2.5" */
+  hilMainLine?: string
 }
 
 export interface ResultIA {

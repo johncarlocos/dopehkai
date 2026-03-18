@@ -10,6 +10,8 @@ export interface HKJCMarkets {
   hadAwayPct?: string;
   condition?: string;
   hiloLines?: { line: string; overPct: string; underPct: string }[];
+  /** HKJC HIL pool main available line condition, e.g. "2.5" */
+  hilMainLine?: string;
 }
 
 export function extractHKJCMarkets(hkjcMatch: HKJC): HKJCMarkets {
@@ -79,6 +81,52 @@ export function extractHKJCMarkets(hkjcMatch: HKJC): HKJCMarkets {
       }
     });
     if (hilo.length) out.hiloLines = hilo;
+  }
+  // Extract HIL pool (入球大細 Over/Under) – main available line condition
+  const hilPool = pools.find((p: FoPool) => p.oddsType === "HIL");
+  if (hilPool && hilPool.lines?.length) {
+    // Get main available line first, fallback to any available line
+    const mainAvailable = (hilPool.lines as Line[]).find(
+      (l: Line) => l.main && l.status === "AVAILABLE" && l.condition
+    );
+    const anyAvailable = mainAvailable
+      ? mainAvailable
+      : (hilPool.lines as Line[]).find(
+          (l: Line) => l.status === "AVAILABLE" && l.condition
+        );
+    if (anyAvailable) {
+      out.hilMainLine = anyAvailable.condition.trim();
+    }
+    // If no hiloLines from TG pool, populate from HIL pool instead
+    if (!out.hiloLines) {
+      const hilo: { line: string; overPct: string; underPct: string }[] = [];
+      (hilPool.lines as Line[]).forEach((l: Line) => {
+        if (l.status !== "AVAILABLE") return;
+        const cond = (l.condition || "").trim();
+        if (!cond) return;
+        const combs = (l.combinations || []) as Combination[];
+        let overOdds = 0,
+          underOdds = 0;
+        combs.forEach((c: Combination) => {
+          const sel = c.selections?.[0];
+          const name = (sel?.name_ch || sel?.name_en || "").trim();
+          const odds = parseFloat(c.currentOdds || "0");
+          if (name === "大" || name === "High" || c.str === "H") overOdds = odds;
+          else if (name === "細" || name === "Low" || c.str === "L") underOdds = odds;
+        });
+        if (overOdds > 0 && underOdds > 0) {
+          const o = 100 / overOdds;
+          const u = 100 / underOdds;
+          const total = o + u;
+          hilo.push({
+            line: cond,
+            overPct: ((o / total) * 100).toFixed(2),
+            underPct: ((u / total) * 100).toFixed(2),
+          });
+        }
+      });
+      if (hilo.length) out.hiloLines = hilo;
+    }
   }
   return out;
 }

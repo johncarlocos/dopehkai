@@ -41,6 +41,8 @@ export interface Match {
     hadAwayPct?: string
     /** HKJC HiLo lines e.g. [{ line: "2.5", overPct, underPct }]. */
     hiloLines?: { line: string; overPct: string; underPct: string }[]
+    /** HKJC HIL pool main available line condition, e.g. "2.5" */
+    hilMainLine?: string
     /** "pending" | "completed" – used for batch Gemini workflow */
     analysis_status?: "pending" | "completed"
     /** When AI analysis was last updated; used for stale check (e.g. re-analyze after 1h) */

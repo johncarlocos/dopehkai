@@ -25,7 +25,7 @@ async function queryHKJC(oddsTypes: string[]): Promise<HKJC[]> {
 /** Fetch one match by id with HAD, HDC, TG (1X2, handicap, HiLo) for real-time odds. */
 export async function ApiHKJCMatchById(matchId: string): Promise<HKJC | null> {
     try {
-        const oddsTypes = ["HAD", "HDC", "TG"];
+        const oddsTypes = ["HAD", "HDC", "TG", "HIL"];
         const queryOne = {
             ...base,
             variables: {

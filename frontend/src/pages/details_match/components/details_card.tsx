@@ -86,14 +86,22 @@ function DetailsCardComponent({
         awayWinRate = awayWinRateCalculated === 0 ? Math.round(awayWin) : awayWinRateCalculated.toFixed(0);
     }
 
-    // Show same text as hilo analysis result (e.g. 大3.5) in all four handicap spots
+    // Show hilo label: compare AI bestPick line with HKJC HIL main line, use the lower value
     const getHiloLabel = () => {
         const pick = probability.ia?.bestPick;
-        if (pick === "OVER_2.5") return t("hilo_short_over_2_5");
-        if (pick === "UNDER_2.5") return t("hilo_short_under_2_5");
-        if (pick === "OVER_3.5") return t("hilo_short_over_3_5");
-        if (pick === "UNDER_3.5") return t("hilo_short_under_3_5");
-        return null;
+        if (!pick) return null;
+        const match = pick.match(/^(OVER|UNDER)_(\d+\.?\d*)$/);
+        if (!match) return null;
+        const direction = match[1]; // "OVER" or "UNDER"
+        const aiLine = parseFloat(match[2]);
+        const hkjcLine = probability.hilMainLine ? parseFloat(probability.hilMainLine) : NaN;
+        // Use the lower of AI line and HKJC HIL main line
+        const displayLine = !isNaN(hkjcLine) && hkjcLine < aiLine ? hkjcLine : aiLine;
+        const key = `hilo_short_${direction.toLowerCase()}_${String(displayLine).replace(".", "_")}`;
+        const translated = t(key);
+        // If translation key exists, use it; otherwise build a fallback label
+        if (translated !== key) return translated;
+        return direction === "OVER" ? `大${displayLine}` : `細${displayLine}`;
     };
     const hiloLabel = getHiloLabel();
     const conditionHome = hiloLabel ?? undefined;
