@@ -95,9 +95,7 @@ function MembersPage() {
                     console.log(formData);
                     const res = await API.PUT(`${AppGlobal.baseURL}admin/member/${editId}`, formData);
                     if (res.status == 200) {
-                        queryClient.invalidateQueries({
-                            queryKey: ["members", page, pageSize, searchTerm, filterVipOnly],
-                        });
+                        queryClient.invalidateQueries({ queryKey: ["members"] });
                         toast.success("🎉 " + t("memberEditedSuccessfully"));
                     } else if (res.status == 409) {
                         alert(res.data.error)
@@ -107,9 +105,7 @@ function MembersPage() {
                 } else {
                     const res = await API.POST(`${AppGlobal.baseURL}admin/member`, formData);
                     if (res.status == 200) {
-                        queryClient.invalidateQueries({
-                            queryKey: ["members", page, pageSize, searchTerm, filterVipOnly],
-                        });
+                        queryClient.invalidateQueries({ queryKey: ["members"] });
                         toast.success("🎉 " + t("memberAddedSuccessfully"));
                     } else if (res.status == 409) {
                         alert(res.data.error)

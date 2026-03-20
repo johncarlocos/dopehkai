@@ -78,9 +78,7 @@ function AdminsPage() {
                 if (editId) {
                     const res = await API.PUT(`${AppGlobal.baseURL}admin/admin/${editId}`, formData);
                     if (res.status == 200) {
-                        queryClient.invalidateQueries({
-                            queryKey: ["admins", page, pageSize],
-                        });
+                        queryClient.invalidateQueries({ queryKey: ["admins"] });
                         toast.success("🎉 " + t("memberEditedSuccessfully"));
                     } else if (res.status == 409) {
                         alert(res.data.error)
@@ -90,9 +88,7 @@ function AdminsPage() {
                 } else {
                     const res = await API.POST(`${AppGlobal.baseURL}admin/admin`, formData);
                     if (res.status == 200) {
-                        queryClient.invalidateQueries({
-                            queryKey: ["admins", page, pageSize],
-                        });
+                        queryClient.invalidateQueries({ queryKey: ["admins"] });
                         toast.success("🎉 " + t("memberAddedSuccessfully"));
                     } else if (res.status == 409) {
                         alert(res.data.error)
