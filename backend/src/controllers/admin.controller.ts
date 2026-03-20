@@ -326,6 +326,71 @@ class AdminController {
         }
     }
 
+    static async analytics(req: Request, res: Response) {
+        try {
+            const dateParam = (req.query.date as string) || new Date().toISOString().split("T")[0];
+
+            const membersRef = collection(db, Tables.members);
+            const snapshot = await getDocs(membersRef);
+            const now = new Date();
+
+            const platforms: Record<string, { total: number; vip: number }> = {
+                FACEBOOK: { total: 0, vip: 0 },
+                INSTAGRAM: { total: 0, vip: 0 },
+                THREADS: { total: 0, vip: 0 },
+                OTHER: { total: 0, vip: 0 },
+            };
+
+            let dailyIncome = 0;
+            let dailyVipCount = 0;
+            const dailyDetails: { email: string; price: string; platform: string; created_at: string }[] = [];
+
+            for (const d of snapshot.docs) {
+                const data = d.data();
+                const platform = ["FACEBOOK", "INSTAGRAM", "THREADS"].includes((data.ageRange || "").toUpperCase())
+                    ? (data.ageRange as string).toUpperCase()
+                    : "OTHER";
+
+                platforms[platform].total++;
+
+                const vipDate = data.date ? new Date(data.date) : null;
+                const isVip = vipDate && !isNaN(vipDate.getTime()) && vipDate.getTime() > now.getTime();
+                if (isVip) {
+                    platforms[platform].vip++;
+                }
+
+                const createdAt = data.created_at || "";
+                const createdDate = createdAt.split("T")[0];
+                if (createdDate === dateParam && data.price) {
+                    const price = parseFloat(data.price);
+                    if (!isNaN(price) && price > 0) {
+                        dailyIncome += price;
+                        dailyVipCount++;
+                        dailyDetails.push({
+                            email: data.email || "",
+                            price: data.price,
+                            platform,
+                            created_at: createdAt,
+                        });
+                    }
+                }
+            }
+
+            res.json({
+                platforms,
+                income: {
+                    date: dateParam,
+                    total: dailyIncome,
+                    vipCount: dailyVipCount,
+                    details: dailyDetails,
+                },
+            });
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: "Error fetching analytics" });
+        }
+    }
+
     static async updateConfig(req: Request, res: Response) {
         const { instagram, threads, telegram } = req.body;
         try {

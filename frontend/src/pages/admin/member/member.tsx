@@ -8,8 +8,8 @@ import {
     ColumnDef,
     SortingState,
 } from "@tanstack/react-table";
-import { Add, Search, WorkspacePremium } from "@mui/icons-material";
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Box, IconButton, Tooltip, FormControl, InputLabel, Select, MenuItem, FormHelperText } from "@mui/material";
+import { Add, Search, WorkspacePremium, Visibility, VisibilityOff } from "@mui/icons-material";
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Box, IconButton, Tooltip, FormControl, InputLabel, Select, MenuItem, FormHelperText, InputAdornment, FormControlLabel, Checkbox } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast, ToastContainer } from "react-toastify";
 import EditIcon from '@mui/icons-material/Edit';
@@ -24,6 +24,7 @@ import { Member } from "../../../models/member";
 import AppBarComponent from "../../../components/appBar";
 import ThemedText from "../../../components/themedText";
 import useIsMobile from "../../../hooks/useIsMobile";
+import { validatePassword } from "../../../ultis/passwordValidation";
 
 function MembersPage() {
     const { t } = useTranslation();
@@ -45,6 +46,9 @@ function MembersPage() {
         date: "",
         ageRange: "",
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [isVip, setIsVip] = useState(false);
+    const [vipDuration, setVipDuration] = useState("");
     const [errors, setErrors] = useState({
         email: "",
         password: "",
@@ -53,34 +57,42 @@ function MembersPage() {
         ageRange: "",
     });
 
+    const applyVipDuration = (days: number) => {
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        setFormData((prev) => ({ ...prev, date: d.toISOString().split("T")[0] }));
+    };
+
     const validateForm = () => {
         let isValid = true;
-        let tempErrors = { email: "", password: "", price: "", date: "", ageRange: "" };
+        const tempErrors = { email: "", password: "", price: "", date: "", ageRange: "" };
         if (!formData.email) {
-            tempErrors.email = t("usernameRequired");
+            tempErrors.email = "請輸入電子郵件";
             isValid = false;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            tempErrors.email = t("usernameRequired");
+            tempErrors.email = "請輸入有效的電子郵件";
             isValid = false;
         }
         if (!editId) {
-            if (!formData.password || formData.password.length < 6) {
-                tempErrors.password = t("passwordRequired");
+            const pwError = validatePassword(formData.password);
+            if (pwError) {
+                tempErrors.password = pwError;
                 isValid = false;
             }
         }
         if (!formData.price) {
-            tempErrors.price = t("priceRequired");
+            tempErrors.price = "請輸入價格";
+            isValid = false;
+        } else if (isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
+            tempErrors.price = "請輸入有效的價格";
             isValid = false;
         }
-        if (!editId) {
-            if (!formData.date) {
-                tempErrors.date = t("dateRequired");
-                isValid = false;
-            }
+        if (isVip && !formData.date) {
+            tempErrors.date = "請選擇 VIP 到期日期";
+            isValid = false;
         }
         if (!formData.ageRange) {
-            tempErrors.ageRange = t("ageRangeRequired");
+            tempErrors.ageRange = "請選擇廣告來源";
             isValid = false;
         }
 
@@ -92,31 +104,27 @@ function MembersPage() {
         if (validateForm()) {
             try {
                 if (editId) {
-                    console.log(formData);
                     const res = await API.PUT(`${AppGlobal.baseURL}admin/member/${editId}`, formData);
                     if (res.status == 200) {
-                        queryClient.invalidateQueries({ queryKey: ["members"] });
+                        handleDialogClose();
+                        await queryClient.refetchQueries({ queryKey: ["members"] });
                         toast.success("🎉 " + t("memberEditedSuccessfully"));
                     } else if (res.status == 409) {
-                        alert(res.data.error)
-                        return;
-
+                        alert(res.data.error);
                     }
                 } else {
                     const res = await API.POST(`${AppGlobal.baseURL}admin/member`, formData);
                     if (res.status == 200) {
-                        queryClient.invalidateQueries({ queryKey: ["members"] });
+                        handleDialogClose();
+                        await queryClient.refetchQueries({ queryKey: ["members"] });
                         toast.success("🎉 " + t("memberAddedSuccessfully"));
                     } else if (res.status == 409) {
-                        alert(res.data.error)
-                        return;
+                        alert(res.data.error);
                     }
                 }
             } catch (error) {
-                console.error("Erro:", error);
+                console.error("Error:", error);
             }
-
-            handleDialogClose();
         }
     };
 
@@ -241,50 +249,42 @@ function MembersPage() {
     const handleOnDelete = async () => {
         const res = await API.DELETE(`${AppGlobal.baseURL}admin/member/${deleteId}`);
         if (res.status == 200) {
-            queryClient.invalidateQueries({
-                queryKey: ["members", page, pageSize, searchTerm, filterVipOnly],
-            });
+            handleDialogCloseDelete();
+            await queryClient.refetchQueries({ queryKey: ["members"] });
             toast.success(t("memberDeletedSuccessfully"));
         } else if (res.status == 409) {
-            alert(res.data.error)
-            return;
-
+            alert(res.data.error);
         }
-        handleDialogCloseDelete();
     }
 
     const handleDialogClose = () => {
-        setFormData({
-            email: "",
-            password: "",
-            price: "",
-            date: "",
-            ageRange: "",
-        })
-        setErrors({
-            email: "",
-            password: "",
-            price: "",
-            date: "",
-            ageRange: "",
-        })
+        setFormData({ email: "", password: "", price: "", date: "", ageRange: "" });
+        setErrors({ email: "", password: "", price: "", date: "", ageRange: "" });
+        setShowPassword(false);
+        setIsVip(false);
+        setVipDuration("");
         setOpenDialog(false);
         setEditId(undefined);
     };
 
     const handleDialogOpen = () => {
+        setIsVip(false);
+        setVipDuration("");
         setOpenDialog(true);
     };
 
     const handleEdit = (e: Member) => {
         setEditId(e.id);
+        const hasVip = !!(e.date && e.price && new Date(e.date) > new Date());
+        setIsVip(hasVip);
+        setVipDuration("");
         setFormData({
             email: e.email,
             password: "",
-            price: e.price,
-            date: e.date,
+            price: e.price || "",
+            date: e.date || "",
             ageRange: e.ageRange || "",
-        })
+        });
         setOpenDialog(true);
     };
 
@@ -468,7 +468,7 @@ function MembersPage() {
                 }}
             >
                 <DialogTitle style={{ color: "black" }}>
-                    {editId ? t("editMember") : t("editMember")}
+                    {editId ? "編輯會員" : "新增會員"}
                 </DialogTitle>
                 <DialogContent>
                     <TextField
@@ -477,7 +477,6 @@ function MembersPage() {
                         margin="normal"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]"
                         error={Boolean(errors.email)}
                         helperText={errors.email}
                     />
@@ -486,39 +485,42 @@ function MembersPage() {
                             label={t("password")}
                             fullWidth
                             margin="normal"
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]"
                             error={Boolean(errors.password)}
                             helperText={errors.password}
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                },
+                            }}
                         />
                     }
 
-                    <FormControl fullWidth error={!!errors.ageRange}>
-                        <InputLabel id="age-label">{t("ageRange") || "Faixa Etária"}</InputLabel>
+                    {/* Platform source */}
+                    <FormControl fullWidth margin="normal" error={!!errors.ageRange}>
+                        <InputLabel id="platform-label">哪一個地方看到廣告？</InputLabel>
                         <Select
-                            labelId="age-label"
-                            id="age"
+                            labelId="platform-label"
+                            label="哪一個地方看到廣告？"
                             value={formData.ageRange}
-                            onChange={(e) =>
-                                setFormData({ ...formData, ageRange: e.target.value })
-                            }
-                            className="bg-[#f7f7e3] text-black rounded-md mt-2 border-none"
+                            onChange={(e) => setFormData({ ...formData, ageRange: e.target.value })}
                         >
-                            <MenuItem value="18-24">18-24</MenuItem>
-                            <MenuItem value="25-34">25-34</MenuItem>
-                            <MenuItem value="35-44">35-44</MenuItem>
-                            <MenuItem value="45-54">45-54</MenuItem>
-                            <MenuItem value="55+">55+</MenuItem>
+                            <MenuItem value="FACEBOOK">Facebook</MenuItem>
+                            <MenuItem value="INSTAGRAM">Instagram</MenuItem>
+                            <MenuItem value="THREADS">Threads</MenuItem>
                         </Select>
-                        {errors.ageRange && (
-                            <FormHelperText>{errors.ageRange}</FormHelperText>
-                        )}
+                        {errors.ageRange && <FormHelperText>{errors.ageRange}</FormHelperText>}
                     </FormControl>
 
-
-
+                    {/* Price */}
                     <TextField
                         label={t("price")}
                         fullWidth
@@ -531,39 +533,87 @@ function MembersPage() {
                                 setFormData({ ...formData, price: value });
                             }
                         }}
-                        inputProps={{
-                            min: "0",
-                            step: "0.01"
-                        }}
-                        className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]"
                         error={Boolean(errors.price)}
                         helperText={errors.price}
                     />
 
-                    <TextField
-                        label={t("date")}
-                        fullWidth
-                        margin="normal"
-                        type="date"
-                        value={formData.date ?? ""}
-                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        inputProps={{
-                            min: new Date().toISOString().split("T")[0]
-                        }}
-                        className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]"
-                        error={Boolean(errors.date)}
-                        helperText={errors.date}
-                    />
+                    {/* VIP toggle */}
+                    <div className="mt-4 mb-2">
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={isVip}
+                                    onChange={(e) => {
+                                        setIsVip(e.target.checked);
+                                        if (!e.target.checked) {
+                                            setFormData((prev) => ({ ...prev, date: "" }));
+                                            setVipDuration("");
+                                        }
+                                    }}
+                                    sx={{ color: "black", "&.Mui-checked": { color: "green" } }}
+                                />
+                            }
+                            label={<span className="font-semibold text-black">設為 VIP 會員</span>}
+                        />
+                    </div>
 
-                    {formData.date && new Date(formData.date) > new Date() && (
-                        <div className="flex justify-start mt-4 w-full items-start">
-                            <span className="bg-green-500 text-white px-4 py-2 rounded shadow font-bold">
-                                VIP 到期時間
-                            </span>
-                        </div>
+                    {/* VIP duration — only visible when VIP is checked */}
+                    {isVip && (
+                        <>
+                            <p className="text-sm text-gray-500 mt-1 mb-2">VIP 時長</p>
+                            <div className="flex flex-wrap gap-2 mb-3">
+                                {[
+                                    { label: "7天", days: 7 },
+                                    { label: "14天", days: 14 },
+                                    { label: "30天", days: 30 },
+                                    { label: "90天", days: 90 },
+                                    { label: "180天", days: 180 },
+                                    { label: "365天", days: 365 },
+                                ].map((opt) => (
+                                    <button
+                                        key={opt.days}
+                                        type="button"
+                                        onClick={() => {
+                                            setVipDuration(String(opt.days));
+                                            applyVipDuration(opt.days);
+                                        }}
+                                        className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                                            vipDuration === String(opt.days)
+                                                ? "bg-green-600 text-white border-green-600"
+                                                : "bg-white text-gray-700 border-gray-300 hover:border-green-500"
+                                        }`}
+                                    >
+                                        {opt.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <TextField
+                                label="VIP 到期日期"
+                                fullWidth
+                                margin="normal"
+                                type="date"
+                                value={formData.date ?? ""}
+                                onChange={(e) => {
+                                    setFormData({ ...formData, date: e.target.value });
+                                    setVipDuration("");
+                                }}
+                                slotProps={{
+                                    inputLabel: { shrink: true },
+                                    htmlInput: { min: new Date().toISOString().split("T")[0] },
+                                }}
+                                error={Boolean(errors.date)}
+                                helperText={errors.date}
+                            />
+
+                            {formData.date && new Date(formData.date) > new Date() && (
+                                <div className="flex items-center gap-2 mt-2">
+                                    <span className="bg-green-500 text-white px-3 py-1 rounded text-sm font-bold">
+                                        VIP {Math.ceil((new Date(formData.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24))} 天
+                                    </span>
+                                </div>
+                            )}
+                        </>
                     )}
 
 

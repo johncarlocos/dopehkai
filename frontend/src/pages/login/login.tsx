@@ -7,6 +7,9 @@ import { useNavigate } from "react-router-dom";
 import ThemedText from "../../components/themedText";
 import { useTranslation } from "react-i18next";
 import Cookies from "js-cookie";
+import { IconButton, InputAdornment, TextField } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { validatePassword } from "../../ultis/passwordValidation";
 
 function LoginPage() {
   const { t } = useTranslation();
@@ -14,12 +17,35 @@ function LoginPage() {
   const { login } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showErro, setShowErro] = useState(false);
+  const [errors, setErrors] = useState({ email: "", password: "" });
+
+  const validateForm = () => {
+    let isValid = true;
+    const tempErrors = { email: "", password: "" };
+    if (!email) {
+      tempErrors.email = "請輸入電子郵件";
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      tempErrors.email = "請輸入有效的電子郵件";
+      isValid = false;
+    }
+    const pwError = validatePassword(password);
+    if (pwError) {
+      tempErrors.password = pwError;
+      isValid = false;
+    }
+    setErrors(tempErrors);
+    return isValid;
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!validateForm()) return;
     setLoading(true);
+    setShowErro(false);
 
     const data = {
       email: email,
@@ -77,28 +103,43 @@ function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-4 mt-10">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-600"> {t('email')}</label>
-                <input
+                <TextField
                   type="email"
-                  id="text"
-                  name="text"
+                  id="email"
+                  name="email"
+                  required={false}
                   className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-black focus:outline-none focus:ring-2 focus:ring-black"
                   placeholder={t('enterYourEmail')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
+                  error={Boolean(errors.email)}
+                  helperText={errors.email}
                 />
               </div>
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-600">{t('password')}</label>
-                <input
-                  type="password"
+                <TextField
+                  type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
+                  required={false}
                   className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-black focus:outline-none focus:ring-2 focus:ring-black"
                   placeholder={t('輸入您的密碼')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
+                  error={Boolean(errors.password)}
+                  helperText={errors.password}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
                 />
               </div>
 

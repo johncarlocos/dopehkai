@@ -14,6 +14,7 @@ const MembersPage = lazy(() => import("../pages/admin/member/member"));
 const AdminsPage = lazy(() => import("../pages/admin/admins/admins"));
 const RecordsAdminPage = lazy(() => import("../pages/admin/records/records"));
 const Records2AdminPage = lazy(() => import("../pages/admin/records2/records2"));
+const AnalyticsPage = lazy(() => import("../pages/admin/analytics/analytics"));
 const RecordsPage = lazy(() => import("../pages/records/records"));
 const Records2Page = lazy(() => import("../pages/records2/records2"));
 const TermsPage = lazy(() => import("../pages/terms/terms"));
@@ -56,6 +57,10 @@ const AppRoutes = () => {
                     }
                     {userRole && (userRole === "admin" || userRole === "subadmin") ?
                         <Route path="/admin/records2" element={<Records2AdminPage />} />
+                        : undefined
+                    }
+                    {userRole && (userRole === "admin" || userRole === "subadmin") ?
+                        <Route path="/admin/analytics" element={<AnalyticsPage />} />
                         : undefined
                     }
 

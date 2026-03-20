@@ -48,4 +48,10 @@ adminRouter.delete('/admin/:id',
 
 
 
+adminRouter.get('/analytics',
+    authenticateAdmin,
+    async (req, res) => {
+        await AdminController.analytics(req, res);
+    });
+
 export { adminRouter };

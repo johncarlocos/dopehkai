@@ -13,5 +13,6 @@ export const useAdmins = (
             if (res.status === 200 && res.data) return res.data;
             throw new Error("Failed to fetch admins");
         },
+        staleTime: 0,
     });
 };

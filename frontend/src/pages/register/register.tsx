@@ -6,7 +6,9 @@ import useAuthStore from "../../store/userAuthStore";
 import { useNavigate, Link } from "react-router-dom";
 import ThemedText from "../../components/themedText";
 import { useTranslation } from "react-i18next";
-import { FormControl, InputLabel, MenuItem, Select, TextField, Checkbox, FormControlLabel } from "@mui/material";
+import { FormControl, InputLabel, MenuItem, Select, TextField, Checkbox, FormControlLabel, IconButton, InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { validatePassword } from "../../ultis/passwordValidation";
 
 function RegisterPage() {
     const { t } = useTranslation();
@@ -15,32 +17,45 @@ function RegisterPage() {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [ageRange, setAgeRange] = useState("");
     const [agreedToTerms, setAgreedToTerms] = useState(false);
 
     const [errors, setErrors] = useState({
         email: "",
         password: "",
+        confirmPassword: "",
+        ageRange: "",
         terms: ""
     });
 
     const validateForm = () => {
         let isValid = true;
-        let tempErrors = { email: "", password: "", terms: "" };
+        const tempErrors = { email: "", password: "", confirmPassword: "", ageRange: "", terms: "" };
         if (!email) {
-            tempErrors.email = t("usernameRequired");
+            tempErrors.email = "請輸入電子郵件";
             isValid = false;
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            tempErrors.email = t("usernameRequired");
+            tempErrors.email = "請輸入有效的電子郵件";
             isValid = false;
         }
-        if (!password || password.length < 6) {
-            tempErrors.password = t("passwordRequired");
+        const pwError = validatePassword(password);
+        if (pwError) {
+            tempErrors.password = pwError;
+            isValid = false;
+        }
+        if (!confirmPassword) {
+            tempErrors.confirmPassword = "請確認密碼";
+            isValid = false;
+        } else if (password !== confirmPassword) {
+            tempErrors.confirmPassword = "密碼不匹配";
             isValid = false;
         }
         if (!ageRange) {
+            tempErrors.ageRange = "請選擇在哪裡看到廣告";
             isValid = false;
-            alert(t("selectAgeRange") || "請選擇在哪裡看到廣告");
         }
         if (!agreedToTerms) {
             tempErrors.terms = "請同意服務條款";
@@ -118,7 +133,7 @@ function RegisterPage() {
                             <div>
                                 <label htmlFor="password" className="block text-sm font-medium text-gray-600">{t('password')}</label>
                                 <TextField
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     id="password"
                                     required={false}
                                     name="password"
@@ -128,12 +143,48 @@ function RegisterPage() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     error={Boolean(errors.password)}
                                     helperText={errors.password}
-
+                                    slotProps={{
+                                        input: {
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        },
+                                    }}
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-600">確認密碼</label>
+                                <TextField
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    id="confirmPassword"
+                                    required={false}
+                                    name="confirmPassword"
+                                    className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-black focus:outline-none focus:ring-2 focus:ring-black"
+                                    placeholder="再次輸入密碼"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    error={Boolean(errors.confirmPassword)}
+                                    helperText={errors.confirmPassword}
+                                    slotProps={{
+                                        input: {
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end" size="small">
+                                                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        },
+                                    }}
                                 />
                             </div>
 
                             <div>
-                                <FormControl fullWidth required={false}>
+                                <FormControl fullWidth required={false} error={Boolean(errors.ageRange)}>
                                     <InputLabel
                                         id="age-label">哪一個地方看到廣告?</InputLabel>
                                     <Select
@@ -147,6 +198,9 @@ function RegisterPage() {
                                         <MenuItem value="INSTAGRAM">INSTAGRAM</MenuItem>
                                         <MenuItem value="THREADS">THREADS</MenuItem>
                                     </Select>
+                                    {errors.ageRange && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.ageRange}</p>
+                                    )}
                                 </FormControl>
                             </div>
 

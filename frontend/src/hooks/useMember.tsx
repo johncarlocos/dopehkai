@@ -13,9 +13,10 @@ export const useMembers = (
         queryFn: async () => {
             const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
             const vipParam = vipOnly ? "&vipOnly=true" : "";
-            const res = await API.GET(`${AppGlobal.baseURL}admin/members?page=${page}&limit=${limit}${searchParam}${vipParam}`);
+            const res = await API.GET(`${AppGlobal.baseURL}admin/members?page=${page}&limit=${limit}${searchParam}${vipParam}&_t=${Date.now()}`);
             if (res.status === 200 && res.data) return res.data;
             throw new Error("Failed to fetch members");
         },
+        staleTime: 0,
     });
 };

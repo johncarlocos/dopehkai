@@ -37,6 +37,7 @@ function AppBarComponent() {
         menuItems.push({ label: t("records"), ur: "/admin/records", path: () => navigate("/admin/records") });
         menuItems.push({ label: "記錄2", ur: "/admin/records2", path: () => navigate("/admin/records2") });
         menuItems.push({ label: t("admins"), ur: "/admin/admins", path: () => navigate("/admin/admins") });
+        menuItems.push({ label: "分析", ur: "/admin/analytics", path: () => navigate("/admin/analytics") });
     }
 
     const scrollToSection = (id: any) => {
