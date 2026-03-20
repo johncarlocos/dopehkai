@@ -8,7 +8,6 @@ import {
     ColumnDef,
     SortingState,
 } from "@tanstack/react-table";
-import { Member } from "../../../models/member";
 import AppBarComponent from "../../../components/appBar";
 import ThemedText from "../../../components/themedText";
 import { Add } from "@mui/icons-material";
