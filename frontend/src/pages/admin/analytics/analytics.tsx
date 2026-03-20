@@ -7,7 +7,7 @@ import { TextField } from "@mui/material";
 import ThemedText from "../../../components/themedText";
 
 function AnalyticsPage() {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Hong_Kong" })).toISOString().split("T")[0];
     const [selectedDate, setSelectedDate] = useState(today);
     const { data, isLoading } = useAnalytics(selectedDate);
 

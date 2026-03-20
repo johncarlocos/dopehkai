@@ -340,7 +340,7 @@ class AdminController {
 
     static async analytics(req: Request, res: Response) {
         try {
-            const dateParam = (req.query.date as string) || new Date().toISOString().split("T")[0];
+            const dateParam = (req.query.date as string) || new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Hong_Kong" })).toISOString().split("T")[0];
 
             const membersRef = collection(db, Tables.members);
             const snapshot = await getDocs(membersRef);
