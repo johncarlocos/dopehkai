@@ -106,8 +106,6 @@ function DetailsCardComponent({
     const hiloLabel = getHiloLabel();
     const conditionHome = hiloLabel ?? undefined;
     const conditionAway = hiloLabel ?? undefined;
-    const hiloLines = probability.hiloLines || []
-
     return (
         <div className="w-full flex justify-center items-center flex-col">
             <div className="sm:w-2/3 w-5/6 flex flex-col h-48 bg-white rounded-lg mt-5 items-center justify-center">
