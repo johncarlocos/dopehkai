@@ -139,7 +139,7 @@ function RecordsAdminPage() {
     };
 
 
-    const columns: ColumnDef<Member>[] = [
+    const columns: ColumnDef<Records>[] = [
         {
             header: () => <span className="sm:text-base text-xs font-medium">{t("date")}</span>,
             accessorKey: "date",
@@ -152,8 +152,37 @@ function RecordsAdminPage() {
             },
         },
         {
+            header: () => <span className="sm:text-base text-xs font-medium">{"媒體"}</span>,
+            accessorKey: "media",
+            cell: (props: any) => {
+                const media: string[] = props.getValue() || [];
+                if (media.length === 0) return <span className="text-gray-500 text-xs">—</span>;
+                return (
+                    <div className="flex gap-1 items-center">
+                        {media.slice(0, 3).map((m, i) => {
+                            const url = AppGlobal.baseURL.replace("/api/", "") + m;
+                            const isVideo = m.endsWith(".mp4");
+                            return isVideo ? (
+                                <div key={i} className="w-10 h-10 bg-gray-700 rounded flex items-center justify-center text-white text-[10px]">MP4</div>
+                            ) : (
+                                <img key={i} src={url} className="w-10 h-10 object-cover rounded" onError={(e: any) => { e.target.style.display = 'none'; }} />
+                            );
+                        })}
+                        {media.length > 3 && <span className="text-gray-400 text-xs ml-1">+{media.length - 3}</span>}
+                    </div>
+                );
+            },
+        },
+        {
+            header: () => <span className="sm:text-base text-xs font-medium">{"描述"}</span>,
+            accessorKey: "description",
+            cell: (props: any) => {
+                const desc = props.getValue() || "";
+                return <span className="text-gray-300 text-xs line-clamp-2 max-w-[200px] block">{desc || "—"}</span>;
+            },
+        },
+        {
             header: t("operation"),
-
             cell: (props: any) => (
                 <Box sx={{ display: "flex", gap: 1 }}>
                     <Tooltip title={t("edit")}>
