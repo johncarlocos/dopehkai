@@ -9,7 +9,7 @@ export const useAdmins = (
     return useQuery<any, Error>({
         queryKey: ["admins", page, limit],
         queryFn: async () => {
-            const res = await API.GET(`${AppGlobal.baseURL}admin/admins?page=${page}&limit=${limit}`);
+            const res = await API.GET(`${AppGlobal.baseURL}admin/admins?page=${page}&limit=${limit}&_t=${Date.now()}`);
             if (res.status === 200 && res.data) return res.data;
             throw new Error("Failed to fetch admins");
         },

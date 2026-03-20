@@ -9,7 +9,10 @@ import {
     SortingState,
 } from "@tanstack/react-table";
 import { Add } from "@mui/icons-material";
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Box, IconButton, Tooltip, FormControl, InputLabel, Select, FormHelperText, MenuItem } from "@mui/material";
+import EditIcon from '@mui/icons-material/Edit';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Box, IconButton, Tooltip, FormControl, InputLabel, Select, FormHelperText, MenuItem, InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { validatePassword } from "../../../ultis/passwordValidation";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast, ToastContainer } from "react-toastify";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -37,6 +40,7 @@ function AdminsPage() {
     const [deleteId, setDeleteId] = useState<string>();
     const [editId, setEditId] = useState<string>();
     const { userRole } = useAuthStore();
+    const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         email: "",
         password: "",
@@ -59,8 +63,15 @@ function AdminsPage() {
             isValid = false;
         }
         if (!editId) {
-            if (!formData.password || formData.password.length < 6) {
-                tempErrors.password = t("passwordRequired");
+            const pwError = validatePassword(formData.password);
+            if (pwError) {
+                tempErrors.password = pwError;
+                isValid = false;
+            }
+        } else if (formData.password) {
+            const pwError = validatePassword(formData.password);
+            if (pwError) {
+                tempErrors.password = pwError;
                 isValid = false;
             }
         }
@@ -78,28 +89,25 @@ function AdminsPage() {
                 if (editId) {
                     const res = await API.PUT(`${AppGlobal.baseURL}admin/admin/${editId}`, formData);
                     if (res.status == 200) {
-                        queryClient.invalidateQueries({ queryKey: ["admins"] });
+                        handleDialogClose();
+                        await queryClient.refetchQueries({ queryKey: ["admins"] });
                         toast.success("🎉 " + t("memberEditedSuccessfully"));
                     } else if (res.status == 409) {
-                        alert(res.data.error)
-                        return;
-
+                        alert(res.data.error);
                     }
                 } else {
                     const res = await API.POST(`${AppGlobal.baseURL}admin/admin`, formData);
                     if (res.status == 200) {
-                        queryClient.invalidateQueries({ queryKey: ["admins"] });
+                        handleDialogClose();
+                        await queryClient.refetchQueries({ queryKey: ["admins"] });
                         toast.success("🎉 " + t("memberAddedSuccessfully"));
                     } else if (res.status == 409) {
-                        alert(res.data.error)
-                        return;
+                        alert(res.data.error);
                     }
                 }
             } catch (error) {
-                console.error("Erro:", error);
+                console.error("Error:", error);
             }
-
-            handleDialogClose();
         }
     };
 
@@ -120,7 +128,7 @@ function AdminsPage() {
                     {(() => {
                         const role = props.getValue();
                         return role ? (
-                            <span className=" text-white sm:px-4 sm:py-2 px-1 py-1 rounded shadow text-xs"
+                            <span className="text-white sm:px-4 sm:py-2 px-1 py-1 rounded shadow text-xs text-center inline-block min-w-[90px]"
                                 style={{ backgroundColor: role == "admin" ? "green" : "grey" }}>
                                 {role.toUpperCase()}
                             </span>
@@ -158,17 +166,36 @@ function AdminsPage() {
                 {
                     accessorKey: "operation",
                     header: () => <span className="sm:text-base text-xs font-medium">{t("operation")}</span>,
-                    cell: (props: any) => (
-
-                        <Tooltip title={t("delete")}>
-                            <IconButton
-                                aria-label={t("delete")}
-                                onClick={() => handleDelete(props.row.original.id)}
-                            >
-                                <DeleteIcon sx={{ fontSize: "1rem", color: "white" }} />
-                            </IconButton>
-                        </Tooltip>
-                    ),
+                    cell: (props: any) => {
+                        const row = props.row.original;
+                        const isSubadmin = row.role === "subadmin";
+                        return (
+                            <Box sx={{ display: "flex", gap: 1, minWidth: 80 }}>
+                                {isSubadmin ? (
+                                    <Tooltip title={t("edit")}>
+                                        <IconButton
+                                            aria-label={t("edit")}
+                                            onClick={() => handleEdit(row)}
+                                        >
+                                            <EditIcon sx={{ fontSize: "1rem", color: "white" }} />
+                                        </IconButton>
+                                    </Tooltip>
+                                ) : (
+                                    <IconButton disabled sx={{ visibility: "hidden" }}>
+                                        <EditIcon sx={{ fontSize: "1rem" }} />
+                                    </IconButton>
+                                )}
+                                <Tooltip title={t("delete")}>
+                                    <IconButton
+                                        aria-label={t("delete")}
+                                        onClick={() => handleDelete(row.id)}
+                                    >
+                                        <DeleteIcon sx={{ fontSize: "1rem", color: "white" }} />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+                        );
+                    },
                 },
             ]
             : []),
@@ -204,14 +231,12 @@ function AdminsPage() {
     const handleOnDelete = async () => {
         const res = await API.DELETE(`${AppGlobal.baseURL}admin/admin/${deleteId}`);
         if (res.status == 200) {
-            queryClient.invalidateQueries({
-                queryKey: ["admins", page, pageSize],
-            });
+            handleDialogCloseDelete();
+            await queryClient.refetchQueries({ queryKey: ["admins"] });
             toast.success(t("memberDeletedSuccessfully"));
-        } else if (res.status == 409) {
-            alert(res.data.error)
             return;
-
+        } else if (res.status == 409) {
+            alert(res.data.error);
         }
         handleDialogCloseDelete();
     }
@@ -227,6 +252,7 @@ function AdminsPage() {
             password: "",
             role: "",
         })
+        setShowPassword(false);
         setOpenDialog(false);
         setEditId(undefined);
     };
@@ -235,6 +261,16 @@ function AdminsPage() {
         setOpenDialog(true);
     };
 
+
+    const handleEdit = (row: any) => {
+        setEditId(row.id);
+        setFormData({
+            email: row.email,
+            password: "",
+            role: row.role || "",
+        });
+        setOpenDialog(true);
+    };
 
     const handleDelete = (id: string) => {
         setDeleteId(id);
@@ -370,19 +406,27 @@ function AdminsPage() {
                         error={Boolean(errors.email)}
                         helperText={errors.email}
                     />
-                    {editId ? <></> :
-                        <TextField
-                            label={t("password")}
-                            fullWidth
-                            margin="normal"
-                            type="password"
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]"
-                            error={Boolean(errors.password)}
-                            helperText={errors.password}
-                        />
-                    }
+                    <TextField
+                        label={editId ? "新密碼（留空則不修改）" : t("password")}
+                        fullWidth
+                        margin="normal"
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        error={Boolean(errors.password)}
+                        helperText={errors.password}
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            },
+                        }}
+                    />
 
                     <FormControl fullWidth margin="normal" className="w-full p-3 mt-2 bg-[#f7f7e3] text-black border rounded-md border-[#a855f7] focus:outline-none focus:ring-2 focus:ring-[#a855f7]">
                         <InputLabel>{t("role", "角色")}</InputLabel>

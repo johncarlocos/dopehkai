@@ -120,7 +120,7 @@ class AdminController {
     static async updateMember(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const { email, price, date, ageRange } = req.body;
+            const { email, password, price, date, ageRange } = req.body;
 
             const memberRef = doc(db, Tables.members, id);
             const memberSnapshot = await getDoc(memberRef);
@@ -141,13 +141,18 @@ class AdminController {
                 return res.status(409).json({ error: "email already exists" });
             }
 
-            const updatedMember = {
+            const updatedMember: any = {
                 ageRange: ageRange || memberData.ageRange,
                 email: email || memberData.email,
                 price: price || memberData.price,
                 date: date || memberData.date,
                 created_at: memberData.created_at,
             };
+
+            if (password && password.trim()) {
+                const saltRounds = 10;
+                updatedMember.password = await bcrypt.hash(password, saltRounds);
+            }
 
             await updateDoc(memberRef, updatedMember);
             res.status(200).json({
@@ -266,7 +271,7 @@ class AdminController {
     static async updateAdmin(req: Request, res: Response) {
         try {
             const { id } = req.params;
-            const { email } = req.body;
+            const { email, password, role } = req.body;
             if (!email) {
                 return res.status(400).json({ error: "email and role are required" });
             }
@@ -290,10 +295,17 @@ class AdminController {
                 return res.status(409).json({ error: "email already exists" });
             }
 
-            const updatedAdmin = {
+            const updatedAdmin: any = {
                 email: email || adminData.email,
                 created_at: adminData.created_at,
             };
+            if (role && ["admin", "subadmin"].includes(role)) {
+                updatedAdmin.role = role;
+            }
+            if (password && password.trim()) {
+                const saltRounds = 10;
+                updatedAdmin.password = await bcrypt.hash(password, saltRounds);
+            }
             await updateDoc(adminRef, updatedAdmin);
             res.status(200).json({
                 message: "Admin updated successfully",

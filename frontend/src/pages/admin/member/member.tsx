@@ -79,6 +79,12 @@ function MembersPage() {
                 tempErrors.password = pwError;
                 isValid = false;
             }
+        } else if (formData.password) {
+            const pwError = validatePassword(formData.password);
+            if (pwError) {
+                tempErrors.password = pwError;
+                isValid = false;
+            }
         }
         if (!formData.price) {
             tempErrors.price = "請輸入價格";
@@ -145,7 +151,7 @@ function MembersPage() {
                         const value = props.getValue();
                         const days = value ? getDays(value) : null;
                         return days !== null && days > 0 ? (
-                            <span className="bg-green-500 text-white sm:px-4 sm:py-2 px-2 py-1 rounded shadow font-bold">
+                            <span className="bg-green-500 text-white sm:px-4 sm:py-2 px-2 py-1 rounded shadow font-bold text-center inline-block min-w-[70px]">
                                 {days + "天"}
                             </span>
                         ) : undefined;
@@ -155,7 +161,7 @@ function MembersPage() {
         },
         {
             accessorKey: "ageRange",
-            header: () => <span className="sm:text-base text-xs font-medium">{t("ageRange")}</span>,
+            header: () => <span className="sm:text-base text-xs font-medium">{"廣告來源"}</span>,
             cell: (props: any) => (
                 <span className="sm:text-base text-[8px]">{props.getValue()}</span>
             ),
@@ -480,29 +486,27 @@ function MembersPage() {
                         error={Boolean(errors.email)}
                         helperText={errors.email}
                     />
-                    {editId ? <></> :
-                        <TextField
-                            label={t("password")}
-                            fullWidth
-                            margin="normal"
-                            type={showPassword ? "text" : "password"}
-                            value={formData.password}
-                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                            error={Boolean(errors.password)}
-                            helperText={errors.password}
-                            slotProps={{
-                                input: {
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
-                                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                },
-                            }}
-                        />
-                    }
+                    <TextField
+                        label={editId ? "新密碼（留空則不修改）" : t("password")}
+                        fullWidth
+                        margin="normal"
+                        type={showPassword ? "text" : "password"}
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        error={Boolean(errors.password)}
+                        helperText={errors.password}
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            },
+                        }}
+                    />
 
                     {/* Platform source */}
                     <FormControl fullWidth margin="normal" error={!!errors.ageRange}>
