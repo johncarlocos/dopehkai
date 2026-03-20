@@ -176,7 +176,7 @@ function AdminsPage() {
                                         <IconButton
                                             aria-label={t("edit")}
                                             onClick={() => handleEdit(row)}
-                                        >
+                                        >   
                                             <EditIcon sx={{ fontSize: "1rem", color: "white" }} />
                                         </IconButton>
                                     </Tooltip>

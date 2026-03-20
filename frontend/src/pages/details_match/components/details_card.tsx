@@ -223,21 +223,6 @@ function DetailsCardComponent({
 
             </div>
 
-            {/* 大細 HiLo section when HKJC TG data exists */}
-            {hiloLines.length > 0 && (
-                <div className="sm:w-2/3 w-5/6 flex flex-col bg-white rounded-lg mt-5 p-4">
-                    <div className="text-sm font-semibold text-gray-600 mb-3">{t("market_hilo")}</div>
-                    {hiloLines.map((row, idx) => (
-                        <div key={idx} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0 gap-4">
-                            <span className="text-gray-700 font-medium">{t("hilo_over")} {row.line}</span>
-                            <span className="font-bold text-black">{row.overPct}%</span>
-                            <span className="text-gray-400">|</span>
-                            <span className="text-gray-700 font-medium">{t("hilo_under")} {row.line}</span>
-                            <span className="font-bold text-black">{row.underPct}%</span>
-                        </div>
-                    ))}
-                </div>
-            )}
 
             <div className="sm:w-2/3 w-5/6 flex flex-col h-48 bg-white rounded-lg mt-5 items-center justify-center">
 
