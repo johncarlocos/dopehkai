@@ -64,7 +64,7 @@ function LoginPage() {
           : raw && typeof raw === "object" && typeof (raw as { token?: string }).token === "string"
             ? (raw as { token: string }).token
             : null;
-      if (sessionIdStr && !Cookies.get("sessionId")) {
+      if (sessionIdStr) {
         const isAdmin = role === "admin" || role === "subadmin";
         Cookies.set("sessionId", sessionIdStr, {
           sameSite: "lax",

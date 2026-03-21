@@ -295,7 +295,8 @@ function RecordsAdminPage() {
                         </button>
                     </div>
 
-                    <table className="w-full border-collapse text-white">
+                    <div className="overflow-x-auto -mx-2">
+                    <table className="w-full border-collapse text-white min-w-[480px]">
                         <thead>
                             {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id}>
@@ -327,6 +328,7 @@ function RecordsAdminPage() {
                             ))}
                         </tbody>
                     </table>
+                    </div>
 
                     <div className="mt-4 flex items-center justify-between text-white">
                         <button
